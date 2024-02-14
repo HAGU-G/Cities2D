@@ -1,6 +1,7 @@
 #pragma once
-
 namespace sfgm {
+
+
 	class Object //객체생성은 동적할당 권장
 	{
 	private:
@@ -13,7 +14,7 @@ namespace sfgm {
 		float z;
 		int layer;
 
-		std::list<sfgm::OBJECTTAG> objectTags;
+		std::list<OBJECTTAG> objectTags;
 
 		//pre_***()를 통해 호출
 		virtual void Init() = 0;
@@ -39,7 +40,7 @@ namespace sfgm {
 		inline static const auto GetObjectsCount() { return objectsCount; };
 		inline const auto& GetKey() const { return key; };
 		inline const auto& GetObjectTags() const { return objectTags; };
-		
+
 
 		//Set
 

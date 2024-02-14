@@ -11,14 +11,13 @@ namespace sfgm {
 
 	public:
 		static void Update(const sf::Event& event);
-		
+
 		static bool isKeyDown(const sf::Keyboard::Key& key);
 		static bool isKeyUp(const sf::Keyboard::Key& key);
 		static bool isKeyPress(const sf::Keyboard::Key& key);
 
 		//Update() 전에 사용
-		static void ClearList(); 
+		static void ClearList();
 
 	};
-
 }

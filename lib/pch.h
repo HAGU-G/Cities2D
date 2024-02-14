@@ -1,11 +1,9 @@
 ﻿//미리 컴파일된 헤더
-#ifndef PCH_H
-#define PCH_H
-#define WIN32_LEAN_AND_MEAN
+#pragma once
 
 //std
-#include <list>
 #include <set>
+#include <list>
 #include <map>
 
 //SFML
@@ -13,8 +11,6 @@
 
 //SFML-GM
 #include "Defines.h"
+#include "IOManager.h"
 #include "Object.h"
 #include "Scene.h"
-
-
-#endif //PCH_H

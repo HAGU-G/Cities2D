@@ -1,4 +1,5 @@
 #pragma once
+
 namespace sfgm {
 
 	class Scene
@@ -9,12 +10,12 @@ namespace sfgm {
 	protected:
 		std::map<std::string, std::list<std::shared_ptr<Object>>> objects;
 
+	public:
 		//pre_***()를 통해 호출
 		virtual void Init() = 0;
 		virtual void Update(float timeDelta, float timeScale) = 0;
 		virtual void Draw() = 0;
 
-	public:
 		Scene();
 		virtual ~Scene();
 

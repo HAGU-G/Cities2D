@@ -74,7 +74,11 @@ int main()
 		window.clear();
 		dd.pre_Update(1.f, 1.f);
 		dd.pre_Draw();
-		dd.GetObjects().find("name")->second;
+		auto& it = dd.GetObjects().find("name")->second;
+		for (auto& i : it)
+		{
+			dynamic_cast<testObj*>(i.get())->Draww(window);
+		}
 		window.display();
 	}
 }

@@ -33,9 +33,11 @@ namespace sfgm {
 		inline static const auto GetScenesCount() { return scenesCount; };
 		inline const auto& GetObjects() const { return objects; };
 
-		//Set
+		//objects 관련 함수
 		bool AddObject(const std::shared_ptr<Object> object);
 		bool DeleteObject(const std::shared_ptr<Object>& object);
+		bool FindObject(std::string key) = delete;
+		bool FindObject(const std::shared_ptr<Object>& object) = delete;
 
 	};
 

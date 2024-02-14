@@ -1,5 +1,5 @@
-﻿#include <iostream>
-#include "pch.h"
+﻿#include "pch.h"
+#include <iostream>
 
 
 class testObj : public sfgm::Object
@@ -8,7 +8,7 @@ public:
 	testObj(std::string str)
 		:Object(str)
 	{
-
+		Init();
 	}
 	sf::Sprite sprite;
 
@@ -50,7 +50,7 @@ protected:
 	}
 };
 
-
+std::string k;
 
 int main()
 {
@@ -60,7 +60,7 @@ int main()
 	std::shared_ptr<testObj> a(new testObj("name"));
 	//std::shared_ptr<int> a(new int(5));
 	dd.AddObject(a);
-
+	k = a->GetKey();
 
 	while (window.isOpen())
 	{
@@ -70,11 +70,9 @@ int main()
 			if (event.type == sf::Event::Closed)
 				window.close();
 		}
-		dd.pre_Init();
 		window.clear();
-		dd.pre_Update(1.f, 1.f);
-		dd.pre_Draw();
-		dd.GetObjects().find("name")->second;
+		std::dynamic_pointer_cast<testObj>((dd.GetObjects().find(k)->second[0]))->Draww(window);
+		std::cout << std::dynamic_pointer_cast<testObj>((dd.GetObjects().find(k)->second[0]))->GetKey();
 		window.display();
 	}
 }

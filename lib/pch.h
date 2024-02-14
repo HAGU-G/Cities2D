@@ -5,6 +5,7 @@
 #include <set>
 #include <list>
 #include <map>
+#include <deque>
 
 //SFML
 #include "SFML/Graphics.hpp"

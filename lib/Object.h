@@ -5,13 +5,11 @@ namespace sfgm {
 	class Object //객체생성은 동적할당 권장
 	{
 	private:
-		static unsigned long long objectsCount;
+		static size_t objectsCount;
 
 	protected:
 		std::string key;
-		float x;
-		float y;
-		float z;
+		float x, y;
 		int layer;
 
 		std::list<OBJECTTAG> objectTags;
@@ -42,7 +40,7 @@ namespace sfgm {
 		inline const auto& GetObjectTags() const { return objectTags; };
 
 
-		//Set
+		//objectTags
 
 		bool AddTag(OBJECTTAG tag);
 		bool DeleteTag(OBJECTTAG tag);

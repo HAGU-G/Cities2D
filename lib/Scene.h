@@ -8,7 +8,7 @@ namespace sfgm {
 		static unsigned long long scenesCount;
 
 	protected:
-		std::map<std::string, std::list<std::shared_ptr<Object>>> objects;
+		std::map<std::string, std::deque<std::shared_ptr<Object>>> objects;
 
 	public:
 		//pre_***()를 통해 호출
@@ -33,11 +33,10 @@ namespace sfgm {
 		inline static const auto GetScenesCount() { return scenesCount; };
 		inline const auto& GetObjects() const { return objects; };
 
-		//objects 관련 함수
-		bool AddObject(const std::shared_ptr<Object> object);
+		//objects
+		bool AddObject(const std::shared_ptr<Object>& object);
 		bool DeleteObject(const std::shared_ptr<Object>& object);
-		bool FindObject(std::string key) = delete;
-		bool FindObject(const std::shared_ptr<Object>& object) = delete;
+		bool DeleteObject(const std::string& key);
 
 	};
 

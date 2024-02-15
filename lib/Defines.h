@@ -3,6 +3,6 @@
 
 	enum class OBJECTTAG
 	{
-		ClickAble, DoNotDraw
+		ClickAble, SelectAble, DoNotDraw
 	};
 

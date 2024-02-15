@@ -5,37 +5,33 @@
 class testObj : public sfgm::Object
 {
 public:
-	testObj(std::string str)
-		:Object(str)
+	sf::Sprite sprite;
+	sf::Texture tex;
+
+	testObj(sfgm::OBJECT_TYPE type)
+		:Object(type)
 	{
 		Init();
 	}
-	sf::Sprite sprite;
 
-	void Draww(sf::RenderWindow& wn)
-	{
-		wn.draw(sprite);
-	}
-protected:
 	void Update(float timeDelta, float timeScale) override
 	{
 
 	}
-	void Draw() override
+	void Draw(sf::RenderWindow& window) override
 	{
-
+		window.draw(sprite);
 	}
 	void Init() override
 	{
-		sf::Texture tex;
-		tex.loadFromFile("graphics/tree");
+		tex.loadFromFile("graphics/bee.png");
 		sprite.setTexture(tex);
 	}
 };
 
 class testScene : public sfgm::Scene
 {
-protected:
+public:
 	void Init() override
 	{
 
@@ -44,9 +40,9 @@ protected:
 	{
 
 	}
-	void Draw() override
+	void Draw(sf::RenderWindow& window) override
 	{
-
+		Scene::Draw(window);
 	}
 };
 
@@ -54,13 +50,15 @@ std::string k;
 
 int main()
 {
-	sf::RenderWindow window(sf::VideoMode(100, 100), "test", sf::Style::Default);
+	sf::RenderWindow window(sf::VideoMode(1000, 1000), "test", sf::Style::Default);
 
 	testScene dd;
-	std::shared_ptr<testObj> a(new testObj("name"));
+	std::shared_ptr<testObj> a(new testObj(sfgm::OBJECT_TYPE::BUILDING));
 	//std::shared_ptr<int> a(new int(5));
 	dd.AddObject(a);
 	k = a->GetKey();
+	dd.Init();
+	testObj nnn(sfgm::OBJECT_TYPE::BUILDING);
 
 	while (window.isOpen())
 	{
@@ -71,8 +69,7 @@ int main()
 				window.close();
 		}
 		window.clear();
-		std::dynamic_pointer_cast<testObj>((dd.GetObjects().find(k)->second[0]))->Draww(window);
-		std::cout << std::dynamic_pointer_cast<testObj>((dd.GetObjects().find(k)->second[0]))->GetKey();
+		dd.Draw(window);
 		window.display();
 	}
 }

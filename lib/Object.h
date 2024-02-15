@@ -8,41 +8,45 @@ namespace sfgm {
 		static size_t objectsCount;
 
 	protected:
+		OBJECT_TYPE objectType;
 		std::string key;
+		std::list<OBJECT_TAG> objectTags;
+
 		float x, y;
-		int layer;
+		int drawLayer = 0;
 
-		std::list<OBJECTTAG> objectTags;
-
-		//pre_***()를 통해 호출
-		virtual void Init() = 0;
-		virtual void Update(float timeDelta, float timeScale) = 0;
-		virtual void Draw() = 0;
-
-	public:
-		explicit Object(std::string objectType);
+		explicit Object(OBJECT_TYPE objectType);
 		virtual ~Object();
-
 		Object(const Object&) = delete;
 		Object(Object&&) = delete;
 		Object& operator=(const Object&) = delete;
 		Object& operator=(Object&&) = delete;
 
-		void pre_Init();
-		void pre_Update(float timeDelta, float timeScale);
-		void pre_Draw();
+	public:
 
+		//
+		virtual void Init() = 0;
+		virtual void Update(float timeDelta, float timeScale) = 0;
+		virtual void Draw(sf::RenderWindow& window) = 0;
 
+		//Set
+		inline void SetX(float x) { this->x = x; }
+		inline void SetY(float y) { this->y = y; }
+		inline void SetXY(float x, float y) { this->x = x; this->y = y; }
+		inline void SetX(sf::Vector2f vector2) { this->x = vector2.x; }
+		inline void SetY(sf::Vector2f vector2) { this->y = vector2.y; }
+		inline void SetXY(sf::Vector2f vector2) { this->x = vector2.x; this->y = vector2.y; }
+		inline void SetDrawLayer(int value) { drawLayer = value; }
+		
 		//Get
-
-		inline static const auto GetObjectsCount() { return objectsCount; };
-		inline const auto& GetKey() const { return key; };
-		inline const auto& GetObjectTags() const { return objectTags; };
-
+		inline static size_t GetObjectsCount() { return objectsCount; }
+		inline std::string GetKey() const { return key; }
+		inline float GetX() const { return x; }
+		inline float GetY() const { return y; }
+		inline sf::Vector2f GetXY() const { return sf::Vector2f(x, y); }
 
 		//objectTags
-
-		bool AddTag(OBJECTTAG tag);
-		bool DeleteTag(OBJECTTAG tag);
+		bool AddTag(OBJECT_TAG tag);
+		bool DeleteTag(OBJECT_TAG tag);
 	};
-}
+}//namespace sfgm

@@ -10,23 +10,20 @@ namespace sfgm {
 	protected:
 		std::map<std::string, std::deque<std::shared_ptr<Object>>> objects;
 
-	public:
-		//pre_***()를 통해 호출
-		virtual void Init() = 0;
-		virtual void Update(float timeDelta, float timeScale) = 0;
-		virtual void Draw() = 0;
-
 		Scene();
 		virtual ~Scene();
-
 		Scene(const Scene&) = delete;
 		Scene(Scene&&) = delete;
 		Scene& operator=(const Scene&) = delete;
 		Scene& operator=(Scene&&) = delete;
 
-		void pre_Init();
-		void pre_Update(float timeDelta, float timeScale);
-		void pre_Draw();
+	public:
+
+		virtual void Init();
+		virtual void Update(float timeDelta, float timeScale);
+		virtual void Draw(sf::RenderWindow& window);
+
+		//Set
 
 
 		//Get
@@ -40,4 +37,4 @@ namespace sfgm {
 
 	};
 
-}
+}//namespace sfgm

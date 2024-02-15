@@ -1,8 +1,14 @@
 #pragma once
 
+namespace sfgm {
 
-	enum class OBJECTTAG
+	enum class OBJECT_TAG
 	{
-		ClickAble, SelectAble, DoNotDraw
+		ABLE_CLICK, ABLE_SELECT, DONOT_DRAW
 	};
 
+	enum class OBJECT_TYPE
+	{
+		ETC, BUILDING
+	};
+}

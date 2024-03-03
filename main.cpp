@@ -8,46 +8,6 @@
 
 using namespace sfgm;
 
-class testObj : public GameObject
-{
-public:
-	sf::Sprite sprite;
-	sf::Texture tex;
-
-	testObj(GAME_OBJECT_TYPE type)
-		:GameObject(type)
-	{
-		Init();
-	}
-
-	void Update(float timeDelta, float timeScale) override
-	{
-
-	}
-	void Draw(sf::RenderWindow& window) override
-	{
-		window.draw(sprite);
-	}
-	void Init() override
-	{
-		tex.loadFromFile("graphics/bee.png");
-		sprite.setTexture(tex);
-	}
-};
-
-class TestScene : public Scene
-{
-public:
-	TestScene(const std::string& name)
-		:Scene(name)
-	{
-
-	}
-	~TestScene() override = default;
-};
-
-std::string k;
-
 int main()
 {
 

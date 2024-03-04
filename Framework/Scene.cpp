@@ -19,17 +19,26 @@ Scene::~Scene()
 
 void Scene::Init()
 {
+	view.setSize(sf::Vector2f( GameManager::GetWindowSize().x, GameManager::GetWindowSize().y*2.f ));
+	view.setCenter(worldCenter);
+
 	for (auto& pair : gameObjectList)
 	{
 		pair.second->Init();
 	}
+	Reset();
+}
+
+void Scene::PreUpdate(float timeDelta, float timeScale)
+{
+	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(),view);
 }
 
 void Scene::Update(float timeDelta, float timeScale)
 {
 	for (auto& pair : gameObjectList)
 	{
-		pair.second->Update(timeDelta, useGlobalTimeScale ? timeScale : this->timeScale);
+		pair.second->Update(timeDelta, timeScale);
 	}
 }
 
@@ -37,16 +46,19 @@ void Scene::PhygicsUpdate(float timeDelta, float timeScale)
 {
 	for (auto& pair : gameObjectList)
 	{
-		pair.second->PhygicsUpdate(timeDelta, useGlobalTimeScale ? timeScale : this->timeScale);
+		pair.second->PhygicsUpdate(timeDelta, timeScale);
 	}
 }
 
 void Scene::Draw(sf::RenderWindow& window)
 {
+	const sf::View& preView = window.getView();
+	window.setView(view);
 	for (auto& pair : drawList)
 	{
 		pair.second->Draw(window);
 	}
+	window.setView(preView);
 }
 
 void Scene::Reset()
@@ -68,6 +80,18 @@ void Scene::Release()
 	resourcePathList.clear(); //파일 경로들이 담긴 컨테이너
 }
 
+float Scene::GetTimeScale() const
+{
+	if (useGlobalTimeScale)
+	{
+		return GameManager::GetGlobalTimeScale();
+	}
+	else
+	{
+		return timeScale;
+	}
+}
+
 size_t Scene::GetScenesCount()
 {
 	return currentCount;
@@ -78,7 +102,7 @@ size_t Scene::GetScenesTotalCount()
 	return totalCount;
 }
 
-const std::string& Scene::GetSceneName()
+const std::string& Scene::GetSceneName() const
 {
 	return name;
 }
@@ -88,7 +112,7 @@ const std::unordered_map<std::string, std::shared_ptr<GameObject>>& Scene::GetOb
 	return gameObjectList;
 }
 
-const std::set<std::string>& Scene::GetResourcePathList() const
+const FilePathList& Scene::GetResourcePathList() const
 {
 	return resourcePathList;
 }

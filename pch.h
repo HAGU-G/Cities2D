@@ -5,6 +5,7 @@
 #include <list>
 #include <deque>
 #include <unordered_map>
+#include <unordered_set>
 
 #include "SFML/Graphics.hpp"
 #include "SFML/Audio.hpp"
@@ -19,5 +20,4 @@
 #include "Scene.h"
 #include "SceneManager.h"
 
-using namespace std;
-using namespace sf;
+#include "GameManager.h"

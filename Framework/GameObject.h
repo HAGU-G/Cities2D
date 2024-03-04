@@ -13,9 +13,9 @@ private:
 
 	const std::string key; //"gameObjectType_CreatedTime_totalCount"
 	GAME_OBJECT_TYPE gameObjectType;
-	std::weak_ptr<Scene> scene;
 
 protected:
+	std::weak_ptr<Scene> scene;
 	std::list<GAME_OBJECT_TAG> gameObjectTagList;
 
 	int drawLayer = 0;
@@ -23,7 +23,7 @@ protected:
 
 	sf::Vector2f position;
 
-	explicit GameObject(GAME_OBJECT_TYPE objectType);
+	explicit GameObject(const std::shared_ptr<Scene>& scene, GAME_OBJECT_TYPE objectType);
 	GameObject(const GameObject&) = delete;
 	GameObject(GameObject&&) = delete;
 	GameObject& operator=(const GameObject&) = delete;

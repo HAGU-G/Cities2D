@@ -14,7 +14,7 @@ class ResourceManager final
 {
 private:
 	T unknownResource;
-	std::set<std::string> resourcePathList;
+	FilePathList resourcePathList;
 	std::unordered_map<std::string, std::shared_ptr<T>> resourceObjectList;
 
 	ResourceManager()
@@ -118,10 +118,10 @@ public:
 		{
 			if (resourceObjectList.find(path) != resourceObjectList.end())
 				continue;
-			std::unique_ptr<T> tempObject = std::make_unique<T>();
+			std::shared_ptr<T> tempObject = std::make_unique<T>();
 			if (tempObject->loadFromFile(path))
 			{
-				resourceObjectList.insert(std::make_pair(path, tempObject.release()));
+				resourceObjectList.insert(std::make_pair(path, tempObject));
 				count++;
 			}
 		}
@@ -131,10 +131,10 @@ public:
 	//리소스 오브젝트 추가. 추가된 리소스 오브젝트 반환.
 	const T& Load(const std::string& resourcePath)
 	{
-		std::unique_ptr<T> tempObject = std::make_unique<T>();
+		std::shared_ptr<T> tempObject = std::make_unique<T>();
 		if (tempObject->loadFromFile(resourcePath))
 		{
-			return *resourceObjectList.insert(std::make_pair(resourcePath, tempObject.release())).first->second;
+			return *resourceObjectList.insert(std::make_pair(resourcePath, tempObject)).first->second;
 		}
 		return unknownResource;
 	}

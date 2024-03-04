@@ -1,82 +1,119 @@
 #include "pch.h"
 #include "SceneManager.h"
 
-
-
-std::vector<std::shared_ptr<Scene>> SceneManager::UsingSceneList;
-std::vector<std::shared_ptr<Scene>> SceneManager::WaitingSceneList;
+std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::UsingSceneList;
+std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::WaitingSceneList;
 
 void SceneManager::Init()
 {
-	for (auto& ptr : UsingSceneList)
+	for (auto& scene : UsingSceneList)
 	{
-		ptr->Init();
+		scene.second->Init();
 	}
 }
-void SceneManager::Update(float timeDelta, float globalTimeScale)
+
+void SceneManager::PreUpdate(float timeDelta)
 {
-	for (auto& ptr : UsingSceneList)
+	for (auto& scene : UsingSceneList)
 	{
-		ptr->Update(timeDelta, globalTimeScale);
+		scene.second->PreUpdate(timeDelta, scene.second->GetTimeScale());
 	}
 }
-void SceneManager::PhygicsUpdate(float timeDelta, float globalTimeScale)
+
+void SceneManager::Update(float timeDelta)
 {
-	for (auto& ptr : UsingSceneList)
+	for (auto& scene : UsingSceneList)
 	{
-		ptr->PhygicsUpdate(timeDelta, globalTimeScale);
+		scene.second->Update(timeDelta, scene.second->GetTimeScale());
 	}
 }
+
+void SceneManager::PhygicsUpdate(float timeDelta)
+{
+	for (auto& scene : UsingSceneList)
+	{
+		scene.second->PhygicsUpdate(timeDelta, scene.second->GetTimeScale());
+	}
+}
+
 void SceneManager::Draw(sf::RenderWindow& window)
 {
-	for (auto& ptr : UsingSceneList)
+	for (auto& scene : UsingSceneList)
 	{
-		ptr->Draw(window);
+		scene.second->Draw(window);
 	}
 }
+
 void SceneManager::DrawOnLayer(sf::RenderWindow& window)
 {
 }
+
 void SceneManager::Use(const std::string& name)
 {
+	auto scene = WaitingSceneList.find(name);
+	if (scene != WaitingSceneList.end())
+	{
+		UsingSceneList.insert(std::make_pair(scene->first, scene->second));
+		WaitingSceneList.erase(name);
+	}
 }
+
 void SceneManager::UnUse(const std::string& name)
 {
+	auto scene = UsingSceneList.find(name);
+	if(scene != UsingSceneList.end())
+	{
+		WaitingSceneList.insert(std::make_pair(scene->first, scene->second));
+		UsingSceneList.erase(name);
+	}
 }
+
+void SceneManager::Add(const std::shared_ptr<Scene>& scene)
+{
+	WaitingSceneList.insert(std::make_pair(scene->GetSceneName(), scene));
+}
+
+void SceneManager::AddUse(const std::shared_ptr<Scene>& scene)
+{
+	UsingSceneList.insert(std::make_pair(scene->GetSceneName(), scene));
+}
+
 const std::shared_ptr<Scene>& SceneManager::Get(const std::string& name)
 {
-	for (auto& ptr : UsingSceneList)
+	for (auto& scene : UsingSceneList)
 	{
-		if (ptr->GetSceneName() == name)
-			return ptr;
+		if (scene.first == name)
+			return scene.second;
 	}
-	for (auto& ptr : WaitingSceneList)
+	for (auto& scene : WaitingSceneList)
 	{
-		if (ptr->GetSceneName() == name)
-			return ptr;
+		if (scene.first == name)
+			return scene.second;
 	}
 	return nullptr;
 }
+
 void SceneManager::Reset()
 {
-	for (auto& ptr : UsingSceneList)
+	for (auto& scene : UsingSceneList)
 	{
-		ptr->Reset();
+		scene.second->Reset();
 	}
-	for (auto& ptr : WaitingSceneList)
+	for (auto& scene : WaitingSceneList)
 	{
-		ptr->Reset();
+		scene.second->Reset();
 	}
 }
+
 void SceneManager::Release()
 {
-	for (auto& ptr : UsingSceneList)
+	for (auto& scene : UsingSceneList)
 	{
-		ptr->Release();
+		scene.second->Release();
 	}
-	for (auto& ptr : WaitingSceneList)
+	for (auto& scene : WaitingSceneList)
 	{
-		ptr->Release();
+		scene.second->Release();
 	}
 	UsingSceneList.clear();
 	WaitingSceneList.clear();

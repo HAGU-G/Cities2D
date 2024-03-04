@@ -2,25 +2,21 @@
 #ifndef SCENEMANAGER_H
 #define SCENEMANAGER_H
 
-
-
-
-
-
 class Scene;
 
 static class SceneManager final
 {
 private:
-	static std::vector<std::shared_ptr<Scene>> UsingSceneList;
-	static std::vector<std::shared_ptr<Scene>> WaitingSceneList;
+	static std::unordered_map<std::string,std::shared_ptr<Scene>> UsingSceneList;
+	static std::unordered_map<std::string,std::shared_ptr<Scene>> WaitingSceneList;
 
 public:
 
 	//Management
 	static void Init();
-	static void Update(float timeDelta, float globalTimeScale); //Using
-	static void PhygicsUpdate(float timeDelta, float globalTimeScale); //Using
+	static void PreUpdate(float timeDelta); //Using
+	static void Update(float timeDelta); //Using
+	static void PhygicsUpdate(float timeDelta); //Using
 
 	//Draw - sceneList에 추가된 순서대로 Draw. Scene안에서는 게임오브젝트의 레이어 순서대로 Draw
 	static void Draw(sf::RenderWindow& window); //Using
@@ -32,6 +28,8 @@ public:
 	//SceneList
 	static void Use(const std::string& name);
 	static void UnUse(const std::string& name);
+	static void Add(const std::shared_ptr<Scene>& scene);
+	static void AddUse(const std::shared_ptr<Scene>& scene);
 	static const std::shared_ptr<Scene>& Get(const std::string& name);
 };
 

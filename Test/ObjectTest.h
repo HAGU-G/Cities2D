@@ -3,12 +3,12 @@
 class ObjectTest : public GameObject
 {
 protected:
-	Sprite sprite;
-	Texture texture;
+	sf::Sprite sprite;
+	sf::Sprite sprite2;
 
 public:
-	explicit ObjectTest(GAME_OBJECT_TYPE objectType);
-	~ObjectTest();
+	explicit ObjectTest(const std::shared_ptr<Scene>& scene, GAME_OBJECT_TYPE objectType);
+	~ObjectTest() override;
 	ObjectTest(const ObjectTest&) = delete;
 	ObjectTest(ObjectTest&&) = delete;
 	ObjectTest& operator=(const ObjectTest&) = delete;
@@ -17,6 +17,6 @@ public:
 
 	void Init() override;
 	void Update(float timeDelta, float timeScale) override;
-	void Draw(RenderWindow& window) override;
+	void Draw(sf::RenderWindow& window) override;
 };
 

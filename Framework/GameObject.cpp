@@ -5,8 +5,8 @@
 size_t GameObject::currentCount = 0;
 size_t GameObject::totalCount = 0;
 
-GameObject::GameObject(GAME_OBJECT_TYPE objectType)
-	:gameObjectType(objectType),
+GameObject::GameObject(const std::shared_ptr<Scene>& scene, GAME_OBJECT_TYPE objectType)
+	:scene(scene), gameObjectType(objectType),
 	key(std::to_string((int)objectType) + "_" + std::to_string(time(NULL)) + "_" + std::to_string(totalCount)),
 	position(0.f, 0.f)
 {

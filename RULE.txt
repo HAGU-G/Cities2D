@@ -1,0 +1,24 @@
+AddObject 규칙
+- Scene 안에서 생성할 경우 Scene에서 AddObject
+- Scene 밖에서 생성할 경우 생성된 오브젝트 내에서 AddObject
+
+Init 규칙
+- 객체 준비
+- 다른 객체의 정보를 가져오는 등의 내용은 Init에서 작성
+- Reset 호출
+
+Reset 규칙
+- 객체 초기화
+- 상속/포함 관계에 있는 포인터는 초기화 하지 않음. 관계도가 바뀔 때 따로 변경
+- Init와 중복되는 코드가 없어야 함.
+
+Release/delete 규칙
+- 꼭 필요한 상황이 아니라면 절대 원시 포인터 생성 금지
+- 스마트 포인터는 Release에서 항상 reset
+- 컨테이너, 배열에 스마트 포인터가 들어갈 경우 Release에서 항상 clear
+- Manager, Scene을 제외한 모든 클래스는 소멸자에서 Release 호출
+
+Enter/Exit 규칙
+- 아직 존재하지 않는 함수
+- 절대로 이곳에서 Init, Release하지 않음. Reset을 통해 준비할 수 있도록 코드 작성.
+- 음악 전환이나 리소스를 Load, UnLoad하는 용도로 사용.

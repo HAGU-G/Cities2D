@@ -1,18 +1,15 @@
 ﻿#include "pch.h"
-#include <iostream>
-#include <SFML/Graphics.hpp>
-#include "SFML-GM/GameObject.h"
-#include "SFML-GM/Scene.h"
-#include "SFML-GM/IOManager.h"
-//#include "SFML-GM/Defines.h"
+#include "SceneTest.h"
 
-using namespace sfgm;
+//#include "SFML-GM/Defines.h"
 
 int main()
 {
 
-	sf::RenderWindow window(sf::VideoMode(1000, 1000), "test", sf::Style::Default);
-	sf::Clock d;
+	RenderWindow window(sf::VideoMode(1000, 1000), "test", sf::Style::Default);
+	Clock d;
+	SceneTest sceneTest("Test");
+	sceneTest.Init();
 
 	//메인 루프
 	while (window.isOpen())
@@ -30,10 +27,11 @@ int main()
 		}
 
 		//업데이트
+		sceneTest.Update(dt,1.f);
 
-		window.clear();
 		//드로우
-
+		window.clear();
+		sceneTest.Draw(window);
 		window.display();
 	}
 }

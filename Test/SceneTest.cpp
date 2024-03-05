@@ -54,10 +54,6 @@ void SceneTest::Update(float timeDelta, float timeScale)
 {
 	Scene::Update(timeDelta, timeScale);
 
-	std::cout << "Window: " << GameManager::GetMousePosWindow().x << " " << GameManager::GetMousePosWindow().y << std::endl;
-	std::cout << "World: " << mousePosWorld.x << " " << mousePosWorld.y << std::endl;
-	std::cout << "Greed: " << GetMousePosGrid().x << " " << GetMousePosGrid().y << std::endl;
-
 
 
 }

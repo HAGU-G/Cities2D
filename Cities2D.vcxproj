@@ -143,6 +143,7 @@
     <ClCompile Include="Framework\Tools.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ObjectTile.cpp" />
     <ClCompile Include="Test\ObjectTest.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
@@ -159,6 +160,7 @@
     <ClInclude Include="Framework\SceneManager.h" />
     <ClInclude Include="Framework\Tools.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="ObjectTile.h" />
     <ClInclude Include="Test\ObjectTest.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Test\SceneTest.h" />

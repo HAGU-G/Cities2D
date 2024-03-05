@@ -5,7 +5,7 @@
 class GameManager final
 {
 private:
-	static unsigned int titleY;
+	static sf::RenderWindow debugWindow;
 	static sf::RenderWindow window;
 	static WINDOW_MODE currentMode;
 	static sf::Vector2u currentSize;
@@ -35,7 +35,6 @@ public:
 	//Get
 	inline static const sf::RenderWindow& GetWindow() { return window; }
 	inline static const sf::Vector2u& GetWindowSize() { return currentSize; }
-	inline static unsigned int GetTitleY() { return titleY; }
 	inline static const sf::Vector2i& GetMousePosScreen() { return sf::Mouse::getPosition(); }
 	inline static const sf::Vector2i& GetMousePosWindow() { return mousePosWindow; }
 	inline static float GetGlobalTimeScale() { return globalTimeScale; }
@@ -43,5 +42,8 @@ public:
 
 	//AddScene
 	static void AddScene();
+
+	//DebugWindow
+	static void DebugUpdate();
 };
 

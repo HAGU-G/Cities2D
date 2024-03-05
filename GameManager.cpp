@@ -4,7 +4,7 @@
 //TESTCODE : 릴리즈에서 삭제
 #include "Test/SceneTest.h" 
 
-unsigned int GameManager::titleY = 40;
+sf::RenderWindow GameManager::debugWindow;
 sf::RenderWindow GameManager::window;
 WINDOW_MODE GameManager::currentMode = WINDOW_MODE::WINDOW;
 sf::Vector2u GameManager::currentSize;
@@ -19,6 +19,9 @@ float GameManager::globalTimer = 0.f;
 sf::Vector2i  GameManager::mousePosScreen;
 sf::Vector2i  GameManager::mousePosWindow;
 
+
+
+
 void GameManager::Init()
 {
 	/////////////////////////////
@@ -30,10 +33,18 @@ void GameManager::Init()
 	ratioX = 16;
 	ratioY = 9;
 
-	window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::Close);
+	sf::ContextSettings setting;
+	setting.antialiasingLevel = 0;
+
+	window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::Close, setting);
 	SetWindowSize(1280);
 	SetWindowPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width - currentSize.x) / 2,
 		(sf::VideoMode::getDesktopMode().height - currentSize.y) / 2)); //스크린 중앙에 위치하도록
+
+	debugWindow.create(sf::VideoMode(200.f, 400.f), "Cities2D : Debug", sf::Style::Close);
+	debugWindow.setPosition(sf::Vector2i(window.getPosition().x - debugWindow.getSize().x, window.getPosition().y));
+	
+	window.requestFocus();
 
 	/////////////////////////////
 	// 
@@ -41,6 +52,7 @@ void GameManager::Init()
 	// 
 	/////////////////////////////
 	AddScene();
+	SFGM_FONT.Load("BMHANNAPro.ttf");
 	
 	/////////////////////////////
 	// 
@@ -90,6 +102,13 @@ void GameManager::MainLoop()
 		window.clear();
 		SceneManager::Draw(window);
 		window.display();
+
+		/////////////////////////////
+		// 
+		//       디버그 윈도우
+		// 
+		/////////////////////////////
+		DebugUpdate();
 	}
 }
 
@@ -118,5 +137,34 @@ void GameManager::SetWindowPosition(sf::Vector2i position)
 void GameManager::AddScene()
 {
 	SceneManager::AddUse(std::make_shared<SceneTest>("Test"));
+}
+
+void GameManager::DebugUpdate()
+{
+	sf::Event event;
+	while (debugWindow.pollEvent(event))
+	{
+		if (event.type == sf::Event::Closed)
+			debugWindow.close();
+	}
+
+	//텍스트
+	sf::Text text;
+	text.setCharacterSize(20);
+	text.setFillColor(sf::Color::White);
+	text.setFont(SFGM_FONT.Get("BMHANNAPro.ttf"));
+	std::shared_ptr<SceneTest> sceneTest = std::dynamic_pointer_cast<SceneTest>(SceneManager::Get("Test"));
+
+	text.setString(
+		"[WolrdPos]\n" + std::to_string(sceneTest->GetMousePosWolrd().x) + "\n" + std::to_string(sceneTest->GetMousePosWolrd().y)
+	);
+	debugWindow.clear();
+	debugWindow.draw(text);
+	text.setPosition(0.f, 60.f);
+	text.setString(
+		"\n[GridPos]\n" + std::to_string(sceneTest->GetMousePosGrid().x) + "\n" + std::to_string(sceneTest->GetMousePosGrid().y)
+	);
+	debugWindow.draw(text);
+	debugWindow.display();
 }
 

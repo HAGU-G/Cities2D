@@ -19,7 +19,7 @@ Scene::~Scene()
 
 void Scene::Init()
 {
-	view.setSize(sf::Vector2f( GameManager::GetWindowSize().x, GameManager::GetWindowSize().y*2.f ));
+	view.setSize(sf::Vector2f( GameManager::GetWindowSize().x, GameManager::GetWindowSize().y ));
 	view.setCenter(worldCenter);
 
 	for (auto& pair : gameObjectList)

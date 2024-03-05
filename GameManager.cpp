@@ -5,6 +5,7 @@
 #include "SceneTest.h" 
 
 sf::RenderWindow GameManager::debugWindow;
+sf::VertexArray GameManager::fpsGraph = sf::VertexArray(sf::LinesStrip, 300);
 sf::RenderWindow GameManager::window;
 WINDOW_MODE GameManager::currentMode = WINDOW_MODE::WINDOW;
 sf::Vector2u GameManager::currentSize;
@@ -40,11 +41,20 @@ void GameManager::Init()
 	SetWindowSize(1280);
 	SetWindowPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width - currentSize.x) / 2,
 		(sf::VideoMode::getDesktopMode().height - currentSize.y) / 2)); //스크린 중앙에 위치하도록
+	//window.setFramerateLimit(60);
 
-	debugWindow.create(sf::VideoMode(200.f, 400.f), "Cities2D : Debug", sf::Style::Close);
+	/////////////////////////////
+	// 
+	//       디버그 윈도우
+	// 
+	/////////////////////////////
+	debugWindow.create(sf::VideoMode(200.f, 400.f), "Cities2D : Debug", sf::Style::Close, setting);
 	debugWindow.setPosition(sf::Vector2i(window.getPosition().x - debugWindow.getSize().x, window.getPosition().y));
-	
-	window.requestFocus();
+	window.requestFocus(); //메인 윈도우 포커싱
+	for (int i = 0; i <= fpsGraph.getVertexCount() - 4; i++)
+	{
+		fpsGraph[i + 2].position = { 1.f + i * 198.f / (fpsGraph.getVertexCount() - 4) ,30.f };
+	}
 
 	/////////////////////////////
 	// 
@@ -53,7 +63,7 @@ void GameManager::Init()
 	/////////////////////////////
 	AddScene();
 	SFGM_FONT.Load("BMHANNAPro.ttf");
-	
+
 	/////////////////////////////
 	// 
 	//       초기화 완료 작업
@@ -162,30 +172,71 @@ void GameManager::DebugUpdate()
 
 	//텍스트
 	sf::Text text;
-	text.setCharacterSize(20);
-	text.setFillColor(sf::Color::White);
+	int fontSize = 30;
+	float infoY = 0.f;
+	text.setCharacterSize(fontSize);
 	text.setFont(SFGM_FONT.Get("BMHANNAPro.ttf"));
 	std::shared_ptr<SceneTest> sceneTest = std::dynamic_pointer_cast<SceneTest>(SceneManager::Get("Test"));
 
-
+	//렌더링
 	debugWindow.clear();
+	{
+		fpsGraph[1].position = sf::Vector2f(1.f, fontSize);
+		fpsGraph[1].color = sf::Color::Green;
+		fpsGraph[0].position = sf::Vector2f(199.f, fontSize);
+		fpsGraph[0].color = sf::Color::Green;
+		fpsGraph[fpsGraph.getVertexCount() - 1].position = fpsGraph[0].position;
+		fpsGraph[fpsGraph.getVertexCount() - 1].color = sf::Color::Green;
+		fpsGraph[fpsGraph.getVertexCount() - 2].position = sf::Vector2f(199.f, fontSize - (1.f / globalTimeDelta) * 0.15f);
+		if (fpsGraph[fpsGraph.getVertexCount() - 2].position.y >= fontSize - 30.f * 0.15f)
+			fpsGraph[fpsGraph.getVertexCount() - 2].color = sf::Color::Red;
+		else if (fpsGraph[fpsGraph.getVertexCount() - 2].position.y >= fontSize - 60.f * 0.15f)
+			fpsGraph[fpsGraph.getVertexCount() - 2].color = sf::Color::Yellow;
+		else
+			fpsGraph[fpsGraph.getVertexCount() - 2].color = sf::Color::Green;
+		debugWindow.draw(fpsGraph);
+		for (int i = 0; i <= fpsGraph.getVertexCount() - 5; i++)
+		{
+			fpsGraph[i + 2].position = { 1.f + i * 198.f / (fpsGraph.getVertexCount() - 4) ,fpsGraph[i + 3].position.y };
+			if (fpsGraph[i + 2].position.y >= fontSize - 30.f * 0.15f)
+				fpsGraph[i + 2].color = sf::Color::Red;
+			else if (fpsGraph[i + 2].position.y >= fontSize - 60.f * 0.15f)
+				fpsGraph[i + 2].color = sf::Color::Yellow;
+			else
+				fpsGraph[i + 2].color = sf::Color::Green;
+		}
 
+	}
+	infoY += fontSize * 1;
+	text.setPosition(0.f, infoY);
+
+	text.setFillColor(sf::Color::Green);
+	text.setString(std::to_string(1 / globalTimeDelta));
+	debugWindow.draw(text);
+	infoY += fontSize * 1;
+	text.setPosition(0.f, infoY);
+
+	text.setFillColor(sf::Color::White);
 	text.setString(
 		"[WolrdPos]\n" + std::to_string(sceneTest->GetMousePosWolrd().x) + "\n" + std::to_string(sceneTest->GetMousePosWolrd().y)
 	);
 	debugWindow.draw(text);
+	infoY += fontSize * 4;
+	text.setPosition(0.f, infoY);
 
-	text.setPosition(0.f, 60.f);
 	text.setString(
-		"\n[GridPos]\n" + std::to_string(sceneTest->GetMousePosGrid().x) + "\n" + std::to_string(sceneTest->GetMousePosGrid().y)
+		"[GridPos]\n" + std::to_string(sceneTest->GetMousePosGrid().x) + "\n" + std::to_string(sceneTest->GetMousePosGrid().y)
 	);
 	debugWindow.draw(text);
+	infoY += fontSize * 4;
+	text.setPosition(0.f, infoY);
 
-	text.setPosition(0.f, 140.f);
 	text.setString(
-		"\n[ObjectCount]\n" + std::to_string(GameObject::GetObjectsTotalCount()) + "\n" + std::to_string(GameObject::GetObjectsCount())
+		"[ObjectCount]\n" + std::to_string(GameObject::GetObjectsTotalCount()) + "\n" + std::to_string(GameObject::GetObjectsCount())
 	);
 	debugWindow.draw(text);
+	infoY += fontSize * 4;
+	text.setPosition(0.f, infoY);
 
 	debugWindow.display();
 }

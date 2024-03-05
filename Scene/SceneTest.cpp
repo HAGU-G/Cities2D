@@ -20,6 +20,9 @@ void SceneTest::Init()
 
 void SceneTest::PreUpdate(float timeDelta, float timeScale)
 {
+	Scene::PreUpdate(timeDelta, timeScale);
+	SetMousePosGrid();
+
 	if (IOManager::IsKeyPress(sf::Keyboard::Q))
 	{
 		view.rotate(45.f * timeDelta);
@@ -46,33 +49,36 @@ void SceneTest::PreUpdate(float timeDelta, float timeScale)
 	}
 
 
-	Scene::PreUpdate(timeDelta, timeScale);
-	SetMousePosGrid();
+	if (IOManager::IsKeyDown(sf::Keyboard::Space))
+	{
+		if (gridInfo[mousePosGrid.x][mousePosGrid.y].second == nullptr)
+			CreateObjectTile(GAME_OBJECT_TYPE::BUILDING, mousePosGrid);
+		else
+			DeleteObject(mousePosGrid);
+	}
+
 }
 
 void SceneTest::Update(float timeDelta, float timeScale)
 {
 	Scene::Update(timeDelta, timeScale);
-
-
-
 }
 
 void SceneTest::Draw(sf::RenderWindow& window)
 {
-
-	test.setSize({ gridSize * 5.f, gridSize * 5.f });
+	test.setSize(gridSize * 5.f);
 	test.setFillColor(sf::Color::White);
 
 	window.draw(test);
 	Scene::Draw(window);
 }
 
-bool SceneTest::CreateObjectTile(const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
+bool SceneTest::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord)
 {
-	if (type != GAME_OBJECT_TYPE::NONE && gridInfo[gridCoord.x][gridCoord.y] == GAME_OBJECT_TYPE::NONE)
+	if (type != GAME_OBJECT_TYPE::NONE && gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
-		//AddObject(std::make_shared<ObjectTile>(This(), gridCoord, type));
+		gridInfo[gridCoord.x][gridCoord.y].first = type;
+		gridInfo[gridCoord.x][gridCoord.y].second = ObjectTile::Create(This(), type, gridCoord);
 		TileUpdate();
 		return true;
 	}
@@ -89,6 +95,13 @@ bool SceneTest::DeleteObject(const std::string& key)
 	return ret;
 }
 
+void SceneTest::DeleteObject(const sf::Vector2i& gridCoord)
+{
+	DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second->GetKey());
+	gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::NONE;
+	gridInfo[gridCoord.x][gridCoord.y].second.reset();
+}
+
 void SceneTest::TileUpdate()
 {
 
@@ -97,12 +110,12 @@ void SceneTest::TileUpdate()
 void SceneTest::SetMousePosGrid()
 {
 	if (mousePosWorld.x >= 0)
-		mousePosGrid.x = mousePosWorld.x / gridSize;
+		mousePosGrid.x = mousePosWorld.x / gridSize.x;
 	else
-		mousePosGrid.x = floor(mousePosWorld.x / gridSize);
+		mousePosGrid.x = floor(mousePosWorld.x / gridSize.x);
 
 	if (mousePosWorld.y >= 0)
-		mousePosGrid.y = mousePosWorld.y / gridSize;
+		mousePosGrid.y = mousePosWorld.y / gridSize.y;
 	else
-		mousePosGrid.y = floor(mousePosWorld.y / gridSize);
+		mousePosGrid.y = floor(mousePosWorld.y / gridSize.y);
 }

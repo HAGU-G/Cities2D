@@ -174,8 +174,12 @@ bool Scene::DeleteObject(const std::string& key)
 		{
 			if (drawIt->first == it->first)
 			{
-				drawList.erase(drawIt);
+				drawIt = drawList.erase(drawIt);
 				break;
+			}
+			else
+			{
+				drawIt++;
 			}
 		}
 		gameObjectList.erase(it);

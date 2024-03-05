@@ -6,6 +6,8 @@ class GameManager final
 {
 private:
 	static sf::RenderWindow debugWindow;
+	static sf::VertexArray fpsGraph;
+
 	static sf::RenderWindow window;
 	static WINDOW_MODE currentMode;
 	static sf::Vector2u currentSize;

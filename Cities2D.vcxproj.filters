@@ -45,10 +45,7 @@
     <ClCompile Include="GameManager.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Framework\RenderWindowRBR.cpp">
-      <Filter>소스 파일</Filter>
-    </ClCompile>
-    <ClCompile Include="ObjectTile.cpp">
+    <ClCompile Include="Object\Tile\ObjectTile.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -86,10 +83,7 @@
     <ClInclude Include="GameManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Framework\RenderWindowRBR.h">
-      <Filter>헤더 파일</Filter>
-    </ClInclude>
-    <ClInclude Include="ObjectTile.h">
+    <ClInclude Include="Object\Tile\ObjectTile.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -86,23 +86,7 @@ void GameObject::SetPositionY(float y)
 	position.y = y;
 }
 
-void GameObject::SetPosition(float x, float y)
-{
-	position.x = x;
-	position.y = y;
-}
-
-void GameObject::SetPositionX(sf::Vector2f position)
-{
-	this->position.x = position.x;
-}
-
-void GameObject::SetPositionY(sf::Vector2f position)
-{
-	this->position.y = position.y;
-}
-
-void GameObject::SetPosition(sf::Vector2f position)
+void GameObject::SetPosition(const sf::Vector2f& position)
 {
 	this->position = position;
 }

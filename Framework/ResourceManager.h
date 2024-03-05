@@ -19,7 +19,11 @@ private:
 
 	ResourceManager()
 	{
-		unknownResource.loadFromFile("unknown.png");
+		if (typeid(T).name() == typeid(sf::Texture).name())
+			unknownResource.loadFromFile("resource/Unknown.png");
+		else if (typeid(T).name() == typeid(sf::Font).name())
+			unknownResource.loadFromFile("resource/font/Sam3KRFont.ttf");
+		//else if (typeid(T).name() == typeid(sf::SoundBuffer))
 	}
 
 public:

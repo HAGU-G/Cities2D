@@ -16,7 +16,7 @@ enum class WINDOW_MODE
 
 enum class GAME_OBJECT_TAG
 {
-	NONE = -1,
+	NONE = 0,
 	//You can edit here
 
 	COUNT
@@ -24,7 +24,7 @@ enum class GAME_OBJECT_TAG
 
 enum class GAME_OBJECT_TYPE
 {
-	NONE = -1,
+	NONE = 0,
 	BUILDING,
 	ROAD,
 	//You can edit here

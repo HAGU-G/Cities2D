@@ -47,10 +47,7 @@ public:
 	void SetScene(std::weak_ptr<Scene> scene);
 	void SetPositionX(float x);
 	void SetPositionY(float y);
-	void SetPosition(float x, float y);
-	void SetPositionX(sf::Vector2f position);
-	void SetPositionY(sf::Vector2f position);
-	void SetPosition(sf::Vector2f position);
+	virtual void SetPosition(const sf::Vector2f& position);
 	void SetDrawLayer(int value);
 	void SetPhygicsLayer(int value);
 
@@ -62,10 +59,9 @@ public:
 	const GAME_OBJECT_TYPE& GetGameObjectType() const;
 	const std::list<GAME_OBJECT_TAG>& GetGameObjectTagList() const;
 
+	const sf::Vector2f& GetPosition() const;
 	const int& GetDrawLayer() const;
 	const int& GetPhygicsLayer() const;
-
-	const sf::Vector2f& GetPosition() const;
 
 	//Add
 	bool AddTag(GAME_OBJECT_TAG tag);

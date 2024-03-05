@@ -49,10 +49,10 @@ public:
 	void SetTimeScale(float value) { timeScale = value; }
 
 	//Get
+	const std::shared_ptr<Scene>& This() { return SceneManager::Get(name); };
 	static size_t GetScenesCount();
 	static size_t GetScenesTotalCount();
 	const std::string& GetSceneName() const;
-	const std::shared_ptr<Scene>& This() { return SceneManager::Get(name); };
 	const GameObjectList& GetObjects() const;
 	const FilePathList& GetResourcePathList() const;
 	float GetTimeScale() const;
@@ -62,7 +62,7 @@ public:
 	//gameObjectsList
 	bool AddObject(const std::shared_ptr<GameObject>& object);
 	const std::shared_ptr<GameObject>& GetObject(const std::string& key) const;
-	const std::shared_ptr<GameObject>& GetObject(const std::shared_ptr<GameObject>& object) const;
+	const std::shared_ptr<GameObject>& GetObject(std::weak_ptr<GameObject> object) const;
 	bool DeleteObject(const std::string& key);
 
 	//drawList

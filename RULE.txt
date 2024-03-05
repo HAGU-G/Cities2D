@@ -1,6 +1,7 @@
 AddObject 규칙
 - Scene 안에서 생성할 경우 Scene에서 AddObject
 - Scene 밖에서 생성할 경우 생성된 오브젝트 내에서 AddObject
+- 포함되어있는 Scene이 있어야만 한다.
 
 Init 규칙
 - 객체 준비

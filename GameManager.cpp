@@ -139,6 +139,18 @@ void GameManager::AddScene()
 	SceneManager::AddUse(std::make_shared<SceneTest>("Test"));
 }
 
+
+
+
+
+
+
+
+/////////////////////////////
+// 
+//       디버그 윈도우
+// 
+/////////////////////////////
 void GameManager::DebugUpdate()
 {
 	sf::Event event;
@@ -155,16 +167,26 @@ void GameManager::DebugUpdate()
 	text.setFont(SFGM_FONT.Get("BMHANNAPro.ttf"));
 	std::shared_ptr<SceneTest> sceneTest = std::dynamic_pointer_cast<SceneTest>(SceneManager::Get("Test"));
 
+
+	debugWindow.clear();
+
 	text.setString(
 		"[WolrdPos]\n" + std::to_string(sceneTest->GetMousePosWolrd().x) + "\n" + std::to_string(sceneTest->GetMousePosWolrd().y)
 	);
-	debugWindow.clear();
 	debugWindow.draw(text);
+
 	text.setPosition(0.f, 60.f);
 	text.setString(
 		"\n[GridPos]\n" + std::to_string(sceneTest->GetMousePosGrid().x) + "\n" + std::to_string(sceneTest->GetMousePosGrid().y)
 	);
 	debugWindow.draw(text);
+
+	text.setPosition(0.f, 140.f);
+	text.setString(
+		"\n[ObjectCount]\n" + std::to_string(GameObject::GetObjectsTotalCount()) + "\n" + std::to_string(GameObject::GetObjectsCount())
+	);
+	debugWindow.draw(text);
+
 	debugWindow.display();
 }
 

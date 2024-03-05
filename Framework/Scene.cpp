@@ -155,9 +155,9 @@ const std::shared_ptr<GameObject>& Scene::GetObject(const std::string& key) cons
 		return it->second;
 	return std::shared_ptr<GameObject>(nullptr);
 }
-const std::shared_ptr<GameObject>& Scene::GetObject(const std::shared_ptr<GameObject>& object) const
+const std::shared_ptr<GameObject>& Scene::GetObject(std::weak_ptr<GameObject> object) const
 {
-	return GetObject(object->GetKey());
+	return GetObject(object.lock()->GetKey());
 }
 
 bool Scene::DeleteObject(const std::string& key)

@@ -14,7 +14,7 @@ SceneTest::~SceneTest()
 void SceneTest::Init()
 {
 	AddObject(std::make_shared<ObjectTest>(This(), GAME_OBJECT_TYPE::BUILDING));
-
+	
 	Scene::Init();
 }
 

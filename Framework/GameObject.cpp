@@ -10,7 +10,7 @@ void GameObject::Setkey(const std::string& loadedKey)
 	key = loadedKey;
 }
 
-GameObject::GameObject(const std::shared_ptr<Scene>& scene, GAME_OBJECT_TYPE objectType)
+GameObject::GameObject(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
 	:scene(scene), gameObjectType(objectType),
 	key(std::to_string((int)objectType) + "_" + std::to_string(time(NULL)) + "_" + std::to_string(totalCount)),
 	position(0.f, 0.f)
@@ -71,7 +71,7 @@ void GameObject::Release()
 	scene.reset();
 }
 
-void GameObject::SetScene(const std::shared_ptr<Scene>& scene)
+void GameObject::SetScene(std::weak_ptr<Scene> scene)
 {
 	this->scene = scene;
 }
@@ -115,6 +115,11 @@ void GameObject::SetDrawLayer(int value)
 void GameObject::SetPhygicsLayer(int value)
 {
 	drawLayer = value;
+}
+
+const std::shared_ptr<GameObject>& GameObject::This()
+{
+	return scene.lock()->GetObject(key);
 }
 
 size_t GameObject::GetObjectsCount()

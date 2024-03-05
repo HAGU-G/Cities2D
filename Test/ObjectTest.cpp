@@ -2,7 +2,7 @@
 #include "ObjectTest.h"
 #include "SceneTest.h"
 
-ObjectTest::ObjectTest(const std::shared_ptr<Scene>& scene, GAME_OBJECT_TYPE objectType)
+ObjectTest::ObjectTest(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
 	:GameObject(scene, objectType)
 {
 }

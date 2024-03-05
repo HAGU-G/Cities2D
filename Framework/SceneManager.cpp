@@ -90,7 +90,7 @@ const std::shared_ptr<Scene>& SceneManager::Get(const std::string& name)
 		if (scene.first == name)
 			return scene.second;
 	}
-	return nullptr;
+	return std::shared_ptr<Scene>(nullptr);
 }
 
 void SceneManager::Reset()

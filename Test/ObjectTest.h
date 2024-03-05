@@ -7,7 +7,7 @@ protected:
 	sf::Sprite sprite2;
 
 public:
-	explicit ObjectTest(const std::shared_ptr<Scene>& scene, GAME_OBJECT_TYPE objectType);
+	explicit ObjectTest(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType);
 	~ObjectTest() override;
 	ObjectTest(const ObjectTest&) = delete;
 	ObjectTest(ObjectTest&&) = delete;

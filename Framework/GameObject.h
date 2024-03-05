@@ -26,7 +26,7 @@ protected:
 
 	sf::Vector2f position;
 
-	explicit GameObject(const std::shared_ptr<Scene>& scene, GAME_OBJECT_TYPE objectType);
+	explicit GameObject(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType);
 	GameObject(const GameObject&) = delete;
 	GameObject(GameObject&&) = delete;
 	GameObject& operator=(const GameObject&) = delete;
@@ -44,7 +44,7 @@ public:
 	virtual void Release();
 
 	//Set
-	void SetScene(const std::shared_ptr<Scene>& scene);
+	void SetScene(std::weak_ptr<Scene> scene);
 	void SetPositionX(float x);
 	void SetPositionY(float y);
 	void SetPosition(float x, float y);
@@ -55,6 +55,7 @@ public:
 	void SetPhygicsLayer(int value);
 
 	//Get
+	const std::shared_ptr<GameObject>& This();
 	static size_t GetObjectsCount();
 	static size_t GetObjectsTotalCount();
 	std::string GetKey() const;

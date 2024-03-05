@@ -2,7 +2,7 @@
 #include "GameManager.h"
 
 //TESTCODE : 릴리즈에서 삭제
-#include "Test/SceneTest.h" 
+#include "SceneTest.h" 
 
 sf::RenderWindow GameManager::debugWindow;
 sf::RenderWindow GameManager::window;

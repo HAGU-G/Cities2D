@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SceneTest.h"
-#include "ObjectTest.h"
+#include "Test/ObjectTest.h"
+#include "ObjectTile.h"
 
 SceneTest::SceneTest(const std::string& name)
 	:Scene(name)
@@ -14,7 +15,6 @@ SceneTest::~SceneTest()
 void SceneTest::Init()
 {
 	AddObject(std::make_shared<ObjectTest>(This(), GAME_OBJECT_TYPE::BUILDING));
-	
 	Scene::Init();
 }
 
@@ -66,6 +66,32 @@ void SceneTest::Draw(sf::RenderWindow& window)
 
 	window.draw(test);
 	Scene::Draw(window);
+}
+
+bool SceneTest::CreateObjectTile(const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
+{
+	if (type != GAME_OBJECT_TYPE::NONE && gridInfo[gridCoord.x][gridCoord.y] == GAME_OBJECT_TYPE::NONE)
+	{
+		//AddObject(std::make_shared<ObjectTile>(This(), gridCoord, type));
+		TileUpdate();
+		return true;
+	}
+	else
+	{
+		return false;
+	}
+}
+
+bool SceneTest::DeleteObject(const std::string& key)
+{
+	bool ret = Scene::DeleteObject(key);
+	TileUpdate();
+	return ret;
+}
+
+void SceneTest::TileUpdate()
+{
+
 }
 
 void SceneTest::SetMousePosGrid()

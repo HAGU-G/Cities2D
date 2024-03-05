@@ -21,7 +21,7 @@
     <ClCompile Include="pch.cpp">
       <Filter>헤더 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Test\SceneTest.cpp">
+    <ClCompile Include="Scene\SceneTest.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Test\ObjectTest.cpp">
@@ -56,7 +56,7 @@
     <ClInclude Include="pch.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Test\SceneTest.h">
+    <ClInclude Include="Scene\SceneTest.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Test\ObjectTest.h">

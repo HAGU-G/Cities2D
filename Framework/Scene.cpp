@@ -19,7 +19,7 @@ Scene::~Scene()
 
 void Scene::Init()
 {
-	view.setSize(sf::Vector2f( GameManager::GetWindowSize().x, GameManager::GetWindowSize().y ));
+	view.setSize(sf::Vector2f(GameManager::GetWindowSize().x, GameManager::GetWindowSize().y));
 	view.setCenter(worldCenter);
 
 	for (auto& pair : gameObjectList)
@@ -31,7 +31,7 @@ void Scene::Init()
 
 void Scene::PreUpdate(float timeDelta, float timeScale)
 {
-	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(),view);
+	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), view);
 }
 
 void Scene::Update(float timeDelta, float timeScale)
@@ -118,7 +118,7 @@ const FilePathList& Scene::GetResourcePathList() const
 }
 
 
-bool Scene::AddObject(const std::shared_ptr<GameObject>& object)
+const std::shared_ptr<GameObject>& Scene::AddObject(const std::shared_ptr<GameObject>& object)
 {
 	auto it = gameObjectList.insert(std::make_pair(object->GetKey(), object));
 	if (it.second)
@@ -129,8 +129,12 @@ bool Scene::AddObject(const std::shared_ptr<GameObject>& object)
 			drawList.push_back(*it.first);
 		else
 			drawList.push_front(*it.first);
+		return object;
 	}
-	return it.second;
+	else
+	{
+		return std::shared_ptr<GameObject>(nullptr);
+	}
 }
 
 void Scene::ResetDrawList()

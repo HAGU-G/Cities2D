@@ -12,8 +12,7 @@ void GameObject::Setkey(const std::string& loadedKey)
 
 GameObject::GameObject(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
 	:scene(scene), gameObjectType(objectType),
-	key(std::to_string((int)objectType) + "_" + std::to_string(time(NULL)) + "_" + std::to_string(totalCount)),
-	position(0.f, 0.f)
+	key(std::to_string((int)objectType) + "_" + std::to_string(time(NULL)) + "_" + std::to_string(totalCount))
 {
 	currentCount++;
 	totalCount++;
@@ -22,6 +21,7 @@ GameObject::GameObject(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
 GameObject::~GameObject()
 {
 	currentCount--;
+	Release();
 }
 
 bool GameObject::AddTag(GAME_OBJECT_TAG tag)

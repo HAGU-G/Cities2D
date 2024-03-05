@@ -60,10 +60,10 @@ public:
 	inline const sf::Vector2f& GetMousePosWolrd() const { return mousePosWorld; }
 
 	//gameObjectsList
-	bool AddObject(const std::shared_ptr<GameObject>& object);
+	const std::shared_ptr<GameObject>& AddObject(const std::shared_ptr<GameObject>& object);
 	const std::shared_ptr<GameObject>& GetObject(const std::string& key) const;
 	const std::shared_ptr<GameObject>& GetObject(std::weak_ptr<GameObject> object) const;
-	bool DeleteObject(const std::string& key);
+	virtual bool DeleteObject(const std::string& key);
 
 	//drawList
 	void ResetDrawList();

@@ -107,7 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\Framework;..\SFML-2.6.1\bin;..\SFML-2.6.1\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Object\UI;.\Scene;.\Object\Tile;.\Framework;..\SFML-2.6.1\bin;..\SFML-2.6.1\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -148,7 +148,7 @@
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Test\SceneTest.cpp" />
+    <ClCompile Include="Scene\SceneTest.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Framework\Defines.h" />
@@ -163,7 +163,7 @@
     <ClInclude Include="ObjectTile.h" />
     <ClInclude Include="Test\ObjectTest.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Test\SceneTest.h" />
+    <ClInclude Include="Scene\SceneTest.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="RULE.txt" />

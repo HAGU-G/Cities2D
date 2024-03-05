@@ -26,7 +26,7 @@ protected:
 
 	sf::Vector2f position;
 
-	explicit GameObject(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType);
+	explicit GameObject(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType = GAME_OBJECT_TYPE::NONE);
 	GameObject(const GameObject&) = delete;
 	GameObject(GameObject&&) = delete;
 	GameObject& operator=(const GameObject&) = delete;

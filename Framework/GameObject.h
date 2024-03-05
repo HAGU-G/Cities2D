@@ -11,8 +11,11 @@ private:
 	static size_t currentCount;
 	static size_t totalCount;
 
-	const std::string key; //"gameObjectType_CreatedTime_totalCount"
+	std::string key; //"gameObjectType_CreatedTime_totalCount"
 	GAME_OBJECT_TYPE gameObjectType;
+
+	//AddObject 하기 전에 호출.
+	void Setkey(const std::string& loadedKey);
 
 protected:
 	std::weak_ptr<Scene> scene;

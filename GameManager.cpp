@@ -1,8 +1,8 @@
 #include "pch.h"
 #include "GameManager.h"
+#include "SceneGame.h" 
 
 //TESTCODE : 릴리즈에서 삭제
-#include "SceneTest.h" 
 
 sf::RenderWindow GameManager::debugWindow;
 sf::VertexArray GameManager::fpsGraph = sf::VertexArray(sf::LinesStrip, 300);
@@ -92,7 +92,10 @@ void GameManager::MainLoop()
 		while (window.pollEvent(event))
 		{
 			if (event.type == sf::Event::Closed)
+			{
 				window.close();
+				debugWindow.close();
+			}
 			IOManager::EventUpdate(event);
 		}
 
@@ -146,7 +149,7 @@ void GameManager::SetWindowPosition(sf::Vector2i position)
 
 void GameManager::AddScene()
 {
-	SceneManager::AddUse(std::make_shared<SceneTest>("Test"));
+	SceneManager::AddUse(std::make_shared<SceneGame>("Test"));
 }
 
 
@@ -176,7 +179,7 @@ void GameManager::DebugUpdate()
 	float infoY = 0.f;
 	text.setCharacterSize(fontSize);
 	text.setFont(SFGM_FONT.Get("BMHANNAPro.ttf"));
-	std::shared_ptr<SceneTest> sceneTest = std::dynamic_pointer_cast<SceneTest>(SceneManager::Get("Test"));
+	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame>(SceneManager::Get("Test"));
 
 	//렌더링
 	debugWindow.clear();
@@ -218,14 +221,14 @@ void GameManager::DebugUpdate()
 
 	text.setFillColor(sf::Color::White);
 	text.setString(
-		"[WolrdPos]\n" + std::to_string(sceneTest->GetMousePosWolrd().x) + "\n" + std::to_string(sceneTest->GetMousePosWolrd().y)
+		"[WolrdPos]\n" + std::to_string(sceneGame->GetMousePosWolrd().x) + "\n" + std::to_string(sceneGame->GetMousePosWolrd().y)
 	);
 	debugWindow.draw(text);
 	infoY += fontSize * 4;
 	text.setPosition(0.f, infoY);
 
 	text.setString(
-		"[GridPos]\n" + std::to_string(sceneTest->GetMousePosGrid().x) + "\n" + std::to_string(sceneTest->GetMousePosGrid().y)
+		"[GridPos]\n" + std::to_string(sceneGame->GetMousePosGrid().x) + "\n" + std::to_string(sceneGame->GetMousePosGrid().y)
 	);
 	debugWindow.draw(text);
 	infoY += fontSize * 4;

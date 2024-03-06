@@ -121,19 +121,32 @@ const FilePathList& Scene::GetResourcePathList() const
 const std::shared_ptr<GameObject>& Scene::AddObject(const std::shared_ptr<GameObject>& object)
 {
 	auto it = gameObjectList.insert(std::make_pair(object->GetKey(), object));
-	if (it.second)
-	{
-		if (drawList.empty())
-			drawList.push_back(*it.first);
-		else if (it.first->second->GetDrawLayer() >= drawList.front().second->GetDrawLayer())
-			drawList.push_back(*it.first);
-		else
-			drawList.push_front(*it.first);
+
+	if (!it.second)
+		return std::shared_ptr<GameObject>(nullptr);
+
+	if (drawList.empty())
+	{ 
+		drawList.push_back(*it.first);
 		return object;
 	}
 	else
 	{
-		return std::shared_ptr<GameObject>(nullptr);
+		auto drawIt = drawList.begin();
+		while (drawIt != drawList.end())
+		{
+			if (it.first->second->GetDrawLayer() < drawIt->second->GetDrawLayer())
+			{
+				drawList.insert(drawIt,*it.first);
+				return object;
+			}
+			else
+			{
+				drawIt++;
+			}
+		}
+		drawList.push_back(*it.first);
+		return object;
 	}
 }
 

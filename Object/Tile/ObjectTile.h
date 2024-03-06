@@ -1,6 +1,6 @@
 #pragma once
 #include "GameObject.h"
-#include "SceneTest.h"
+#include "SceneGame.h"
 //#include <tuple>
 
 class ObjectTile : public GameObject
@@ -16,7 +16,7 @@ public:
 	};
 
 protected:
-	std::weak_ptr<SceneTest> sceneTest;
+	std::weak_ptr<SceneGame> sceneGame;
 	sf::Vector2i gridCoord;
 	sf::Vector2f gridCenterPos;
 
@@ -41,8 +41,11 @@ public:
 
 
 	void SetPosition(const sf::Vector2f& position) override;
+	bool AddAdjacent(ADDIREC ad, std::weak_ptr<ObjectTile> ptr);
+	void UpdateAdjacent();
 
-	bool AddAdjacnet(const std::string& key, ADDIREC ad, std::weak_ptr<ObjectTile> ptr);
 	void RemoveAdjacent(ADDIREC ad);
+
+	inline const sf::Vector2i& GetGridCoord() { return gridCoord; }
 };
 

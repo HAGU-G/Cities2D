@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "ObjectTest.h"
-#include "SceneTest.h"
+#include "SceneGame.h"
 
 ObjectTest::ObjectTest(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
 	:GameObject(scene, objectType)
@@ -24,7 +24,7 @@ void ObjectTest::Init()
 
 void ObjectTest::Update(float timeDelta, float timeScale)
 {
-	sprite.setPosition(std::dynamic_pointer_cast<SceneTest, Scene>(scene.lock())->GetSelectGridPos());
+	sprite.setPosition(std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock())->GetSelectGridPos());
 	sprite2.setPosition(sprite.getPosition() + sf::Vector2f(sprite.getGlobalBounds().width,sprite.getGlobalBounds().height) * 0.5f);
 	sprite2.setRotation(scene.lock()->GetView().getRotation());
 }

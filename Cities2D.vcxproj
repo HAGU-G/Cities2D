@@ -142,12 +142,13 @@
     <ClCompile Include="Framework\Tools.cpp" />
     <ClCompile Include="GameManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object\Tile\ObjectTileMap.cpp" />
     <ClCompile Include="Object\Tile\ObjectTile.cpp" />
     <ClCompile Include="Test\ObjectTest.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="Scene\SceneTest.cpp" />
+    <ClCompile Include="Scene\SceneGame.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Framework\Defines.h" />
@@ -158,10 +159,11 @@
     <ClInclude Include="Framework\SceneManager.h" />
     <ClInclude Include="Framework\Tools.h" />
     <ClInclude Include="GameManager.h" />
+    <ClInclude Include="Object\Tile\ObjectTileMap.h" />
     <ClInclude Include="Object\Tile\ObjectTile.h" />
     <ClInclude Include="Test\ObjectTest.h" />
     <ClInclude Include="pch.h" />
-    <ClInclude Include="Scene\SceneTest.h" />
+    <ClInclude Include="Scene\SceneGame.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="RULE.txt" />

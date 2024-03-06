@@ -7,8 +7,8 @@ class Scene;
 static class SceneManager final
 {
 private:
-	static std::unordered_map<std::string,std::shared_ptr<Scene>> UsingSceneList;
-	static std::unordered_map<std::string,std::shared_ptr<Scene>> WaitingSceneList;
+	static std::unordered_map<std::string,std::shared_ptr<Scene>> usingSceneList;
+	static std::unordered_map<std::string,std::shared_ptr<Scene>> waitingSceneList;
 
 public:
 

@@ -1,6 +1,6 @@
 #pragma once
 
-#define CITY_RCI (RCIManager::Instance())
+#define GM_RCI (RCIManager::Instance())
 class ObjectUnit;
 
 struct RCI

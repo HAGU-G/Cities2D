@@ -3,6 +3,6 @@
 #define TOOLS_H
 
 namespace tool {
-	static float Random(float from, float to);
+	float RandomBetween(float from, float to);
 }
 #endif // !TOOLS_H

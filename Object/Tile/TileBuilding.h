@@ -26,5 +26,6 @@ public:
 
 	inline const RCI& GetRCI() { return rci; }
 	bool MoveIn(std::weak_ptr<ObjectUnit> citizen);
+	void MoveOut(const std::string& key);
 };
 

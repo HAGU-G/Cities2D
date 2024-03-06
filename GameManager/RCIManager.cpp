@@ -4,7 +4,8 @@
 
 void RCIManager::UpdateRCI() const
 {
-	std::dynamic_pointer_cast<SceneGameUI,Scene>(SceneManager::Get("SceneGameUI"))->UpdateRCIGraph(totalRegidence - usingRegidence, totalCommerce - usingCommerce, totalIndustry - usingIndustry);
+	std::dynamic_pointer_cast<SceneGameUI,Scene>(SceneManager::Get("SceneGameUI"))
+		->UpdateRCIGraph(totalRegidence,usingRegidence , totalRegidence- usingRegidence);
 }
 
 void RCIManager::UpdateRCI(int r, int c, int i)

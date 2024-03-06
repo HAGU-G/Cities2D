@@ -30,6 +30,10 @@ void Scene::Init()
 void Scene::PreUpdate(float timeDelta, float timeScale)
 {
 	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), view);
+	for (auto& pair : gameObjectList)
+	{
+		pair.second->PreUpdate(timeDelta, timeScale);
+	}
 }
 
 void Scene::Update(float timeDelta, float timeScale)
@@ -37,6 +41,38 @@ void Scene::Update(float timeDelta, float timeScale)
 	for (auto& pair : gameObjectList)
 	{
 		pair.second->Update(timeDelta, timeScale);
+	}
+}
+void Scene::PostUpdate(float timeDelta, float timeScale)
+{
+	for (auto& pair : gameObjectList)
+	{
+		pair.second->PostUpdate(timeDelta, timeScale);
+	}
+
+
+	//delete
+	while (!deleteDeque.empty())
+	{
+		auto it = gameObjectList.find(deleteDeque.front());
+		if (it != gameObjectList.end())
+		{
+			auto drawIt = drawList.begin();
+			while (drawIt != drawList.end())
+			{
+				if (drawIt->first == it->first)
+				{
+					drawIt = drawList.erase(drawIt);
+					break;
+				}
+				else
+				{
+					drawIt++;
+				}
+			}
+			gameObjectList.erase(it);
+		}
+		deleteDeque.pop_front();
 	}
 }
 
@@ -175,28 +211,10 @@ const std::shared_ptr<GameObject>& Scene::GetObject(std::weak_ptr<GameObject> ob
 	return GetObject(object.lock()->GetKey());
 }
 
-bool Scene::DeleteObject(const std::string& key)
+void Scene::DeleteObject(const std::string& key)
 {
-	auto it = gameObjectList.find(key);
-	if (it != gameObjectList.end())
-	{
-		auto drawIt = drawList.begin();
-		while (drawIt != drawList.end())
-		{
-			if (drawIt->first == it->first)
-			{
-				drawIt = drawList.erase(drawIt);
-				break;
-			}
-			else
-			{
-				drawIt++;
-			}
-		}
-		gameObjectList.erase(it);
-		return true;
-	}
-	return false;
+	deleteDeque.push_back(key);
+
 }
 
 

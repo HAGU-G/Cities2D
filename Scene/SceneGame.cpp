@@ -2,6 +2,7 @@
 #include "SceneGame.h"
 #include "Test/ObjectTest.h"
 #include "_Include_Tile.h"
+#include "ObjectUnit.h"
 
 SceneGame::SceneGame(const std::string& name)
 	:Scene(name)
@@ -71,6 +72,12 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		else
 			DeleteObjectTile(mousePosGrid);
 	}
+	if (IOManager::IsKeyDown(sf::Keyboard::Num3))
+	{
+
+		ObjectUnit::Create(This());
+
+	}
 	if (IOManager::IsKeyDown(sf::Keyboard::F5))
 	{
 		OrganizeGridInfo();
@@ -134,18 +141,16 @@ void SceneGame::OrganizeGridInfo()
 	}
 }
 
-bool SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
+void SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
 {
-	bool ret = DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second->GetKey());
+	DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second->GetKey());
 	gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::NONE;
 	gridInfo[gridCoord.x][gridCoord.y].second.reset();
 
 	groundTileMap->UpdateTile(gridCoord);
-
-	return ret;
 }
 
-inline const GridInfo& SceneGame::GetGridInfo()
+const GridInfo& SceneGame::GetGridInfo()
 {
 	OrganizeGridInfo();
 	return gridInfo;

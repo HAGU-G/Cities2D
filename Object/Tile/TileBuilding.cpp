@@ -6,12 +6,12 @@
 TileBuilding::TileBuilding(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord)
 	:ObjectTile(scene, GAME_OBJECT_TYPE::BUILDING, gridCoord), rci(rci)
 {
-	CITY_RCI.UpdateRCI(rci.residence, rci.commerce, rci.industry);
+	GM_RCI.UpdateRCI(rci.residence, rci.commerce, rci.industry);
 }
 
 TileBuilding::~TileBuilding()
 {
-	CITY_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
+	GM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
 }
 
 void TileBuilding::Update(float timeDelta, float timeScale)
@@ -84,5 +84,11 @@ bool TileBuilding::MoveIn(std::weak_ptr<ObjectUnit> citizen)
 
 	rci.residenceSlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
 	citizen.lock()->SetHome(std::dynamic_pointer_cast<TileBuilding, GameObject>(This()));
+	GM_RCI.UseRegidence(1);
 	return true;
+}
+
+void TileBuilding::MoveOut(const std::string& key)
+{
+	rci.residenceSlot.erase(key);
 }

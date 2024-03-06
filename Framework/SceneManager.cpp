@@ -28,6 +28,14 @@ void SceneManager::Update(float timeDelta)
 	}
 }
 
+void SceneManager::PostUpdate(float timeDelta)
+{
+	for (auto& scene : usingSceneList)
+	{
+		scene.second->PostUpdate(timeDelta, scene.second->GetTimeScale());
+	}
+}
+
 void SceneManager::PhygicsUpdate(float timeDelta)
 {
 	for (auto& scene : usingSceneList)

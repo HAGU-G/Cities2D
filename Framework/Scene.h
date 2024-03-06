@@ -17,6 +17,7 @@ protected:
 	GameObjectList gameObjectList;
 	std::list<std::pair<std::string, std::shared_ptr<GameObject>>> drawList;
 	FilePathList resourcePathList; //파일 경로들이 담긴 컨테이너
+	std::deque<std::string> deleteDeque;
 
 	int drawLayer = 0;
 
@@ -39,6 +40,7 @@ public:
 	virtual void Init();
 	virtual void PreUpdate(float timeDelta, float timeScale);
 	virtual void Update(float timeDelta, float timeScale);
+	virtual void PostUpdate(float timeDelta, float timeScale);
 	virtual void PhygicsUpdate(float timeDelta, float timeScale);
 	virtual void Draw(sf::RenderWindow& window);
 	virtual void Reset();
@@ -57,13 +59,13 @@ public:
 	const FilePathList& GetResourcePathList() const;
 	float GetTimeScale() const;
 	inline const sf::View& GetView() const { return view; }
-	inline const sf::Vector2f& GetMousePosWolrd() const { return mousePosWorld; }
+	inline const sf::Vector2f& GetMousePosWorld() const { return mousePosWorld; }
 
 	//gameObjectsList
 	const std::shared_ptr<GameObject>& AddObject(const std::shared_ptr<GameObject>& object);
 	const std::shared_ptr<GameObject>& GetObject(const std::string& key) const;
 	const std::shared_ptr<GameObject>& GetObject(std::weak_ptr<GameObject> object) const;
-	virtual bool DeleteObject(const std::string& key);
+	void DeleteObject(const std::string& key);
 
 	//drawList
 	void ResetDrawList();

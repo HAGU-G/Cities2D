@@ -2,6 +2,7 @@
 #include "GameObject.h"
 
 class TileBuilding;
+class SceneGame;
 
 class ObjectUnit : public GameObject
 {
@@ -12,8 +13,12 @@ protected:
 	std::weak_ptr<TileBuilding> home;
 	std::weak_ptr<TileBuilding> workPlace;
 
+	bool hasHome = false;
+	bool hasworkPlace = false;
+
 	float findTimer = 0.f;
 	float findInterval = 10.f;
+	int	patience = 5;
 
 	void SetHome(std::weak_ptr<TileBuilding> building);
 	void SetWorkPlace(std::weak_ptr<TileBuilding> building);
@@ -31,8 +36,7 @@ public:
 	void Reset() override;
 	void Release() override;
 
-	//TODO Create 함수 작성
-	//void 
-	//void FindHome();
+	static std::shared_ptr<ObjectUnit> Create(std::weak_ptr<Scene> scene);
+	bool FindHome();
 };
 

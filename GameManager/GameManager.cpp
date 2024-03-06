@@ -105,6 +105,7 @@ void GameManager::MainLoop()
 		/////////////////////////////
 		SceneManager::PreUpdate(globalTimeDelta);
 		SceneManager::Update(globalTimeDelta);
+		SceneManager::PostUpdate(globalTimeDelta);
 
 		/////////////////////////////
 		// 
@@ -221,7 +222,7 @@ void GameManager::DebugUpdate()
 
 	text.setFillColor(sf::Color::White);
 	text.setString(
-		"[WolrdPos]\n" + std::to_string(sceneGame->GetMousePosWolrd().x) + "\n" + std::to_string(sceneGame->GetMousePosWolrd().y)
+		"[WolrdPos]\n" + std::to_string(sceneGame->GetMousePosWorld().x) + "\n" + std::to_string(sceneGame->GetMousePosWorld().y)
 	);
 	debugWindow.draw(text);
 	infoY += fontSize * 4;

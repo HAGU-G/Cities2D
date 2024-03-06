@@ -50,7 +50,15 @@ void GameObject::Init()
 {
 }
 
+void GameObject::PreUpdate(float timeDelta, float timeScale)
+{
+}
+
 void GameObject::Update(float timeDelta, float timeScale)
+{
+}
+
+void GameObject::PostUpdate(float timeDelta, float timeScale)
 {
 }
 

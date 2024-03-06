@@ -16,6 +16,7 @@ public:
 	static void Init();
 	static void PreUpdate(float timeDelta); //Using
 	static void Update(float timeDelta); //Using
+	static void PostUpdate(float timeDelta); //Using
 	static void PhygicsUpdate(float timeDelta); //Using
 
 	//Draw - sceneList에 추가된 순서대로 Draw. Scene안에서는 게임오브젝트의 레이어 순서대로 Draw

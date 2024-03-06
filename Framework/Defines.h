@@ -21,8 +21,8 @@ enum class GAME_OBJECT_TYPE
 {
 	GROUND = -1,
 	NONE = 0,
-	BUILDING,
 	ROAD,
+	BUILDING,
 	//You can edit here
 
 	COUNT

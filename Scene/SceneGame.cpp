@@ -3,6 +3,8 @@
 #include "Test/ObjectTest.h"
 #include "ObjectTile.h"
 #include "ObjectTileMap.h"
+#include "TileRoad.h"
+#include "TileHouse.h"
 
 SceneGame::SceneGame(const std::string& name)
 	:Scene(name)
@@ -54,10 +56,17 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	}
 
 
-	if (IOManager::IsKeyDown(sf::Keyboard::Space))
+	if (IOManager::IsKeyDown(sf::Keyboard::Num1))
 	{
 		if (gridInfo[mousePosGrid.x][mousePosGrid.y].second == nullptr)
 			CreateObjectTile(GAME_OBJECT_TYPE::BUILDING, mousePosGrid);
+		else
+			DeleteObjectTile(mousePosGrid);
+	}
+	if (IOManager::IsKeyDown(sf::Keyboard::Num2))
+	{
+		if (gridInfo[mousePosGrid.x][mousePosGrid.y].second == nullptr)
+			CreateObjectTile(GAME_OBJECT_TYPE::ROAD, mousePosGrid);
 		else
 			DeleteObjectTile(mousePosGrid);
 	}
@@ -80,17 +89,32 @@ void SceneGame::Draw(sf::RenderWindow& window)
 
 bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord)
 {
-	if (type != GAME_OBJECT_TYPE::NONE && gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
+	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
-		gridInfo[gridCoord.x][gridCoord.y].first = type;
-		gridInfo[gridCoord.x][gridCoord.y].second = ObjectTile::Create(This(), type, gridCoord);
-		groundTileMap->UpdateTile(gridCoord);
-		return true;
+		switch (type)
+		{
+		case GAME_OBJECT_TYPE::ROAD:
+			gridInfo[gridCoord.x][gridCoord.y].first = type;
+			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord);
+			groundTileMap->UpdateTile(gridCoord);
+			return true;
+			break;
+		case GAME_OBJECT_TYPE::BUILDING:
+			gridInfo[gridCoord.x][gridCoord.y].first = type;
+			gridInfo[gridCoord.x][gridCoord.y].second = TileHouse::Create(This(), gridCoord);
+			groundTileMap->UpdateTile(gridCoord);
+			return true;
+			break;
+		case GAME_OBJECT_TYPE::COUNT:
+			break;
+		default:
+			break;
+		}
+
 	}
-	else
-	{
-		return false;
-	}
+
+	return false;
+
 }
 
 void SceneGame::OrganizeGridInfo()

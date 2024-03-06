@@ -149,6 +149,8 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Scene\SceneGame.cpp" />
+    <ClCompile Include="Object\Tile\TileRoad.cpp" />
+    <ClCompile Include="Object\Tile\TileHouse.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Framework\Defines.h" />
@@ -164,6 +166,8 @@
     <ClInclude Include="Test\ObjectTest.h" />
     <ClInclude Include="pch.h" />
     <ClInclude Include="Scene\SceneGame.h" />
+    <ClInclude Include="Object\Tile\TileRoad.h" />
+    <ClInclude Include="Object\Tile\TileHouse.h" />
   </ItemGroup>
   <ItemGroup>
     <Text Include="RULE.txt" />

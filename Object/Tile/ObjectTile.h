@@ -5,7 +5,7 @@
 
 class ObjectTile : public GameObject
 {
-public:
+protected:
 	//인접 방향 Adjacent direction
 	enum ADDIREC
 	{
@@ -15,18 +15,17 @@ public:
 		AD_RIGHT = ~AD_LEFT,
 	};
 
-protected:
 	std::weak_ptr<SceneGame> sceneGame;
 	sf::Vector2i gridCoord;
 	sf::Vector2f gridCenterPos;
 
 	std::unordered_map<ADDIREC, std::weak_ptr<ObjectTile>> adjacent; //인접 리스트 최대 4개
-
-	sf::Sprite tempSprite;
 	sf::VertexArray edge;
 
-public:
+	sf::Sprite tempSprite;
+
 	explicit ObjectTile(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord);
+public:
 	~ObjectTile() override;
 	ObjectTile(const ObjectTile&) = delete;
 	ObjectTile(ObjectTile&&) = delete;
@@ -38,12 +37,10 @@ public:
 	void Draw(sf::RenderWindow& window) override;
 	void Reset() override;
 	void Release() override;
-	static std::shared_ptr<ObjectTile> Create(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord);
-
 
 	void SetPosition(const sf::Vector2f& position) override;
 	bool AddAdjacent(ADDIREC ad, std::weak_ptr<ObjectTile> ptr);
-	void UpdateAdjacent();
+	virtual void UpdateAdjacent() = 0;
 	void UpdateEdge(ADDIREC ad);
 
 	void RemoveAdjacent(ADDIREC ad);

@@ -90,48 +90,12 @@ void ObjectTile::Release()
 	}
 }
 
-std::shared_ptr<ObjectTile> ObjectTile::Create(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord)
-{
-	std::shared_ptr<ObjectTile> objectTile = std::make_shared<ObjectTile>(scene, objectType, gridCoord);
-	scene.lock()->AddObject(objectTile);
-	objectTile->Init();
-
-	return objectTile;
-}
-
 void ObjectTile::SetPosition(const sf::Vector2f& position)
 {
 	GameObject::SetPosition(position);
 	tempSprite.setPosition(position + sceneGame.lock()->GetGridSize() * 0.5f);
 }
 
-void ObjectTile::UpdateAdjacent()
-{
-	//TODO 인접리스트 한번에 업데이트하는 작업 중.
-	adjacent.clear();
-
-	const TileInfo& upInfo = sceneGame.lock()->GetTileInfo(gridCoord.x, gridCoord.y - 1);
-	const TileInfo& downInfo = sceneGame.lock()->GetTileInfo(gridCoord.x, gridCoord.y + 1);
-	const TileInfo& leftInfo = sceneGame.lock()->GetTileInfo(gridCoord.x - 1, gridCoord.y);
-	const TileInfo& rightInfo = sceneGame.lock()->GetTileInfo(gridCoord.x + 1, gridCoord.y);
-
-	if (upInfo.first == GAME_OBJECT_TYPE::BUILDING)
-	{
-		AddAdjacent(AD_UP, upInfo.second);
-	}
-	if (downInfo.first == GAME_OBJECT_TYPE::BUILDING)
-	{
-		AddAdjacent(AD_DOWN, downInfo.second);
-	}
-	if (leftInfo.first == GAME_OBJECT_TYPE::BUILDING)
-	{
-		AddAdjacent(AD_LEFT, leftInfo.second);
-	}
-	if (rightInfo.first == GAME_OBJECT_TYPE::BUILDING)
-	{
-		AddAdjacent(AD_RIGHT, rightInfo.second);
-	}
-}
 
 void ObjectTile::UpdateEdge(ADDIREC ad)
 {

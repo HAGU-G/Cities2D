@@ -51,21 +51,13 @@ void ObjectTile::Init()
 	Reset();
 }
 
-void ObjectTile::Update(float timeDelta, float timeScale)
-{
-	tempSprite.setRotation(scene.lock()->GetView().getRotation());
-}
-
 void ObjectTile::Draw(sf::RenderWindow& window)
 {
-	window.draw(tempSprite);
 	window.draw(edge);
 }
 
 void ObjectTile::Reset()
 {
-	tempSprite.setTexture(SFGM_TEXTURE.Get("resource/building/House01.png"));
-	tempSprite.setOrigin(tempSprite.getGlobalBounds().getSize() * 0.5f);
 
 	for (int i = 0; i < 8; i++)
 	{
@@ -89,13 +81,6 @@ void ObjectTile::Release()
 		adjacent.clear();
 	}
 }
-
-void ObjectTile::SetPosition(const sf::Vector2f& position)
-{
-	GameObject::SetPosition(position);
-	tempSprite.setPosition(position + sceneGame.lock()->GetGridSize() * 0.5f);
-}
-
 
 void ObjectTile::UpdateEdge(ADDIREC ad)
 {

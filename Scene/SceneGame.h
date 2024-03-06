@@ -31,8 +31,7 @@ public:
 	//정보 확인을 위해 생성된 nullptr를 제거
 	void OrganizeGridInfo();
 
-	bool DeleteObject(const std::string& key) override;
-	void DeleteObjectTile(const sf::Vector2i& gridCoord);
+	bool DeleteObjectTile(const sf::Vector2i& gridCoord);
 
 	inline const sf::Vector2i& GetMousePosGrid() const { return mousePosGrid; }
 	inline const sf::Vector2f& GetSelectGridPos() const { return sf::Vector2f(mousePosGrid) * gridSize.x; }

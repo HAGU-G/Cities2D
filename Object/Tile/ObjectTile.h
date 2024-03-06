@@ -22,8 +22,6 @@ protected:
 	std::unordered_map<ADDIREC, std::weak_ptr<ObjectTile>> adjacent; //인접 리스트 최대 4개
 	sf::VertexArray edge;
 
-	sf::Sprite tempSprite;
-
 	explicit ObjectTile(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord);
 public:
 	~ObjectTile() override;
@@ -33,12 +31,10 @@ public:
 	ObjectTile& operator=(ObjectTile&&) = delete;
 
 	void Init() override;
-	void Update(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
 	void Reset() override;
 	void Release() override;
 
-	void SetPosition(const sf::Vector2f& position) override;
 	bool AddAdjacent(ADDIREC ad, std::weak_ptr<ObjectTile> ptr);
 	virtual void UpdateAdjacent() = 0;
 	void UpdateEdge(ADDIREC ad);

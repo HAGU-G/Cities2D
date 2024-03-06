@@ -38,7 +38,7 @@ void ObjectTileMap::UpdateTile(int x, int y)
 		color = {100,100,100,255};
 		break;
 	case GAME_OBJECT_TYPE::BUILDING:
-		color = { 255,255,0,255 };
+		color = { 70,190,110,255 };
 		break;
 	default:
 		break;

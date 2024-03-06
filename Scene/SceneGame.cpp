@@ -1,10 +1,7 @@
 #include "pch.h"
 #include "SceneGame.h"
 #include "Test/ObjectTest.h"
-#include "ObjectTile.h"
-#include "ObjectTileMap.h"
-#include "TileRoad.h"
-#include "TileHouse.h"
+#include "_Include_Tile.h"
 
 SceneGame::SceneGame(const std::string& name)
 	:Scene(name)
@@ -101,7 +98,7 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 			break;
 		case GAME_OBJECT_TYPE::BUILDING:
 			gridInfo[gridCoord.x][gridCoord.y].first = type;
-			gridInfo[gridCoord.x][gridCoord.y].second = TileHouse::Create(This(), gridCoord);
+			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(RCI(), This(), gridCoord);
 			groundTileMap->UpdateTile(gridCoord);
 			return true;
 			break;
@@ -132,18 +129,15 @@ void SceneGame::OrganizeGridInfo()
 	}
 }
 
-bool SceneGame::DeleteObject(const std::string& key)
+bool SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
 {
-	return Scene::DeleteObject(key);
-}
-
-void SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
-{
-	DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second->GetKey());
+	bool ret = DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second->GetKey());
 	gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::NONE;
 	gridInfo[gridCoord.x][gridCoord.y].second.reset();
 
 	groundTileMap->UpdateTile(gridCoord);
+
+	return ret;
 }
 
 void SceneGame::SetMousePosGrid()

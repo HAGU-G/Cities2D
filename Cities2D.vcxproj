@@ -107,7 +107,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\GameManager;.\Object\UI;.\Scene;.\Object\Tile;.\Framework;..\SFML-2.6.1\bin;..\SFML-2.6.1\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>.\Object\Unit;.\GameManager;.\Object\UI;.\Scene;.\Object\Tile;.\Framework;..\SFML-2.6.1\bin;..\SFML-2.6.1\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
     </ClCompile>
@@ -142,6 +142,7 @@
     <ClCompile Include="Framework\Tools.cpp" />
     <ClCompile Include="GameManager\GameManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object\Unit\ObjectUnit.cpp" />
     <ClCompile Include="Object\Tile\ObjectTileMap.cpp" />
     <ClCompile Include="Object\Tile\ObjectTile.cpp" />
     <ClCompile Include="GameManager\RCIManager.cpp" />
@@ -163,6 +164,7 @@
     <ClInclude Include="Framework\SceneManager.h" />
     <ClInclude Include="Framework\Tools.h" />
     <ClInclude Include="GameManager\GameManager.h" />
+    <ClInclude Include="Object\Unit\ObjectUnit.h" />
     <ClInclude Include="Object\Tile\ObjectTileMap.h" />
     <ClInclude Include="Object\Tile\ObjectTile.h" />
     <ClInclude Include="GameManager\RCIManager.h" />

@@ -36,7 +36,7 @@ public:
 	inline const sf::Vector2i& GetMousePosGrid() const { return mousePosGrid; }
 	inline const sf::Vector2f& GetSelectGridPos() const { return sf::Vector2f(mousePosGrid) * gridSize.x; }
 	inline const sf::Vector2f& GetGridSize() const { return gridSize; }
-	inline const GridInfo& GetGridInfo() const { return gridInfo; }
+	inline const GridInfo& GetGridInfo();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
 
 };

@@ -1,6 +1,7 @@
 #pragma once
 
 #define CITY_RCI (RCIManager::Instance())
+class ObjectUnit;
 
 struct RCI
 {
@@ -8,6 +9,9 @@ struct RCI
 	int commerce = 0; //상업
 	int industry = 0; //산업
 
+	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> residenceSlot;
+	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> commerceSlot;
+	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> industrySlot;
 };
 
 class RCIManager final
@@ -16,6 +20,11 @@ private:
 	int totalRegidence;
 	int totalCommerce;
 	int totalIndustry;
+
+	int usingRegidence;
+	int usingCommerce;
+	int usingIndustry;
+
 
 	RCIManager() = default;
 public:
@@ -27,10 +36,16 @@ public:
 		return instance;
 	}
 
-	inline int UpdateRegidence(int value) { return totalRegidence += value; }
-	inline int UpdateCommerce(int value) { return totalCommerce += value; }
-	inline int UpdateIndustry(int value) { return totalIndustry += value; }
+	void UpdateRCI() const;
 	void UpdateRCI(int r, int c, int i);
+
+	void UpdateRegidence(int value);
+	void UpdateCommerce(int value);
+	void UpdateIndustry(int value);
+
+	void UseRegidence(int value);
+	void UseCommerce(int value);
+	void UseIndustry(int value);
 
 };
 

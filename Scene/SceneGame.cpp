@@ -17,6 +17,10 @@ void SceneGame::Init()
 	groundTileMap = ObjectTileMap::Create(This());
 
 	Scene::Init();
+
+	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
+	//view.setCenter(worldCenter);
+
 	Reset();
 }
 
@@ -97,13 +101,14 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 			return true;
 			break;
 		case GAME_OBJECT_TYPE::BUILDING:
+		{
+			RCI rci = { 3,2,1 };
 			gridInfo[gridCoord.x][gridCoord.y].first = type;
-			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(RCI(), This(), gridCoord);
+			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
 			groundTileMap->UpdateTile(gridCoord);
 			return true;
 			break;
-		case GAME_OBJECT_TYPE::COUNT:
-			break;
+		}
 		default:
 			break;
 		}
@@ -138,6 +143,12 @@ bool SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
 	groundTileMap->UpdateTile(gridCoord);
 
 	return ret;
+}
+
+inline const GridInfo& SceneGame::GetGridInfo()
+{
+	OrganizeGridInfo();
+	return gridInfo;
 }
 
 void SceneGame::SetMousePosGrid()

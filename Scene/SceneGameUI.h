@@ -3,6 +3,7 @@
 class SceneGameUI : public Scene
 {
 protected:
+	sf::Text tempText;
 
 public:
 	explicit SceneGameUI(const std::string& name);
@@ -11,5 +12,10 @@ public:
 	SceneGameUI(SceneGameUI&&) = delete;
 	SceneGameUI& operator=(const SceneGameUI&) = delete;
 	SceneGameUI& operator=(SceneGameUI&&) = delete;
+
+	void Init() override;
+	void Draw(sf::RenderWindow& window) override;
+
+	void UpdateRCIGraph(int r, int c, int i);
 };
 

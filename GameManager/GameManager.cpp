@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "GameManager.h"
 #include "SceneGame.h" 
+#include <SceneGameUI.h>
 
 sf::RenderWindow GameManager::debugWindow;
 sf::VertexArray GameManager::fpsGraph = sf::VertexArray(sf::LinesStrip, 300);
@@ -33,7 +34,7 @@ void GameManager::Init()
 	ratioY = 9;
 
 	sf::ContextSettings setting;
-	setting.antialiasingLevel = 0;
+	setting.antialiasingLevel = 8;
 
 	window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::Close, setting);
 	SetWindowSize(1280);
@@ -46,7 +47,7 @@ void GameManager::Init()
 	//       디버그 윈도우
 	// 
 	/////////////////////////////
-	debugWindow.create(sf::VideoMode(200.f, 400.f), "Cities2D : Debug", sf::Style::Close, setting);
+	debugWindow.create(sf::VideoMode(200.f, 400.f), "Cities2D : Debug", sf::Style::Close);
 	debugWindow.setPosition(sf::Vector2i(window.getPosition().x - debugWindow.getSize().x, window.getPosition().y));
 	window.requestFocus(); //메인 윈도우 포커싱
 	for (int i = 0; i <= fpsGraph.getVertexCount() - 4; i++)
@@ -147,7 +148,8 @@ void GameManager::SetWindowPosition(sf::Vector2i position)
 
 void GameManager::AddScene()
 {
-	SceneManager::AddUse(std::make_shared<SceneGame>("Test"));
+	SceneManager::AddUse(std::make_shared<SceneGame>("SceneGame"));
+	SceneManager::AddUse(std::make_shared<SceneGameUI>("SceneGameUI"));
 }
 
 
@@ -177,7 +179,7 @@ void GameManager::DebugUpdate()
 	float infoY = 0.f;
 	text.setCharacterSize(fontSize);
 	text.setFont(SFGM_FONT.Get("BMHANNAPro.ttf"));
-	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame>(SceneManager::Get("Test"));
+	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame>(SceneManager::Get("SceneGame"));
 
 	//렌더링
 	debugWindow.clear();

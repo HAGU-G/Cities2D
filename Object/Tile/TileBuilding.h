@@ -20,10 +20,11 @@ public:
 	void Draw(sf::RenderWindow& window);
 	void Reset();
 
-
-
 	void SetPosition(const sf::Vector2f& position) override;
 	static std::shared_ptr<ObjectTile> Create(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord);
 	void UpdateAdjacent() override;
+
+	inline const RCI& GetRCI() { return rci; }
+	bool MoveIn(std::weak_ptr<ObjectUnit> citizen);
 };
 

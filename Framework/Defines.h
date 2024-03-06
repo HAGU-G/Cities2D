@@ -21,11 +21,15 @@ enum class GAME_OBJECT_TYPE
 {
 	GROUND = -1,
 	NONE = 0,
-	ROAD,
-	BUILDING,
-	//You can edit here
 
-	COUNT
+	TILE,
+	ROAD = TILE,
+	BUILDING,
+	TILE_END, //TILE_END - TILE = TILE_COUNT
+
+	UNIT,
+	CITIZEN = UNIT,
+	UNIT_END //UNIT_END - UNIT = UNIT_COUNT
 };
 
 class GameObject;

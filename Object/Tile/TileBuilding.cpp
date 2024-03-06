@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "TileBuilding.h"
-
+#include "ObjectUnit.h"
 
 
 TileBuilding::TileBuilding(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord)
@@ -75,4 +75,14 @@ void TileBuilding::UpdateAdjacent()
 	{
 		AddAdjacent(AD_RIGHT, rightInfo.second);
 	}
+}
+
+bool TileBuilding::MoveIn(std::weak_ptr<ObjectUnit> citizen)
+{
+	if (rci.residenceSlot.size() == rci.residence)
+		return false;
+
+	rci.residenceSlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
+	citizen.lock()->SetHome(std::dynamic_pointer_cast<TileBuilding, GameObject>(This()));
+	return true;
 }

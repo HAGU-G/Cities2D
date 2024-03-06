@@ -24,19 +24,19 @@ void TileRoad::UpdateAdjacent()
 	const TileInfo& leftInfo = sceneGame.lock()->GetTileInfo(gridCoord.x - 1, gridCoord.y);
 	const TileInfo& rightInfo = sceneGame.lock()->GetTileInfo(gridCoord.x + 1, gridCoord.y);
 
-	if (upInfo.first >= GAME_OBJECT_TYPE::ROAD)
+	if (upInfo.first >= GAME_OBJECT_TYPE::TILE && upInfo.first < GAME_OBJECT_TYPE::TILE_END)
 	{
 		AddAdjacent(AD_UP, upInfo.second);
 	}
-	if (downInfo.first >= GAME_OBJECT_TYPE::ROAD)
+	if (downInfo.first >= GAME_OBJECT_TYPE::TILE && downInfo.first < GAME_OBJECT_TYPE::TILE_END)
 	{
 		AddAdjacent(AD_DOWN, downInfo.second);
 	}
-	if (leftInfo.first >= GAME_OBJECT_TYPE::ROAD)
+	if (leftInfo.first >= GAME_OBJECT_TYPE::TILE && leftInfo.first < GAME_OBJECT_TYPE::TILE_END)
 	{
 		AddAdjacent(AD_LEFT, leftInfo.second);
 	}
-	if (rightInfo.first >= GAME_OBJECT_TYPE::ROAD)
+	if (rightInfo.first >= GAME_OBJECT_TYPE::TILE && rightInfo.first < GAME_OBJECT_TYPE::TILE_END)
 	{
 		AddAdjacent(AD_RIGHT, rightInfo.second);
 	}

@@ -9,10 +9,6 @@ SceneGame::SceneGame(const std::string& name)
 {
 }
 
-SceneGame::~SceneGame()
-{
-}
-
 void SceneGame::Init()
 {
 	//선택된 타일 표시용 (임시)
@@ -29,6 +25,8 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 {
 	Scene::PreUpdate(timeDelta, timeScale);
 	SetMousePosGrid();
+
+	//TESTCODE 이 밑으로 전부 테스트 코드
 
 	if (IOManager::IsKeyPress(sf::Keyboard::Q))
 	{
@@ -63,6 +61,10 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		else
 			DeleteObjectTile(mousePosGrid);
 	}
+	if (IOManager::IsKeyDown(sf::Keyboard::F5))
+	{
+		OrganizeGridInfo();
+	}
 
 }
 
@@ -83,7 +85,6 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 		gridInfo[gridCoord.x][gridCoord.y].first = type;
 		gridInfo[gridCoord.x][gridCoord.y].second = ObjectTile::Create(This(), type, gridCoord);
 		groundTileMap->UpdateTile(gridCoord);
-		TileUpdate(); //사용하지 않을 것으로 예상됨.
 		return true;
 	}
 	else
@@ -92,11 +93,24 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 	}
 }
 
+void SceneGame::OrganizeGridInfo()
+{
+	for (auto& x : gridInfo)
+	{
+		auto it = x.second.begin();
+		while (it != x.second.end())
+		{
+			if (it->second.second == nullptr)
+				it = x.second.erase(it);
+			else
+				it++;
+		}
+	}
+}
+
 bool SceneGame::DeleteObject(const std::string& key)
 {
-	bool ret = Scene::DeleteObject(key);
-	TileUpdate();
-	return ret;
+	return Scene::DeleteObject(key);
 }
 
 void SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
@@ -106,11 +120,6 @@ void SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
 	gridInfo[gridCoord.x][gridCoord.y].second.reset();
 
 	groundTileMap->UpdateTile(gridCoord);
-}
-
-void SceneGame::TileUpdate()
-{
-	
 }
 
 void SceneGame::SetMousePosGrid()

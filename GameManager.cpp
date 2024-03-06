@@ -2,8 +2,6 @@
 #include "GameManager.h"
 #include "SceneGame.h" 
 
-//TESTCODE : 릴리즈에서 삭제
-
 sf::RenderWindow GameManager::debugWindow;
 sf::VertexArray GameManager::fpsGraph = sf::VertexArray(sf::LinesStrip, 300);
 sf::RenderWindow GameManager::window;

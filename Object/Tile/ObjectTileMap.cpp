@@ -8,6 +8,11 @@ ObjectTileMap::ObjectTileMap(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE object
 {
 }
 
+ObjectTileMap::~ObjectTileMap()
+{
+	Release();
+}
+
 std::shared_ptr<ObjectTileMap> ObjectTileMap::Create(std::weak_ptr<Scene> scene)
 {
 	std::shared_ptr<ObjectTileMap> objectTileMap = std::make_shared<ObjectTileMap>(scene);

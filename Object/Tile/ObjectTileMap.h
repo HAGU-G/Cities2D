@@ -14,7 +14,7 @@ protected:
 
 public:
 	explicit ObjectTileMap(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType = GAME_OBJECT_TYPE::GROUND);
-	~ObjectTileMap() override = default;
+	~ObjectTileMap() override;
 	ObjectTileMap(const ObjectTileMap&) = delete;
 	ObjectTileMap(ObjectTileMap&&) = delete;
 	ObjectTileMap& operator=(const ObjectTileMap&) = delete;

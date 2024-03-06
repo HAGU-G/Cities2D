@@ -20,9 +20,10 @@ protected:
 	sf::Vector2i gridCoord;
 	sf::Vector2f gridCenterPos;
 
-	std::unordered_map<ADDIREC, std::pair<std::string, std::weak_ptr<ObjectTile>>> adjacent; //인접 리스트 최대 4개
+	std::unordered_map<ADDIREC, std::weak_ptr<ObjectTile>> adjacent; //인접 리스트 최대 4개
 
 	sf::Sprite tempSprite;
+	sf::VertexArray edge;
 
 public:
 	explicit ObjectTile(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord);
@@ -43,9 +44,11 @@ public:
 	void SetPosition(const sf::Vector2f& position) override;
 	bool AddAdjacent(ADDIREC ad, std::weak_ptr<ObjectTile> ptr);
 	void UpdateAdjacent();
+	void UpdateEdge(ADDIREC ad);
 
 	void RemoveAdjacent(ADDIREC ad);
 
 	inline const sf::Vector2i& GetGridCoord() { return gridCoord; }
+	inline const sf::Vector2f& GetGridCenterPos() { return gridCenterPos; }
 };
 

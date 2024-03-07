@@ -37,11 +37,88 @@ void ObjectTile::RemoveAdjacent(ADDIREC ad)
 	UpdateEdge(ad);
 }
 
-std::queue<sf::Vector2i> ObjectTile::FindShortPath(sf::Vector2i fromGridCoord, GAME_OBJECT_TAG toTag, bool Available)
+std::pair<bool, std::list<sf::Vector2i>> ObjectTile::FindShortPath(GAME_OBJECT_TAG toTag, bool doCheck)
 {
-	//TODO 작성 시작
+	visitList.clear();
+	std::list<sf::Vector2i> path;
+	bool find = false;
 
-	return std::queue<sf::Vector2i>();
+	std::shared_ptr<ObjectTile> node;
+	for (auto& i : adjacent)
+	{
+		node = i.second.lock();
+		if (node->visit)
+			continue;
+
+		visitList.push_back(std::dynamic_pointer_cast<ObjectTile,GameObject>(node->This()));
+		node->visit = true;
+		const std::list<GAME_OBJECT_TAG>& nodeTags = node->GetGameObjectTagList();
+
+		if (std::find(nodeTags.begin(), nodeTags.end(), toTag) != nodeTags.end())
+		{
+			if (doCheck)
+			{
+				if (ConditionCheck(toTag, node))
+				{
+					find = true;
+					path.push_back(node->GetGridCoord());
+					ResetVisit(visitList);
+					return { find, path };
+				}
+			}
+			else
+			{
+				find = true;
+				path.push_back(node->GetGridCoord());
+				ResetVisit(visitList);
+				return { find, path };
+			}
+		}
+
+
+		if (std::find(nodeTags.begin(), nodeTags.end(), GAME_OBJECT_TAG::MOVEABLE) != nodeTags.end())
+		{
+			path.push_back(node->GetGridCoord());
+			std::pair<bool, std::list<sf::Vector2i>> tempPath = node->FindShortPath(toTag, doCheck);
+			if (tempPath.first)
+			{
+				find = true;
+				path.splice(path.end(), tempPath.second);
+			}
+		}
+	}
+
+
+
+//못찾아도 path는 넘겨야지
+	return { find, path };
+}
+
+bool ObjectTile::ConditionCheck(GAME_OBJECT_TAG tag, std::weak_ptr<ObjectTile> tile)
+{
+	switch (tag)
+	{
+	case GAME_OBJECT_TAG::R:
+		break;
+	case GAME_OBJECT_TAG::C:
+
+		break;
+	case GAME_OBJECT_TAG::I:
+
+		break;
+	default:
+		break;
+	}
+
+	return true;
+}
+
+void ObjectTile::ResetVisit(std::deque<std::weak_ptr<ObjectTile>>& visitList)
+{
+	for (auto& ptr : visitList)
+	{
+		ptr.lock()->visit = false;
+	}
 }
 
 void ObjectTile::Init()

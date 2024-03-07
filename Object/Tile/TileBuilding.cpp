@@ -15,6 +15,18 @@ TileBuilding::~TileBuilding()
 	GM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
 }
 
+void TileBuilding::Init()
+{
+	ObjectTile::Init();
+	if (rci.residence > 0)
+		AddTag(GAME_OBJECT_TAG::R);
+	if (rci.commerce > 0)
+		AddTag(GAME_OBJECT_TAG::C);
+	if (rci.industry > 0)
+		AddTag(GAME_OBJECT_TAG::I);
+
+}
+
 void TileBuilding::Update(float timeDelta, float timeScale)
 {
 	ObjectTile::Update(timeDelta, timeScale);

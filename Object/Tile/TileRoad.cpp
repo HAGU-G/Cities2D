@@ -6,6 +6,12 @@ TileRoad::TileRoad(std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord)
 {
 }
 
+void TileRoad::Init()
+{
+	ObjectTile::Init();
+	AddTag(GAME_OBJECT_TAG::MOVEABLE);
+}
+
 std::shared_ptr<ObjectTile> TileRoad::Create(std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord)
 {
 	std::shared_ptr<ObjectTile> tileRoad = std::make_shared<TileRoad>(scene, gridCoord);

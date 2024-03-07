@@ -84,6 +84,19 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		OrganizeGridInfo();
 	}
 
+	std::pair<bool, std::list<sf::Vector2i>> tttt;
+
+	if (IOManager::IsKeyDown(sf::Keyboard::F))
+	{
+		tttt = gridInfo[mousePosGrid.x][mousePosGrid.y].second->FindShortPath(GAME_OBJECT_TAG::I);
+		for (auto& data : tttt.second)
+		{
+			std::cout << data.x << " " << data.y << std::endl;
+		}
+	}
+
+
+
 }
 
 void SceneGame::Update(float timeDelta, float timeScale)

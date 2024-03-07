@@ -12,6 +12,8 @@ public:
 	TileRoad& operator=(const TileRoad&) = delete;
 	TileRoad& operator=(TileRoad&&) = delete;
 
+	void Init() override;
+
 	static std::shared_ptr<ObjectTile> Create(std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord);
 
 	void UpdateAdjacent() override;

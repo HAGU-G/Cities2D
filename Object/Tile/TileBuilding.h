@@ -16,9 +16,10 @@ public:
 	TileBuilding& operator=(const TileBuilding&) = delete;
 	TileBuilding& operator=(TileBuilding&&) = delete;
 
-	void Update(float timeDelta, float timeScale);
-	void Draw(sf::RenderWindow& window);
-	void Reset();
+	void Init() override;
+	void Update(float timeDelta, float timeScale) override;
+	void Draw(sf::RenderWindow& window) override;
+	void Reset() override;
 
 	void SetPosition(const sf::Vector2f& position) override;
 	static std::shared_ptr<ObjectTile> Create(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord);

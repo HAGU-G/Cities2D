@@ -54,6 +54,8 @@ void ObjectUnit::Reset()
 	tempRender.setRadius(tool::RandomBetween(5.f, 7.f));
 	tempRender.setFillColor(sf::Color(tool::RandomBetween(0, 255), tool::RandomBetween(0, 255), tool::RandomBetween(0, 255), 255));
 	tempRender.setOrigin(tempRender.getLocalBounds().getSize() * 0.5f);
+	tempRender.setOutlineColor(sf::Color::Black);
+	tempRender.setOutlineThickness(1);
 
 	ResetHome();
 	ResetWorkPlace();
@@ -124,12 +126,10 @@ void ObjectUnit::GridUpdate()
 				if (status == STATUS::TO_HOME)
 				{
 					ResetHome();
-					CheckWorkPlace();
 				}
 				else if (status == STATUS::TO_WORK_PLACE)
 				{
 					ResetWorkPlace();
-					CheckHome();
 				}
 				else
 				{
@@ -341,7 +341,6 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		}
 		else
 		{
-
 		}
 	case STATUS::HOME:
 		if (!hasHome)
@@ -542,8 +541,8 @@ void ObjectUnit::MovingReverse(float timeDelta, float timeScale)
 		walkPath = ObjectTile::FindShortPath(destination, startingPoint);
 		if (walkPath.empty())
 		{
-			if (status == STATUS::TO_WORK_PLACE)
-				ResetWorkPlace();
+			if (status == STATUS::TO_HOME)
+				ResetHome();
 			isMoving = false;
 			return;
 		}

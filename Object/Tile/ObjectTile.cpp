@@ -12,6 +12,12 @@ ObjectTile::~ObjectTile()
 	Release();
 }
 
+void ObjectTile::SetPosition(const sf::Vector2f& position)
+{
+	GameObject::SetPosition(position);
+	gridCenterPos = position + sceneGame.lock()->GetGridSize() * 0.5f;
+}
+
 bool ObjectTile::AddAdjacent(ADDIREC ad, std::weak_ptr<ObjectTile> ptr)
 {
 	if (adjacent.find(ad) == adjacent.end())
@@ -139,6 +145,74 @@ std::deque<sf::Vector2i> ObjectTile::FindShortPath(
 	return realPath;
 }
 
+std::deque<sf::Vector2i> ObjectTile::FindShortPath(std::weak_ptr<ObjectTile> fromTile, std::weak_ptr<ObjectTile> toTile)
+{
+	std::deque<sf::Vector2i> realPath;
+	std::shared_ptr<ObjectTile> currentTile = fromTile.lock();
+
+	if (fromTile.expired())
+		return realPath;
+	if (currentTile->adjacent.empty())
+		return realPath;
+
+	std::queue<std::weak_ptr<ObjectTile>> nodeList;
+	std::unordered_map<int, std::unordered_map<int, bool>> visitList;
+	std::unordered_map<int, std::unordered_map<int, sf::Vector2i>> path;
+	bool isFind = false;
+	sf::Vector2i currentGridCoord = currentTile->gridCoord;
+
+	//자신에 대해 먼저 검사
+	visitList[currentGridCoord.x][currentGridCoord.y] = true;
+	if (currentTile == toTile.lock())
+	{
+		realPath.push_front(currentGridCoord);
+		return realPath;
+	}
+	nodeList.push(fromTile);
+
+	//다른 타일 검사
+	while (!nodeList.empty())
+	{
+		if (isFind)
+			break;
+
+		sf::Vector2i preGridCoord = nodeList.front().lock()->gridCoord;
+		for (auto& i : nodeList.front().lock()->adjacent)
+		{
+			currentTile = i.second.lock();
+			currentGridCoord = currentTile->gridCoord;
+			if (visitList[currentGridCoord.x][currentGridCoord.y])
+				continue;
+
+			path[currentGridCoord.x][currentGridCoord.y] = preGridCoord;
+			visitList[currentGridCoord.x][currentGridCoord.y] = true;
+
+			if (currentTile == toTile.lock())
+			{
+				isFind = true;
+				sf::Vector2i findRoad = currentGridCoord;
+				realPath.push_front(findRoad);
+				while (findRoad != fromTile.lock()->gridCoord)
+				{
+					findRoad = path[findRoad.x][findRoad.y];
+					realPath.push_front(findRoad);
+				}
+				break;
+			}
+
+			if (!currentTile->adjacent.empty())
+			{
+				const std::list<GAME_OBJECT_TAG>& nodeTags = currentTile->GetGameObjectTagList();
+				if (std::find(nodeTags.begin(), nodeTags.end(), GAME_OBJECT_TAG::MOVEABLE) != nodeTags.end())
+					nodeList.push(currentTile);
+			}
+		}
+		nodeList.pop();
+	}
+
+	return realPath;
+}
+
 bool ObjectTile::ConditionCheck(GAME_OBJECT_TAG tag)
 {
 
@@ -149,7 +223,6 @@ void ObjectTile::Init()
 {
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
 	SetPosition(sf::Vector2f(gridCoord) * sceneGame.lock()->GetGridSize().x);
-	gridCenterPos = position + sceneGame.lock()->GetGridSize() * 0.5f;
 
 	edge.setPrimitiveType(sf::Lines);
 	edge.resize(8);

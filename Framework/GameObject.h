@@ -25,6 +25,7 @@ protected:
 	int phygicsLayer = 0;
 
 	sf::Vector2f position;
+	sf::Vector2f direction;
 
 	explicit GameObject(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType = GAME_OBJECT_TYPE::NONE);
 	GameObject(const GameObject&) = delete;

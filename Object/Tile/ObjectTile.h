@@ -35,6 +35,7 @@ public:
 	void Reset() override;
 	void Release() override;
 
+	void SetPosition(const sf::Vector2f& position) override;
 	bool AddAdjacent(ADDIREC ad, std::weak_ptr<ObjectTile> ptr);
 	virtual void UpdateAdjacent() = 0;
 	void UpdateEdge(ADDIREC ad);
@@ -56,6 +57,8 @@ public:
 	/// <returns>: back ¸ñÇ¥ ÁÂÇ¥</returns>
 	static std::deque<sf::Vector2i> FindShortPath(
 		std::weak_ptr<ObjectTile> fromTile, GAME_OBJECT_TAG toTag, bool doCheck = true);
+	static std::deque<sf::Vector2i> FindShortPath(
+		std::weak_ptr<ObjectTile> fromTile, std::weak_ptr<ObjectTile> toTile);
 
 	virtual bool ConditionCheck(GAME_OBJECT_TAG tag);
 };

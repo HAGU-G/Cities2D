@@ -28,7 +28,7 @@ void ObjectUnit::Update(float timeDelta, float timeScale)
 		if (findTimer >= findInterval)
 		{
 			findTimer = 0.f;
-			if(FindHome())
+			if (FindHome())
 				patience++;
 			else
 				patience--;
@@ -45,8 +45,11 @@ void ObjectUnit::Update(float timeDelta, float timeScale)
 			hasHome = false;
 			GM_RCI.UseRegidence(-1);
 		}
+	}
 
-		if (!hasworkPlace) //직장이 없을 때
+	if (!hasworkPlace) //직장이 없을 때
+	{
+		if (hasHome)
 		{
 			if (findTimer >= findInterval)
 			{
@@ -61,14 +64,19 @@ void ObjectUnit::Update(float timeDelta, float timeScale)
 				findTimer += timeDelta * timeScale;
 			}
 		}
-		else if (home.expired()) //직장이 있는데 회사가 부숴졌을 때
+	}
+	else
+	{
+		if (workPlace.expired()) //회사가 부숴졌을 때
 		{
 			hasworkPlace = false;
 			GM_RCI.UseIndustry(-1);
 		}
-
 	}
+}
 
+void ObjectUnit::PostUpdate(float timeDelta, float timeScale)
+{
 	if (patience <= 0)
 	{
 		scene.lock()->DeleteObject(GetKey());
@@ -159,7 +167,7 @@ void ObjectUnit::SetHome(std::weak_ptr<TileBuilding> building)
 {
 	if (!home.expired())
 	{
-		building.lock()->MoveOut(GetKey());
+		home.lock()->MoveOut(GetKey());
 		GM_RCI.UseRegidence(-1);
 	}
 	home = building;
@@ -170,7 +178,7 @@ void ObjectUnit::SetWorkPlace(std::weak_ptr<TileBuilding> building)
 {
 	if (!workPlace.expired())
 	{
-		building.lock()->Quit(GetKey());
+		workPlace.lock()->Quit(GetKey());
 		GM_RCI.UseIndustry(-1);
 	}
 	workPlace = building;

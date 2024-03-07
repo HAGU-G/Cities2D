@@ -30,5 +30,7 @@ public:
 	void MoveOut(const std::string& key);
 	bool Join(std::weak_ptr<ObjectUnit> citizen);
 	void Quit(const std::string& key);
+
+	bool ConditionCheck(GAME_OBJECT_TAG tag) override;
 };
 

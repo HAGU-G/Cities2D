@@ -55,6 +55,6 @@ public:
 	static std::stack<sf::Vector2i> FindShortPath(
 		std::weak_ptr<ObjectTile> fromTile, GAME_OBJECT_TAG toTag, bool doCheck = true);
 
-	static bool ConditionCheck(GAME_OBJECT_TAG tag, std::weak_ptr<ObjectTile> tile);
+	virtual bool ConditionCheck(GAME_OBJECT_TAG tag);
 };
 

@@ -33,6 +33,7 @@ public:
 
 	void Init();
 	void Update(float timeDelta, float timeScale) override;
+	void PostUpdate(float timeDelta, float timeScale) override;
 	void Reset() override;
 	void Release() override;
 

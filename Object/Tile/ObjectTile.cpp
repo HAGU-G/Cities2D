@@ -62,7 +62,7 @@ std::stack<sf::Vector2i> ObjectTile::FindShortPath(
 	{
 		if (doCheck)
 		{
-			if (ConditionCheck(toTag, currentTile))
+			if (currentTile->ConditionCheck(toTag))
 			{
 				realPath.push(currentGridCoord); //현재 위치 추가
 				return realPath;
@@ -98,7 +98,7 @@ std::stack<sf::Vector2i> ObjectTile::FindShortPath(
 			{
 				if (doCheck)
 				{
-					if (ConditionCheck(toTag, currentTile))
+					if (currentTile->ConditionCheck(toTag))
 					{
 						//길찾음 BEGIN
 						isFind = true;
@@ -140,21 +140,8 @@ std::stack<sf::Vector2i> ObjectTile::FindShortPath(
 	return realPath;
 }
 
-bool ObjectTile::ConditionCheck(GAME_OBJECT_TAG tag, std::weak_ptr<ObjectTile> tile)
+bool ObjectTile::ConditionCheck(GAME_OBJECT_TAG tag)
 {
-	switch (tag)
-	{
-	case GAME_OBJECT_TAG::R:
-		break;
-	case GAME_OBJECT_TAG::C:
-
-		break;
-	case GAME_OBJECT_TAG::I:
-
-		break;
-	default:
-		break;
-	}
 
 	return true;
 }

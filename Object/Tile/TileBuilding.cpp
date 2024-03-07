@@ -103,6 +103,8 @@ void TileBuilding::UpdateAdjacent()
 
 bool TileBuilding::MoveIn(std::weak_ptr<ObjectUnit> citizen)
 {
+	if (citizen.expired())
+		return false;
 	if (rci.residenceSlot.size() == rci.residence)
 		return false;
 
@@ -119,6 +121,8 @@ void TileBuilding::MoveOut(const std::string& key)
 
 bool TileBuilding::Join(std::weak_ptr<ObjectUnit> citizen)
 {
+	if (citizen.expired())
+		return false;
 	if (rci.industrySlot.size() == rci.industry)
 		return false;
 
@@ -131,4 +135,26 @@ bool TileBuilding::Join(std::weak_ptr<ObjectUnit> citizen)
 void TileBuilding::Quit(const std::string& key)
 {
 	rci.industrySlot.erase(key);
+}
+
+bool TileBuilding::ConditionCheck(GAME_OBJECT_TAG tag)
+{
+	switch (tag)
+	{
+	case GAME_OBJECT_TAG::R:
+		if (rci.residenceSlot.size() < rci.residence)
+			return true;
+		break;
+	case GAME_OBJECT_TAG::C:
+		if (rci.commerceSlot.size() < rci.commerce)
+			return true;
+		break;
+	case GAME_OBJECT_TAG::I:
+		if (rci.industrySlot.size() < rci.industry)
+			return true;
+		break;
+	default:
+		break;
+	}
+	return false;
 }

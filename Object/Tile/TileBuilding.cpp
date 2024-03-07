@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "TileBuilding.h"
 #include "ObjectUnit.h"
+#include <algorithm>
 
 
 TileBuilding::TileBuilding(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord)
@@ -28,8 +29,19 @@ void TileBuilding::Draw(sf::RenderWindow& window)
 
 void TileBuilding::Reset()
 {
-	buildingSprite.setTexture(SFGM_TEXTURE.Get("resource/building/House01.png"));
-	buildingSprite.setOrigin(buildingSprite.getGlobalBounds().getSize() * 0.5f);
+	buildingSprite.setTexture(SFGM_TEXTURE.Get("resource/building/Buildings.png"));
+	std::initializer_list<int> elements = { rci.residence, rci.commerce, rci.industry };
+	int rciMax = std::max(elements);
+
+	if (rciMax == rci.commerce)
+		buildingSprite.setTextureRect({ 0, 0, 50, 50 });
+	else if (rciMax == rci.industry)
+		buildingSprite.setTextureRect({ 0, 50, 50, 100 });
+	else
+		buildingSprite.setTextureRect({ 0, 0, 50, 50 });
+
+	buildingSprite.setOrigin(buildingSprite.getLocalBounds().width * 0.5f,
+		buildingSprite.getLocalBounds().height - sceneGame.lock()->GetGridSize().y * 0.5f);
 
 	ObjectTile::Reset();
 }
@@ -91,4 +103,20 @@ bool TileBuilding::MoveIn(std::weak_ptr<ObjectUnit> citizen)
 void TileBuilding::MoveOut(const std::string& key)
 {
 	rci.residenceSlot.erase(key);
+}
+
+bool TileBuilding::Join(std::weak_ptr<ObjectUnit> citizen)
+{
+	if (rci.industrySlot.size() == rci.industry)
+		return false;
+
+	rci.industrySlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
+	citizen.lock()->SetWorkPlace(std::dynamic_pointer_cast<TileBuilding, GameObject>(This()));
+	GM_RCI.UseIndustry(1);
+	return true;
+}
+
+void TileBuilding::Quit(const std::string& key)
+{
+	rci.industrySlot.erase(key);
 }

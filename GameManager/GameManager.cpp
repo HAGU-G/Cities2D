@@ -61,14 +61,17 @@ void GameManager::Init()
 	// 
 	/////////////////////////////
 	AddScene();
-	SFGM_FONT.Load("BMHANNAPro.ttf");
+	//scene use list가 필요
+	SFGM_TEXTURE.Add(SceneManager::Get("SceneGame"));
+	SFGM_TEXTURE.Add(SceneManager::Get("SceneGameUI"));
+	SFGM_TEXTURE.Load();
 
 	/////////////////////////////
 	// 
 	//       초기화 완료 작업
 	// 
 	/////////////////////////////
-	SceneManager::Init();
+	srand(time(NULL) + unsigned(SceneManager::Get("SceneGame").get()) + GetMousePosScreen().x * GetMousePosScreen().y);
 	globalClock.restart();
 }
 
@@ -151,6 +154,7 @@ void GameManager::AddScene()
 {
 	SceneManager::AddUse(std::make_shared<SceneGame>("SceneGame"));
 	SceneManager::AddUse(std::make_shared<SceneGameUI>("SceneGameUI"));
+	SceneManager::Init();
 }
 
 

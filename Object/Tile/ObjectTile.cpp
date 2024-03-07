@@ -43,8 +43,6 @@ void ObjectTile::Init()
 	SetPosition(sf::Vector2f(gridCoord) * sceneGame.lock()->GetGridSize().x);
 	gridCenterPos = position + sceneGame.lock()->GetGridSize() * 0.5f;
 
-	SFGM_TEXTURE.Load("resource/building/House01.png");
-
 	edge.setPrimitiveType(sf::Lines);
 	edge.resize(8);
 

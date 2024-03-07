@@ -31,6 +31,21 @@ void IOManager::EventUpdate(const sf::Event& event)
 		if (doComboRecord)
 			combo.push_back({ event.key.code, KEY_STATE::UP });
 		break;
+	case sf::Event::MouseButtonPressed:
+		if (!IsKeyPress(event.mouseButton.button))
+		{
+			keyPressList.push_back(MouseKeyConversion(event.mouseButton.button));
+			keyDownList.push_back(MouseKeyConversion(event.mouseButton.button));
+			if (doComboRecord)
+				combo.push_back({ MouseKeyConversion(event.mouseButton.button), KEY_STATE::DOWN });
+		}
+		break;
+	case sf::Event::MouseButtonReleased:
+		keyPressList.remove(MouseKeyConversion(event.mouseButton.button));
+		keyUpList.push_back(MouseKeyConversion(event.mouseButton.button));
+		if (doComboRecord)
+			combo.push_back({ MouseKeyConversion(event.mouseButton.button), KEY_STATE::UP });
+		break;
 	}
 }
 
@@ -62,6 +77,31 @@ void IOManager::ClearKeyList()
 	keyPressList.clear();
 	keyDownList.clear();
 	keyUpList.clear();
+}
+
+sf::Keyboard::Key IOManager::MouseKeyConversion(const sf::Mouse::Button mouse)
+{
+	return sf::Keyboard::Key(mouse + sf::Keyboard::KeyCount);
+}
+
+sf::Mouse::Button IOManager::MouseKeyConversion(const sf::Keyboard::Key key)
+{
+	return sf::Mouse::Button(key - sf::Keyboard::KeyCount);
+}
+
+bool IOManager::IsKeyPress(const sf::Mouse::Button mouse)
+{
+	return IsKeyPress(MouseKeyConversion(mouse));
+}
+
+bool IOManager::IsKeyDown(const sf::Mouse::Button mouse)
+{
+	return IsKeyDown(MouseKeyConversion(mouse));
+}
+
+bool IOManager::IsKeyUp(const sf::Mouse::Button mouse)
+{
+	return IsKeyUp(MouseKeyConversion(mouse));
 }
 
 

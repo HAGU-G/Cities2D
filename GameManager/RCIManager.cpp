@@ -4,8 +4,13 @@
 
 void RCIManager::UpdateRCI() const
 {
+	std::string str = "R: " + std::to_string(totalRegidence) + " " + std::to_string(usingRegidence) + " " + std::to_string(totalRegidence - usingRegidence)
+		+ "\nC: "+ std::to_string(totalCommerce) + " " + std::to_string(usingCommerce) + " " + std::to_string(totalCommerce - usingCommerce)
+		+ "\nI: "+ std::to_string(totalIndustry) + " " + std::to_string(usingIndustry) + " " + std::to_string(totalIndustry - usingIndustry);
+
+
 	std::dynamic_pointer_cast<SceneGameUI,Scene>(SceneManager::Get("SceneGameUI"))
-		->UpdateRCIGraph(totalRegidence,usingRegidence , totalRegidence- usingRegidence);
+		->SetTempText(str);
 }
 
 void RCIManager::UpdateRCI(int r, int c, int i)

@@ -17,5 +17,6 @@ public:
 	void Draw(sf::RenderWindow& window) override;
 
 	void UpdateRCIGraph(int r, int c, int i);
+	void SetTempText(const std::string& str);
 };
 

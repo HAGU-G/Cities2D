@@ -38,7 +38,7 @@ public:
 	{
 		return resourcePathList.insert(path).second;
 	}
-	size_t Add(const std::set<std::string>& pathList)
+	size_t Add(const FilePathList& pathList)
 	{
 		size_t count = 0;
 		if (pathList.empty())
@@ -51,7 +51,7 @@ public:
 		}
 		return count;
 	}
-	size_t Add(std::shared_ptr<Scene> scene)
+	size_t Add(const std::shared_ptr<Scene>& scene)
 	{
 		return Add(scene->GetResourcePathList());
 	}

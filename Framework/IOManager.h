@@ -38,11 +38,19 @@ public:
 	//메시지 루프 안에서 호출
 	static void EventUpdate(const sf::Event& event);
 
-	//키
+	//키보드
 	static bool IsKeyPress(const sf::Keyboard::Key key);
 	static bool IsKeyDown(const sf::Keyboard::Key key);
 	static bool IsKeyUp(const sf::Keyboard::Key key);
 	static void ClearKeyList();
+
+	//마우스
+	static sf::Keyboard::Key MouseKeyConversion(const sf::Mouse::Button mouse);
+	static sf::Mouse::Button MouseKeyConversion(const sf::Keyboard::Key key);
+	static bool IsKeyPress(const sf::Mouse::Button mouse);
+	static bool IsKeyDown(const sf::Mouse::Button mouse);
+	static bool IsKeyUp(const sf::Mouse::Button mouse);
+
 
 	//콤보
 	static bool IsPerpectCombo(const SFGM_COMBO& combo);

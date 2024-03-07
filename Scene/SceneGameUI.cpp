@@ -24,3 +24,8 @@ void SceneGameUI::UpdateRCIGraph(int r, int c, int i)
 {
 	tempText.setString(std::to_string(r) + " " + std::to_string(c) + " " + std::to_string(i));
 }
+
+void SceneGameUI::SetTempText(const std::string& str)
+{
+	tempText.setString(str);
+}

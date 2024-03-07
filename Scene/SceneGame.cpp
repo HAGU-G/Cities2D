@@ -11,6 +11,8 @@ SceneGame::SceneGame(const std::string& name)
 
 void SceneGame::Init()
 {
+	resourcePathList.insert("resource/building/Buildings.png");
+
 	//선택된 타일 표시용 (임시)
 	AddObject(std::make_shared<ObjectTest>(This(), GAME_OBJECT_TYPE::BUILDING));
 
@@ -18,7 +20,6 @@ void SceneGame::Init()
 	groundTileMap = ObjectTileMap::Create(This());
 
 	Scene::Init();
-
 	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
 	//view.setCenter(worldCenter);
 
@@ -58,7 +59,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	}
 
 
-	if (IOManager::IsKeyDown(sf::Keyboard::Num1))
+	if (IOManager::IsKeyDown(sf::Mouse::Left))
 	{
 		if (gridInfo[mousePosGrid.x][mousePosGrid.y].second == nullptr)
 			CreateObjectTile(GAME_OBJECT_TYPE::BUILDING, mousePosGrid);
@@ -109,7 +110,7 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 			break;
 		case GAME_OBJECT_TYPE::BUILDING:
 		{
-			RCI rci = { 3,2,1 };
+			RCI rci = { tool::RandomBetween(1, 3),0,tool::RandomBetween(0,3)};
 			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
 			groundTileMap->UpdateTile(gridCoord);

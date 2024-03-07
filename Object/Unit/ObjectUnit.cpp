@@ -17,19 +17,20 @@ ObjectUnit::~ObjectUnit()
 void ObjectUnit::Init()
 {
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
-	srand(time(NULL) + unsigned(this) + scene.lock()->GetMousePosWorld().x * sceneGame.lock()->GetMousePosWorld().y);
 	findInterval = tool::RandomBetween(5.f, 10.f);
 	Reset();
 }
 
 void ObjectUnit::Update(float timeDelta, float timeScale)
 {
-	if (!hasHome)
+	if (!hasHome) //집이 없을 때
 	{
 		if (findTimer >= findInterval)
 		{
 			findTimer = 0.f;
-			if(!FindHome())
+			if(FindHome())
+				patience++;
+			else
 				patience--;
 		}
 		else
@@ -37,10 +38,35 @@ void ObjectUnit::Update(float timeDelta, float timeScale)
 			findTimer += timeDelta * timeScale;
 		}
 	}
-	else if (home.expired())
+	else //집이 있을 때
 	{
-		hasHome = false;
-		GM_RCI.UseRegidence(-1);
+		if (home.expired()) //집이 부숴졌을 때
+		{
+			hasHome = false;
+			GM_RCI.UseRegidence(-1);
+		}
+
+		if (!hasworkPlace) //직장이 없을 때
+		{
+			if (findTimer >= findInterval)
+			{
+				findTimer = 0.f;
+				if (FindWorkSpace())
+					patience++;
+				else
+					patience--;
+			}
+			else
+			{
+				findTimer += timeDelta * timeScale;
+			}
+		}
+		else if (home.expired()) //직장이 있는데 회사가 부숴졌을 때
+		{
+			hasworkPlace = false;
+			GM_RCI.UseIndustry(-1);
+		}
+
 	}
 
 	if (patience <= 0)
@@ -51,6 +77,16 @@ void ObjectUnit::Update(float timeDelta, float timeScale)
 
 void ObjectUnit::Reset()
 {
+	if (!home.expired())
+	{
+		home.lock()->MoveOut(GetKey());
+		GM_RCI.UseRegidence(-1);
+	}
+	if (!workPlace.expired())
+	{
+		workPlace.lock()->Quit(GetKey());
+		GM_RCI.UseIndustry(-1);
+	}
 	home.reset();
 	workPlace.reset();
 	GameObject::Reset();
@@ -58,6 +94,16 @@ void ObjectUnit::Reset()
 
 void ObjectUnit::Release()
 {
+	if (!home.expired())
+	{
+		home.lock()->MoveOut(GetKey());
+		GM_RCI.UseRegidence(-1);
+	}
+	if (!workPlace.expired())
+	{
+		workPlace.lock()->Quit(GetKey());
+		GM_RCI.UseIndustry(-1);
+	}
 	home.reset();
 	workPlace.reset();
 }
@@ -89,12 +135,32 @@ bool ObjectUnit::FindHome()
 	return false;
 }
 
+bool ObjectUnit::FindWorkSpace()
+{
+	//가까운 직장을 찾게 변경할 예정
+	const GridInfo& tiles = sceneGame.lock()->GetGridInfo();
+
+	for (auto& x : tiles)
+	{
+		for (auto& y : x.second)
+		{
+			if (y.second.first != GAME_OBJECT_TYPE::BUILDING)
+				continue;
+
+			if (std::dynamic_pointer_cast<TileBuilding, ObjectTile>(y.second.second)
+				->Join(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This())) == true)
+				return true;
+		}
+	}
+	return false;
+}
+
 void ObjectUnit::SetHome(std::weak_ptr<TileBuilding> building)
 {
 	if (!home.expired())
 	{
-		GM_RCI.UseRegidence(-1);
 		building.lock()->MoveOut(GetKey());
+		GM_RCI.UseRegidence(-1);
 	}
 	home = building;
 	hasHome = true;
@@ -104,9 +170,8 @@ void ObjectUnit::SetWorkPlace(std::weak_ptr<TileBuilding> building)
 {
 	if (!workPlace.expired())
 	{
+		building.lock()->Quit(GetKey());
 		GM_RCI.UseIndustry(-1);
-		//building.lock()->MoveOut(GetKey());
-		//구현필요.
 	}
 	workPlace = building;
 	hasworkPlace = true;

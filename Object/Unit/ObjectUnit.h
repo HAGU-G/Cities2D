@@ -38,5 +38,6 @@ public:
 
 	static std::shared_ptr<ObjectUnit> Create(std::weak_ptr<Scene> scene);
 	bool FindHome();
+	bool FindWorkSpace();
 };
 

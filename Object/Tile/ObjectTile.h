@@ -1,7 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "SceneGame.h"
-//#include <tuple>
+#include <queue>
 
 class ObjectTile : public GameObject
 {
@@ -43,5 +43,15 @@ public:
 
 	inline const sf::Vector2i& GetGridCoord() { return gridCoord; }
 	inline const sf::Vector2f& GetGridCenterPos() { return gridCenterPos; }
+
+
+
+	/// <summary>
+	/// 최단경로 찾기
+	/// </summary>
+	/// <param name="gridCoord">시작 좌표</param>
+	/// <param name="tag">목표 태그</param>
+	/// <param name="Available">태그가 RCI일 때 슬롯이 비었는지 검사</param>
+	std::queue<sf::Vector2i> FindShortPath(sf::Vector2i fromGridCoord, GAME_OBJECT_TAG toTag, bool Available = true);
 };
 

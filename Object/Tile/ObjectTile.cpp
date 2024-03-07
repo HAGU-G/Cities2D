@@ -37,6 +37,13 @@ void ObjectTile::RemoveAdjacent(ADDIREC ad)
 	UpdateEdge(ad);
 }
 
+std::queue<sf::Vector2i> ObjectTile::FindShortPath(sf::Vector2i fromGridCoord, GAME_OBJECT_TAG toTag, bool Available)
+{
+	//TODO 작성 시작
+
+	return std::queue<sf::Vector2i>();
+}
+
 void ObjectTile::Init()
 {
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());

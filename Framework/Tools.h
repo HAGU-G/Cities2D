@@ -4,6 +4,6 @@
 
 namespace tool {
 	float RandomBetween(float a, float b);
-	float RandomBetween(int a, int b);
+	int RandomBetween(int a, int b);
 }
 #endif // !TOOLS_H

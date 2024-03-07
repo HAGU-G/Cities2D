@@ -38,6 +38,7 @@ public:
 	inline const sf::Vector2f& GetGridSize() const { return gridSize; }
 	const GridInfo& GetGridInfo();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
+	inline const TileInfo& GetTileInfo(const sf::Vector2i& gridCoord) { return gridInfo[gridCoord.x][gridCoord.y]; }
 
 };
 

@@ -12,7 +12,9 @@ enum class WINDOW_MODE
 enum class GAME_OBJECT_TAG
 {
 	NONE = 0,
-	//You can edit here
+	R,
+	C,
+	I,
 
 	COUNT
 };

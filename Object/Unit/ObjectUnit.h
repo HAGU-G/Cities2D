@@ -12,6 +12,7 @@ protected:
 
 	std::weak_ptr<TileBuilding> home;
 	std::weak_ptr<TileBuilding> workPlace;
+	std::deque<sf::Vector2i> pathToWorkPlace;
 
 	bool hasHome = false;
 	bool hasworkPlace = false;

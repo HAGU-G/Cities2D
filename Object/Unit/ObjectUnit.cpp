@@ -17,7 +17,7 @@ ObjectUnit::~ObjectUnit()
 void ObjectUnit::Init()
 {
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
-	findInterval = tool::RandomBetween(5.f, 10.f);
+	findInterval = tool::RandomBetween(0.1f, 1.f);
 	Reset();
 }
 
@@ -146,21 +146,15 @@ bool ObjectUnit::FindHome()
 bool ObjectUnit::FindWorkSpace()
 {
 	//가까운 직장을 찾게 변경할 예정
-	const GridInfo& tiles = sceneGame.lock()->GetGridInfo();
 
-	for (auto& x : tiles)
-	{
-		for (auto& y : x.second)
-		{
-			if (y.second.first != GAME_OBJECT_TYPE::BUILDING)
-				continue;
+	pathToWorkPlace = ObjectTile::FindShortPath(home, GAME_OBJECT_TAG::I);
 
-			if (std::dynamic_pointer_cast<TileBuilding, ObjectTile>(y.second.second)
-				->Join(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This())) == true)
-				return true;
-		}
-	}
-	return false;
+	if (pathToWorkPlace.empty())
+		return false;
+
+	std::dynamic_pointer_cast<TileBuilding, ObjectTile>(sceneGame.lock()->GetTileInfo(pathToWorkPlace.back()).second)
+		->Join(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
+	return true;
 }
 
 void ObjectUnit::SetHome(std::weak_ptr<TileBuilding> building)

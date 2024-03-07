@@ -1,6 +1,5 @@
 #include "pch.h"
 #include "ObjectTile.h"
-#include <queue>
 
 ObjectTile::ObjectTile(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord)
 	:GameObject(scene, objectType), gridCoord(gridCoord)
@@ -38,10 +37,10 @@ void ObjectTile::RemoveAdjacent(ADDIREC ad)
 	UpdateEdge(ad);
 }
 
-std::stack<sf::Vector2i> ObjectTile::FindShortPath(
+std::deque<sf::Vector2i> ObjectTile::FindShortPath(
 	std::weak_ptr<ObjectTile> fromTile, GAME_OBJECT_TAG toTag, bool doCheck)
 {
-	std::stack<sf::Vector2i> realPath; //찾은 경로
+	std::deque<sf::Vector2i> realPath; //찾은 경로
 	std::shared_ptr<ObjectTile> currentTile = fromTile.lock(); //현재 타일
 
 	if (fromTile.expired()) //선택 타일에 아무것도 없을 경우 종료
@@ -64,13 +63,13 @@ std::stack<sf::Vector2i> ObjectTile::FindShortPath(
 		{
 			if (currentTile->ConditionCheck(toTag))
 			{
-				realPath.push(currentGridCoord); //현재 위치 추가
+				realPath.push_front(currentGridCoord); //현재 위치 추가
 				return realPath;
 			}
 		}
 		else
 		{
-			realPath.push(currentGridCoord);
+			realPath.push_front(currentGridCoord);
 			return realPath;
 		}
 	}
@@ -103,11 +102,11 @@ std::stack<sf::Vector2i> ObjectTile::FindShortPath(
 						//길찾음 BEGIN
 						isFind = true;
 						sf::Vector2i findRoad = currentGridCoord; //경로를 잇기 위한 변수
-						realPath.push(findRoad); //현재 위치 추가
+						realPath.push_front(findRoad); //현재 위치 추가
 						while (findRoad != fromTile.lock()->gridCoord) //시작 좌표가 될때까지 반복
 						{
 							findRoad = path[findRoad.x][findRoad.y]; //findRoad의 전 타일 좌표로 변경
-							realPath.push(findRoad);//전 타일 좌표 추가
+							realPath.push_front(findRoad);//전 타일 좌표 추가
 						}
 						break;
 						//길찾음 END
@@ -118,11 +117,11 @@ std::stack<sf::Vector2i> ObjectTile::FindShortPath(
 					//길찾음 BEGIN
 					isFind = true;
 					sf::Vector2i findRoad = currentGridCoord;
-					realPath.push(findRoad);
+					realPath.push_front(findRoad);
 					while (findRoad != fromTile.lock()->gridCoord)
 					{
 						findRoad = path[findRoad.x][findRoad.y];
-						realPath.push(findRoad);
+						realPath.push_front(findRoad);
 					}
 					break;
 					//길찾음 END

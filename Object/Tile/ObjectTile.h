@@ -1,7 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "SceneGame.h"
-#include <stack>
+#include <queue>
 
 class ObjectTile : public GameObject
 {
@@ -46,13 +46,15 @@ public:
 
 
 
+
 	/// <summary>
-	/// 최단경로 찾기
+	/// 목표까지의 최단경로 찾기
 	/// </summary>
-	/// <param name="gridCoord">시작 좌표</param>
-	/// <param name="tag">목표 태그</param>
-	/// <param name="Available">목표 태그일때 심화검사</param>
-	static std::stack<sf::Vector2i> FindShortPath(
+	/// <param name="fromTile">: 시작 타일</param>
+	/// <param name="toTag">: 목표 태그</param>
+	/// <param name="doCheck">: 목표 태그일때 심화검사</param>
+	/// <returns>: back 목표 좌표</returns>
+	static std::deque<sf::Vector2i> FindShortPath(
 		std::weak_ptr<ObjectTile> fromTile, GAME_OBJECT_TAG toTag, bool doCheck = true);
 
 	virtual bool ConditionCheck(GAME_OBJECT_TAG tag);

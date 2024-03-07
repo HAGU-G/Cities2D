@@ -84,14 +84,15 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		OrganizeGridInfo();
 	}
 
-	std::pair<bool, std::list<sf::Vector2i>> tttt;
+	std::stack<sf::Vector2i> tttt;
 
 	if (IOManager::IsKeyDown(sf::Keyboard::F))
 	{
-		tttt = gridInfo[mousePosGrid.x][mousePosGrid.y].second->FindShortPath(GAME_OBJECT_TAG::I);
-		for (auto& data : tttt.second)
+		tttt = ObjectTile::FindShortPath(GetTileInfo(mousePosGrid).second, GAME_OBJECT_TAG::I);
+		while (!tttt.empty())
 		{
-			std::cout << data.x << " " << data.y << std::endl;
+			std::cout << tttt.top().x << " " << tttt.top().y << std::endl;
+			tttt.pop();
 		}
 	}
 

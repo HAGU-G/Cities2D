@@ -1,7 +1,7 @@
 #pragma once
 #include "GameObject.h"
 #include "SceneGame.h"
-#include <queue>
+#include <stack>
 
 class ObjectTile : public GameObject
 {
@@ -21,12 +21,9 @@ protected:
 
 	std::unordered_map<ADDIREC, std::weak_ptr<ObjectTile>> adjacent; //인접 리스트 최대 4개
 	sf::VertexArray edge;
-	std::deque<std::weak_ptr<ObjectTile>> visitList;
 
 	explicit ObjectTile(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord);
 public:
-	bool visit = false;
-
 	~ObjectTile() override;
 	ObjectTile(const ObjectTile&) = delete;
 	ObjectTile(ObjectTile&&) = delete;
@@ -54,9 +51,10 @@ public:
 	/// </summary>
 	/// <param name="gridCoord">시작 좌표</param>
 	/// <param name="tag">목표 태그</param>
-	/// <param name="Available">태그가 RCI일 때 슬롯이 비었는지 검사</param>
-	std::pair<bool,std::list<sf::Vector2i>> FindShortPath(GAME_OBJECT_TAG toTag, bool doCheck = true);
-	bool ConditionCheck(GAME_OBJECT_TAG tag, std::weak_ptr<ObjectTile> tile);
-	void ResetVisit(std::deque<std::weak_ptr<ObjectTile>>& visitList);
+	/// <param name="Available">목표 태그일때 심화검사</param>
+	static std::stack<sf::Vector2i> FindShortPath(
+		std::weak_ptr<ObjectTile> fromTile, GAME_OBJECT_TAG toTag, bool doCheck = true);
+
+	static bool ConditionCheck(GAME_OBJECT_TAG tag, std::weak_ptr<ObjectTile> tile);
 };
 

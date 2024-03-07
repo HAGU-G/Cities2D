@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "ObjectTile.h"
+#include <queue>
 
 ObjectTile::ObjectTile(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord)
 	:GameObject(scene, objectType), gridCoord(gridCoord)
@@ -37,61 +38,80 @@ void ObjectTile::RemoveAdjacent(ADDIREC ad)
 	UpdateEdge(ad);
 }
 
-std::pair<bool, std::list<sf::Vector2i>> ObjectTile::FindShortPath(GAME_OBJECT_TAG toTag, bool doCheck)
+std::stack<sf::Vector2i> ObjectTile::FindShortPath(
+	std::weak_ptr<ObjectTile> fromTile, GAME_OBJECT_TAG toTag, bool doCheck)
 {
-	visitList.clear();
-	std::list<sf::Vector2i> path;
-	bool find = false;
+	std::queue<std::weak_ptr<ObjectTile>> nodeList; //탐색할 노드
+	std::unordered_map<int, std::unordered_map<int, bool>> visitList; //방문 기록
+	std::unordered_map<int, std::unordered_map<int, sf::Vector2i>> path; //검사중인 노드 좌표 (이전 타일 좌표)
+	std::stack<sf::Vector2i> realPath; //찾은 경로
+	bool isFind = false; //목표를 찾았는지 여부
 
-	std::shared_ptr<ObjectTile> node;
-	for (auto& i : adjacent)
+	std::shared_ptr<ObjectTile> currentTile; //현재 타일
+	sf::Vector2i currentGridCoord; //현재 타일좌표
+	nodeList.push(fromTile);
+
+	while (!nodeList.empty()) //탐색할 노드가 없을 때까지 반복
 	{
-		node = i.second.lock();
-		if (node->visit)
-			continue;
+		if (isFind) //찾았으면 while 종료
+			break;
 
-		visitList.push_back(std::dynamic_pointer_cast<ObjectTile,GameObject>(node->This()));
-		node->visit = true;
-		const std::list<GAME_OBJECT_TAG>& nodeTags = node->GetGameObjectTagList();
-
-		if (std::find(nodeTags.begin(), nodeTags.end(), toTag) != nodeTags.end())
+		sf::Vector2i preGridCoord = nodeList.front().lock()->gridCoord; //노드 좌표
+		for (auto& i : nodeList.front().lock()->adjacent) //노드의 인접리스트 순회
 		{
-			if (doCheck)
+			currentTile = i.second.lock(); //현재 타일 설정
+			currentGridCoord = currentTile->gridCoord; //현재 타일좌표 설정
+			if (visitList[currentGridCoord.x][currentGridCoord.y]) //방문 검사
+				continue;
+
+			path[currentGridCoord.x][currentGridCoord.y] = preGridCoord; //이전 타일 좌표 기록
+			visitList[currentGridCoord.x][currentGridCoord.y] = true; //방문 기록
+
+			const std::list<GAME_OBJECT_TAG>& nodeTags = currentTile->GetGameObjectTagList();
+			if (std::find(nodeTags.begin(), nodeTags.end(), toTag) != nodeTags.end())
 			{
-				if (ConditionCheck(toTag, node))
+				if (doCheck)
 				{
-					find = true;
-					path.push_back(node->GetGridCoord());
-					ResetVisit(visitList);
-					return { find, path };
+					if (ConditionCheck(toTag, currentTile))
+					{
+						//길찾음 BEGIN
+						isFind = true;
+						sf::Vector2i findRoad = currentGridCoord; //경로를 잇기 위한 변수
+						realPath.push(findRoad); //현재 위치 추가
+						while (findRoad != fromTile.lock()->gridCoord) //시작 좌표가 될때까지 반복
+						{
+							findRoad = path[findRoad.x][findRoad.y]; //findRoad의 전 타일 좌표로 변경
+							realPath.push(findRoad);//전 타일 좌표 추가
+						}
+						break;
+						//길찾음 END
+					}
+				}
+				else
+				{
+					//길찾음 BEGIN
+					isFind = true;
+					sf::Vector2i findRoad = currentGridCoord;
+					realPath.push(findRoad);
+					while (findRoad != fromTile.lock()->gridCoord)
+					{
+						findRoad = path[findRoad.x][findRoad.y];
+						realPath.push(findRoad);
+					}
+					break;
+					//길찾음 END
 				}
 			}
-			else
+			if (!currentTile->adjacent.empty())
 			{
-				find = true;
-				path.push_back(node->GetGridCoord());
-				ResetVisit(visitList);
-				return { find, path };
+				if (std::find(nodeTags.begin(), nodeTags.end(), GAME_OBJECT_TAG::MOVEABLE) != nodeTags.end())
+					nodeList.push(currentTile);
 			}
 		}
-
-
-		if (std::find(nodeTags.begin(), nodeTags.end(), GAME_OBJECT_TAG::MOVEABLE) != nodeTags.end())
-		{
-			path.push_back(node->GetGridCoord());
-			std::pair<bool, std::list<sf::Vector2i>> tempPath = node->FindShortPath(toTag, doCheck);
-			if (tempPath.first)
-			{
-				find = true;
-				path.splice(path.end(), tempPath.second);
-			}
-		}
+		nodeList.pop();
 	}
 
-
-
-//못찾아도 path는 넘겨야지
-	return { find, path };
+	return realPath;
 }
 
 bool ObjectTile::ConditionCheck(GAME_OBJECT_TAG tag, std::weak_ptr<ObjectTile> tile)
@@ -111,14 +131,6 @@ bool ObjectTile::ConditionCheck(GAME_OBJECT_TAG tag, std::weak_ptr<ObjectTile> t
 	}
 
 	return true;
-}
-
-void ObjectTile::ResetVisit(std::deque<std::weak_ptr<ObjectTile>>& visitList)
-{
-	for (auto& ptr : visitList)
-	{
-		ptr.lock()->visit = false;
-	}
 }
 
 void ObjectTile::Init()

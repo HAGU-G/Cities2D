@@ -41,16 +41,42 @@ void ObjectTile::RemoveAdjacent(ADDIREC ad)
 std::stack<sf::Vector2i> ObjectTile::FindShortPath(
 	std::weak_ptr<ObjectTile> fromTile, GAME_OBJECT_TAG toTag, bool doCheck)
 {
+	std::stack<sf::Vector2i> realPath; //찾은 경로
+	std::shared_ptr<ObjectTile> currentTile = fromTile.lock(); //현재 타일
+
+	if (fromTile.expired()) //선택 타일에 아무것도 없을 경우 종료
+		return realPath;
+	if (currentTile->adjacent.empty()) //연결된 타일이 없을 경우 종료
+		return realPath;
+
 	std::queue<std::weak_ptr<ObjectTile>> nodeList; //탐색할 노드
 	std::unordered_map<int, std::unordered_map<int, bool>> visitList; //방문 기록
 	std::unordered_map<int, std::unordered_map<int, sf::Vector2i>> path; //검사중인 노드 좌표 (이전 타일 좌표)
-	std::stack<sf::Vector2i> realPath; //찾은 경로
 	bool isFind = false; //목표를 찾았는지 여부
+	sf::Vector2i currentGridCoord = currentTile->gridCoord; //현재 타일좌표
 
-	std::shared_ptr<ObjectTile> currentTile; //현재 타일
-	sf::Vector2i currentGridCoord; //현재 타일좌표
+	//자신에 대해 먼저 검사
+	visitList[currentGridCoord.x][currentGridCoord.y] = true;
+	const std::list<GAME_OBJECT_TAG>& nodeTags = currentTile->GetGameObjectTagList();
+	if (std::find(nodeTags.begin(), nodeTags.end(), toTag) != nodeTags.end())
+	{
+		if (doCheck)
+		{
+			if (ConditionCheck(toTag, currentTile))
+			{
+				realPath.push(currentGridCoord); //현재 위치 추가
+				return realPath;
+			}
+		}
+		else
+		{
+			realPath.push(currentGridCoord);
+			return realPath;
+		}
+	}
 	nodeList.push(fromTile);
 
+	//다른 타일 검사
 	while (!nodeList.empty()) //탐색할 노드가 없을 때까지 반복
 	{
 		if (isFind) //찾았으면 while 종료

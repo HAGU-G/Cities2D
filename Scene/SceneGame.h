@@ -15,6 +15,8 @@ protected:
 	std::shared_ptr<ObjectTileMap> groundTileMap;
 
 public:
+	UnitOnGrid unitOnGrid; //[x][y]
+
 	explicit SceneGame(const std::string& name);
 	~SceneGame() override = default;
 	SceneGame(const Scene&) = delete;
@@ -37,6 +39,7 @@ public:
 	inline const sf::Vector2f& GetSelectGridPos() const { return sf::Vector2f(mousePosGrid) * gridSize.x; }
 	inline const sf::Vector2f& GetGridSize() const { return gridSize; }
 	const GridInfo& GetGridInfo();
+	GridInfo& GetGridInfoRaw();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
 	inline const TileInfo& GetTileInfo(const sf::Vector2i& gridCoord) { return gridInfo[gridCoord.x][gridCoord.y]; }
 

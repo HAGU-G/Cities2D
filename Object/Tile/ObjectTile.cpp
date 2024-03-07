@@ -46,6 +46,7 @@ void ObjectTile::RemoveAdjacent(ADDIREC ad)
 std::deque<sf::Vector2i> ObjectTile::FindShortPath(
 	std::weak_ptr<ObjectTile> fromTile, GAME_OBJECT_TAG toTag, bool doCheck)
 {
+	//std::cout << "태그 최단경로 찾기" << std::endl;
 	std::deque<sf::Vector2i> realPath; //찾은 경로
 	std::shared_ptr<ObjectTile> currentTile = fromTile.lock(); //현재 타일
 
@@ -90,6 +91,8 @@ std::deque<sf::Vector2i> ObjectTile::FindShortPath(
 		sf::Vector2i preGridCoord = nodeList.front().lock()->gridCoord; //노드 좌표
 		for (auto& i : nodeList.front().lock()->adjacent) //노드의 인접리스트 순회
 		{
+			if (i.second.expired())
+				continue;
 			currentTile = i.second.lock(); //현재 타일 설정
 			currentGridCoord = currentTile->gridCoord; //현재 타일좌표 설정
 			if (visitList[currentGridCoord.x][currentGridCoord.y]) //방문 검사
@@ -147,11 +150,12 @@ std::deque<sf::Vector2i> ObjectTile::FindShortPath(
 
 std::deque<sf::Vector2i> ObjectTile::FindShortPath(std::weak_ptr<ObjectTile> fromTile, std::weak_ptr<ObjectTile> toTile)
 {
+	//std::cout << "목적지 최단경로 찾기" << std::endl;
 	std::deque<sf::Vector2i> realPath;
-	std::shared_ptr<ObjectTile> currentTile = fromTile.lock();
-
-	if (fromTile.expired())
+	if (fromTile.expired() || toTile.expired())
 		return realPath;
+
+	std::shared_ptr<ObjectTile> currentTile = fromTile.lock();
 	if (currentTile->adjacent.empty())
 		return realPath;
 
@@ -179,6 +183,8 @@ std::deque<sf::Vector2i> ObjectTile::FindShortPath(std::weak_ptr<ObjectTile> fro
 		sf::Vector2i preGridCoord = nodeList.front().lock()->gridCoord;
 		for (auto& i : nodeList.front().lock()->adjacent)
 		{
+			if (i.second.expired())
+				continue;
 			currentTile = i.second.lock();
 			currentGridCoord = currentTile->gridCoord;
 			if (visitList[currentGridCoord.x][currentGridCoord.y])
@@ -211,6 +217,82 @@ std::deque<sf::Vector2i> ObjectTile::FindShortPath(std::weak_ptr<ObjectTile> fro
 	}
 
 	return realPath;
+}
+
+sf::Vector2i ObjectTile::FindShortPath(sf::Vector2i fromGridCoord, GridInfo& gridInfo)
+{
+	//std::cout << "가까운 타일 찾기" << std::endl;
+	std::queue<sf::Vector2i> nodeList; //탐색할 노드
+	std::unordered_map<int, std::unordered_map<int, bool>> visitList; //방문 기록
+	std::unordered_map<int, std::unordered_map<int, sf::Vector2i>> path; //검사중인 노드 좌표 (이전 타일 좌표)
+	bool isFind = false; //목표를 찾았는지 여부
+	sf::Vector2i currentGridCoord = fromGridCoord; //현재 그리드좌표
+	std::shared_ptr<ObjectTile> currentTile = gridInfo[fromGridCoord.x][fromGridCoord.y].second.lock(); //현재 그리드좌표의 타일 포인터
+	//자신에 대해 먼저 검사
+	visitList[currentGridCoord.x][currentGridCoord.y] = true;
+	if (currentTile != nullptr)
+	{
+		return currentGridCoord;
+	}
+	nodeList.push(currentGridCoord);
+
+	//다른 타일 검사
+	int count = 0;
+	while (!nodeList.empty() && count < 181) //탐색할 노드가 없을 때까지 or 181번 반복 (반경 약 10칸)
+	{
+		count++;
+		sf::Vector2i preGridCoord = nodeList.front(); //노드 좌표
+		//노드의 상하좌우 검사
+		//상
+		currentGridCoord = preGridCoord + sf::Vector2i(0, -1);
+		if (visitList[currentGridCoord.x][currentGridCoord.y])
+			continue;
+		visitList[currentGridCoord.x][currentGridCoord.y] = true;
+		currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
+		if (currentTile != nullptr)
+			return currentGridCoord;
+		nodeList.push(currentGridCoord);
+		//하
+		currentGridCoord = preGridCoord + sf::Vector2i(0, 1);
+		if (visitList[currentGridCoord.x][currentGridCoord.y])
+			continue;
+		visitList[currentGridCoord.x][currentGridCoord.y] = true;
+		currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
+		if (currentTile != nullptr)
+			return currentGridCoord;
+		nodeList.push(currentGridCoord);
+		//좌
+		currentGridCoord = preGridCoord + sf::Vector2i(-1, 0);
+		if (visitList[currentGridCoord.x][currentGridCoord.y])
+			continue;
+		visitList[currentGridCoord.x][currentGridCoord.y] = true;
+		currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
+		if (currentTile != nullptr)
+			return currentGridCoord;
+		nodeList.push(currentGridCoord);
+		//우
+		currentGridCoord = preGridCoord + sf::Vector2i(1, 0);
+		if (visitList[currentGridCoord.x][currentGridCoord.y])
+			continue;
+		visitList[currentGridCoord.x][currentGridCoord.y] = true;
+		currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
+		if (currentTile != nullptr)
+			return currentGridCoord;
+		nodeList.push(currentGridCoord);
+
+		nodeList.pop();
+	}
+
+	for (auto& x : gridInfo)
+	{
+		for (auto& y : x.second)
+		{
+			if (!y.second.second.expired())
+				return y.second.second.lock()->GetGridCoord();
+		}
+	}
+
+	return fromGridCoord;
 }
 
 bool ObjectTile::ConditionCheck(GAME_OBJECT_TAG tag)

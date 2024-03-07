@@ -119,7 +119,7 @@ void ObjectTileMap::Reset()
 	{
 		for (auto& y : x.second)
 		{
-			UpdateTile(y.second.second->GetGridCoord());
+			UpdateTile(y.second.second.lock()->GetGridCoord());
 		}
 	}
 }

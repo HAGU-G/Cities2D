@@ -37,11 +37,13 @@ enum class GAME_OBJECT_TYPE
 
 class GameObject;
 class ObjectTile;
+class ObjectUnit;
 
 typedef std::unordered_map<std::string, std::shared_ptr<GameObject>> GameObjectList;
 typedef std::unordered_set<std::string> FilePathList;
-typedef std::pair<GAME_OBJECT_TYPE, std::shared_ptr<ObjectTile>> TileInfo;
+typedef std::pair<GAME_OBJECT_TYPE, std::weak_ptr<ObjectTile>> TileInfo;
 typedef std::unordered_map<int, std::unordered_map<int, TileInfo>> GridInfo;
+typedef std::unordered_map<int, std::unordered_map<int, std::list<std::weak_ptr<ObjectUnit>>>> UnitOnGrid;
 
 
 

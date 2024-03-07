@@ -22,10 +22,13 @@ void ObjectUnit::Init()
 
 void ObjectUnit::Update(float timeDelta, float timeScale)
 {
-	if(sceneGame.lock()->GetTileInfo(gridCoord))//TODO 작성중
 	UpdateHome(timeDelta, timeScale);
 	UpdateWorkSpace(timeDelta, timeScale);
-	LifeCycle(timeDelta, timeScale);
+	if (isCitizen)
+	{
+		GridUpdate();
+		LifeCycle(timeDelta, timeScale);
+	}
 }
 
 void ObjectUnit::PostUpdate(float timeDelta, float timeScale)
@@ -52,35 +55,31 @@ void ObjectUnit::Reset()
 	tempRender.setFillColor(sf::Color(tool::RandomBetween(0, 255), tool::RandomBetween(0, 255), tool::RandomBetween(0, 255), 255));
 	tempRender.setOrigin(tempRender.getLocalBounds().getSize() * 0.5f);
 
-	if (!home.expired())
-	{
-		home.lock()->MoveOut(GetKey());
-		GM_RCI.UseRegidence(-1);
-	}
-	if (!workPlace.expired())
-	{
-		workPlace.lock()->Quit(GetKey());
-		GM_RCI.UseIndustry(-1);
-	}
-	home.reset();
-	workPlace.reset();
+	ResetHome();
+	ResetWorkPlace();
+
+	isCitizen = false;
+	status = STATUS::NONE;
+
+	pathToWorkPlace.clear();
+	walkPath.clear();
+	isMoving = false;
+
+	nextTile.reset();
+	startingPoint.reset();
+	destination.reset();
+
 	GameObject::Reset();
 }
 
 void ObjectUnit::Release()
 {
-	if (!home.expired())
-	{
-		home.lock()->MoveOut(GetKey());
-		GM_RCI.UseRegidence(-1);
-	}
-	if (!workPlace.expired())
-	{
-		workPlace.lock()->Quit(GetKey());
-		GM_RCI.UseIndustry(-1);
-	}
-	home.reset();
-	workPlace.reset();
+	ResetHome();
+	ResetWorkPlace();
+	sceneGame.reset();
+	nextTile.reset();
+	startingPoint.reset();
+	destination.reset();
 }
 
 std::shared_ptr<ObjectUnit> ObjectUnit::Create(std::weak_ptr<Scene> scene)
@@ -111,6 +110,61 @@ void ObjectUnit::SetPosition(const sf::Vector2f& position)
 	gridCenterPos.y = gridCoord.y * gridSize.y + gridSize.y * 0.5f;
 
 
+}
+
+void ObjectUnit::GridUpdate()
+{
+	if (sceneGame.lock()->GetTileInfo(gridCoord).second.expired())
+	{
+		if (hasHome && hasWorkPlace)
+		{
+			pathToWorkPlace = ObjectTile::FindShortPath(home, workPlace);
+			if (home.lock() != workPlace.lock() && pathToWorkPlace.empty())
+			{
+				if (status == STATUS::TO_HOME)
+				{
+					ResetHome();
+					CheckWorkPlace();
+				}
+				else if (status == STATUS::TO_WORK_PLACE)
+				{
+					ResetWorkPlace();
+					CheckHome();
+				}
+				else
+				{
+					Reset();
+				}
+			}
+		}
+		else if (hasHome)
+		{
+			CheckHome();
+		}
+		else if (hasWorkPlace)
+		{
+			CheckWorkPlace();
+		}
+		else
+		{
+			Reset();
+		}
+	}
+	else if (preGridCoord != gridCoord)
+	{
+		const std::shared_ptr<ObjectUnit>& tempPtr = std::dynamic_pointer_cast<ObjectUnit, GameObject>(This());
+
+		sceneGame.lock()->unitOnGrid[preGridCoord.x][preGridCoord.y]
+			.remove_if(
+				[tempPtr](std::weak_ptr<ObjectUnit> ptr)
+				{
+					return tempPtr.get() == ptr.lock().get();
+				});
+
+		sceneGame.lock()->unitOnGrid[gridCoord.x][gridCoord.y]
+			.push_back(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
+		preGridCoord = gridCoord;
+	}
 }
 
 void ObjectUnit::UpdateHome(float timeDelta, float timeScale)
@@ -172,35 +226,103 @@ void ObjectUnit::UpdateWorkSpace(float timeDelta, float timeScale)
 
 bool ObjectUnit::FindHome()
 {
-	const GridInfo& tiles = sceneGame.lock()->GetGridInfo();
-
-	for (auto& x : tiles)
+	if (!isCitizen)
 	{
-		for (auto& y : x.second)
-		{
-			if (y.second.first != GAME_OBJECT_TYPE::BUILDING)
-				continue;
+		const GridInfo& tiles = sceneGame.lock()->GetGridInfo();
 
-			if (std::dynamic_pointer_cast<TileBuilding, ObjectTile>(y.second.second)
-				->MoveIn(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This())) == true)
-				return true;
+		for (auto& x : tiles)
+		{
+			for (auto& y : x.second)
+			{
+				if (y.second.first != GAME_OBJECT_TYPE::BUILDING)
+					continue;
+
+				if (std::dynamic_pointer_cast<TileBuilding, ObjectTile>(y.second.second.lock())
+					->MoveIn(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This())) == true)
+					return true;
+			}
 		}
+		return false;
 	}
-	return false;
+	else
+	{
+		std::deque<sf::Vector2i> pathToHome = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, GAME_OBJECT_TAG::R);
+
+		if (pathToHome.empty())
+			return false;
+		if (sceneGame.lock()->GetTileInfo(pathToHome.back()).second.expired())
+			return false;
+
+		std::dynamic_pointer_cast<TileBuilding, ObjectTile>(sceneGame.lock()->GetTileInfo(pathToHome.back()).second.lock())
+			->MoveIn(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
+		return true;
+	}
 }
 
 bool ObjectUnit::FindWorkSpace()
 {
-	//가까운 직장을 찾게 변경할 예정
-
 	pathToWorkPlace = ObjectTile::FindShortPath(home, GAME_OBJECT_TAG::I);
 
 	if (pathToWorkPlace.empty())
 		return false;
 
-	std::dynamic_pointer_cast<TileBuilding, ObjectTile>(sceneGame.lock()->GetTileInfo(pathToWorkPlace.back()).second)
+	std::dynamic_pointer_cast<TileBuilding, ObjectTile>(sceneGame.lock()->GetTileInfo(pathToWorkPlace.back()).second.lock())
 		->Join(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
 	return true;
+}
+
+void ObjectUnit::ResetHome()
+{
+	if (!home.expired())
+	{
+		home.lock()->MoveOut(GetKey());
+		GM_RCI.UseRegidence(-1);
+	}
+	home.reset();
+	hasHome = false;
+}
+
+void ObjectUnit::ResetWorkPlace()
+{
+	if (!workPlace.expired())
+	{
+		workPlace.lock()->Quit(GetKey());
+		GM_RCI.UseIndustry(-1);
+	}
+	workPlace.reset();
+	hasWorkPlace = false;
+}
+
+void ObjectUnit::CheckHome()
+{
+	walkPath = ObjectTile::FindShortPath(home, sceneGame.lock()->GetTileInfo(gridCoord).second);
+	if (walkPath.empty())
+	{
+		ResetHome();
+		status = STATUS::HOMELESS;
+	}
+	else
+	{
+		startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+		destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+		status = STATUS::TO_HOME;
+	}
+}
+
+void ObjectUnit::CheckWorkPlace()
+{
+	walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, workPlace);
+	if (walkPath.empty())
+	{
+		ResetWorkPlace();
+		status = STATUS::HOMELESS;
+	}
+	else
+	{
+		startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+		destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+		status = STATUS::TO_WORK_PLACE;
+	}
 }
 
 void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
@@ -208,10 +330,32 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 	sf::Vector2f gridSize = sceneGame.lock()->GetGridSize();
 	switch (status)
 	{
-	case STATUS::NONE:
-		break;
+	case STATUS::HOMELESS:
+		if (hasHome)
+		{
+			CheckHome();
+		}
+		else if (hasWorkPlace)
+		{
+			CheckWorkPlace();
+		}
+		else
+		{
+
+		}
 	case STATUS::HOME:
-		if (hasWorkPlace)
+		if (!hasHome)
+		{
+			if (hasWorkPlace)
+			{
+				CheckWorkPlace();
+			}
+			else
+			{
+				status = STATUS::HOMELESS;
+			}
+		}
+		else if (hasWorkPlace)
 		{
 			if (lifeTimer < lifeInterval)
 			{
@@ -227,49 +371,49 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				else
 				{
 					walkPath = pathToWorkPlace;
+					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+					destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
 					status = STATUS::TO_WORK_PLACE;
 				}
-
 			}
 		}
 		break;
 	case STATUS::TO_WORK_PLACE:
 		if (hasWorkPlace)
 		{
-			float goalX = walkPath.front().x * gridSize.x + gridSize.x * 0.5f;
-			float goalY = walkPath.front().y * gridSize.y + gridSize.y * 0.5f;
-			direction.x = goalX - position.x;
-			direction.y = goalY - position.y;
-			tool::Normalize(direction);
-			SetPosition(position + direction * speed * timeDelta * timeScale);
-			if (tool::Distance(position, sf::Vector2f(goalX, goalY)) <= 1.f)
+			Moving(timeDelta, timeScale);
+			if (!isMoving)
 			{
-				SetPosition({ goalX, goalY });
-				walkPath.pop_front();
-			}
-			if (tool::Distance(position, workPlace.lock()->GetGridCenterPos()) <= 1.f)
-			{
-				status = STATUS::WORK_PLACE;
-				SetPosition(workPlace.lock()->GetGridCenterPos());
-				walkPath.clear();
+				if (position == destination.lock()->GetGridCenterPos())
+				{
+					startingPoint.reset();
+					destination.reset();
+					status = STATUS::WORK_PLACE;
+				}
 			}
 		}
 		else if (hasHome)
 		{
-
-			walkPath = ObjectTile::FindShortPath(home, sceneGame.lock()->GetTileInfo(gridCoord).second);
-			if (walkPath.empty())
-			{
-				status = STATUS::NONE;
-			}
-			else
-			{
-				status = STATUS::TO_HOME;
-			}
+			CheckHome();
+		}
+		else
+		{
+			status = STATUS::HOMELESS;
 		}
 		break;
 	case STATUS::WORK_PLACE:
-		if (hasHome)
+		if (!hasWorkPlace)
+		{
+			if (hasHome)
+			{
+				CheckHome();
+			}
+			else
+			{
+				status = STATUS::HOMELESS;
+			}
+		}
+		else if (hasHome)
 		{
 			if (lifeTimer < lifeInterval)
 			{
@@ -285,6 +429,8 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				else
 				{
 					walkPath = pathToWorkPlace;
+					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+					destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
 					status = STATUS::TO_HOME;
 				}
 			}
@@ -293,27 +439,24 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 	case STATUS::TO_HOME:
 		if (hasHome)
 		{
-			float goalX = walkPath.back().x * gridSize.x + gridSize.x * 0.5f;
-			float goalY = walkPath.back().y * gridSize.y + gridSize.y * 0.5f;
-			direction.x = goalX - position.x;
-			direction.y = goalY - position.y;
-			tool::Normalize(direction);
-			SetPosition(position + direction * speed * timeDelta * timeScale);
-			if (tool::Distance(position, sf::Vector2f(goalX, goalY)) <= 1.f)
+			MovingReverse(timeDelta, timeScale);
+			if (!isMoving)
 			{
-				SetPosition({ goalX, goalY });
-				walkPath.pop_back();
+				if (position == destination.lock()->GetGridCenterPos())
+				{
+					startingPoint.reset();
+					destination.reset();
+					status = STATUS::HOME;
+				}
 			}
-			if (tool::Distance(position, home.lock()->GetGridCenterPos()) <= 1.f)
-			{
-				status = STATUS::HOME;
-				SetPosition(home.lock()->GetGridCenterPos());
-				walkPath.clear();
-			}
+		}
+		else if (hasWorkPlace)
+		{
+			CheckWorkPlace();
 		}
 		else
 		{
-			status = STATUS::NONE;
+			status = STATUS::HOMELESS;
 		}
 		break;
 	default:
@@ -321,32 +464,132 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 	}
 
 }
+void ObjectUnit::Moving(float timeDelta, float timeScale)
+{
+	if (!isMoving)
+	{
+		if (!walkPath.empty())
+		{
+			this->nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+			walkPath.pop_front();
+		}
+	}
+
+	bool doCheck = false;
+	if (nextTile.expired())
+		doCheck = true;
+	else if (!walkPath.empty() && startingPoint.lock() != nextTile.lock())
+	{
+		std::list<GAME_OBJECT_TAG> nextTags;
+		nextTags = nextTile.lock()->GetGameObjectTagList();
+		if (std::find(nextTags.begin(), nextTags.end(), GAME_OBJECT_TAG::MOVEABLE) == nextTags.end())
+			doCheck = true;
+	}
+	if (doCheck)
+	{
+		startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+		walkPath = ObjectTile::FindShortPath(destination, startingPoint);
+		if (walkPath.empty())
+		{
+			if (status == STATUS::TO_WORK_PLACE)
+				ResetWorkPlace();
+			isMoving = false;
+			return;
+		}
+		nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+		walkPath.pop_front();
+	}
+	isMoving = true;
+
+	sf::Vector2f nextGridCenterPosition = nextTile.lock()->GetGridCenterPos();
+	direction = nextGridCenterPosition - position;
+	tool::Normalize(direction);
+	SetPosition(position + direction * speed * timeDelta * timeScale);
+
+	float arriveRange = tool::Magnitude(direction * speed * timeDelta * timeScale);
+	if (tool::Distance(position, nextGridCenterPosition) <= arriveRange)
+	{
+		SetPosition(nextGridCenterPosition);
+		isMoving = false;
+	}
+}
+
+void ObjectUnit::MovingReverse(float timeDelta, float timeScale)
+{
+	if (!isMoving)
+	{
+		if (!walkPath.empty())
+		{
+			this->nextTile = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+			walkPath.pop_back();
+		}
+	}
+
+
+	bool doCheck = false;
+	if (nextTile.expired())
+		doCheck = true;
+	else if (!walkPath.empty() && startingPoint.lock() != nextTile.lock())
+	{
+		std::list<GAME_OBJECT_TAG> nextTags;
+		nextTags = nextTile.lock()->GetGameObjectTagList();
+		if (std::find(nextTags.begin(), nextTags.end(), GAME_OBJECT_TAG::MOVEABLE) == nextTags.end())
+			doCheck = true;
+	}
+	if (doCheck)
+	{
+		startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+		walkPath = ObjectTile::FindShortPath(destination, startingPoint);
+		if (walkPath.empty())
+		{
+			if (status == STATUS::TO_WORK_PLACE)
+				ResetWorkPlace();
+			isMoving = false;
+			return;
+		}
+		nextTile = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+		walkPath.pop_back();
+	}
+	isMoving = true;
+
+	sf::Vector2f nextGridCenterPosition = nextTile.lock()->GetGridCenterPos();
+	direction = nextGridCenterPosition - position;
+	tool::Normalize(direction);
+	SetPosition(position + direction * speed * timeDelta * timeScale);
+
+	float arriveRange = tool::Magnitude(direction * speed * timeDelta * timeScale);
+	if (tool::Distance(position, nextGridCenterPosition) <= arriveRange)
+	{
+		SetPosition(nextGridCenterPosition);
+		isMoving = false;
+	}
+}
 
 void ObjectUnit::SetHome(std::weak_ptr<TileBuilding> building)
 {
-	if (!home.expired())
-	{
-		home.lock()->MoveOut(GetKey());
-		GM_RCI.UseRegidence(-1);
-	}
+	ResetHome();
 	home = building;
 	hasHome = true;
 
-	if (!isMoveToCity)
+	if (!isCitizen)
 	{
-		isMoveToCity = true;
+		isCitizen = true;
 		SetPosition(home.lock()->GetGridCenterPos());
 		status = STATUS::HOME;
+		sceneGame.lock()->unitOnGrid[gridCoord.x][gridCoord.y]
+			.push_back(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
+		preGridCoord = gridCoord;
+	}
+
+	if (hasWorkPlace)
+	{
+		pathToWorkPlace = ObjectTile::FindShortPath(home, workPlace);
 	}
 }
 
 void ObjectUnit::SetWorkPlace(std::weak_ptr<TileBuilding> building)
 {
-	if (!workPlace.expired())
-	{
-		workPlace.lock()->Quit(GetKey());
-		GM_RCI.UseIndustry(-1);
-	}
+	ResetWorkPlace();
 	workPlace = building;
 	hasWorkPlace = true;
 }

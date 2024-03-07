@@ -48,17 +48,14 @@ public:
 
 
 
-	/// <summary>
-	/// 목표까지의 최단경로 찾기
-	/// </summary>
-	/// <param name="fromTile">: 시작 타일</param>
-	/// <param name="toTag">: 목표 태그</param>
-	/// <param name="doCheck">: 목표 태그일때 심화검사</param>
-	/// <returns>: back 목표 좌표</returns>
+	//fromTile에서 목표 태그 찾기
 	static std::deque<sf::Vector2i> FindShortPath(
 		std::weak_ptr<ObjectTile> fromTile, GAME_OBJECT_TAG toTag, bool doCheck = true);
+	//fromTile에서 toTile 길 찾기
 	static std::deque<sf::Vector2i> FindShortPath(
 		std::weak_ptr<ObjectTile> fromTile, std::weak_ptr<ObjectTile> toTile);
+	//fromGridCoord에서 가장 가까운 타일 찾기
+	static sf::Vector2i FindShortPath(sf::Vector2i fromGridCoord, GridInfo& gridInfo);
 
 	virtual bool ConditionCheck(GAME_OBJECT_TAG tag);
 };

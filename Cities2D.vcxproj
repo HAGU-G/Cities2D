@@ -135,6 +135,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="GameManager\DataManager.cpp" />
+    <ClCompile Include="Framework\CsvFile.cpp" />
     <ClCompile Include="Framework\GameObject.cpp" />
     <ClCompile Include="Framework\IOManager.cpp" />
     <ClCompile Include="Framework\Scene.cpp" />
@@ -156,9 +158,12 @@
     <ClCompile Include="Object\Tile\TileBuilding.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="GameManager\DataManager.h" />
+    <ClInclude Include="Framework\CsvFile.h" />
     <ClInclude Include="Framework\Defines.h" />
     <ClInclude Include="Framework\GameObject.h" />
     <ClInclude Include="Framework\IOManager.h" />
+    <ClInclude Include="Framework\rapidcsv.h" />
     <ClInclude Include="Framework\ResourceManager.h" />
     <ClInclude Include="Framework\Scene.h" />
     <ClInclude Include="Framework\SceneManager.h" />

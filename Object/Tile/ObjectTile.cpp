@@ -308,8 +308,6 @@ void ObjectTile::Init()
 
 	edge.setPrimitiveType(sf::Lines);
 	edge.resize(8);
-
-	Reset();
 }
 
 void ObjectTile::Draw(sf::RenderWindow& window)

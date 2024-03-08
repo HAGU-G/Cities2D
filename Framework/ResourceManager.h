@@ -5,10 +5,12 @@
 #define SFGM_TEXTURE (ResourceManager<sf::Texture>::Instance())
 #define SFGM_FONT (ResourceManager<sf::Font>::Instance())
 #define SFGM_SOUNDBUFFER (ResourceManager<sf::SoundBuffer>::Instance())
+#define SFGM_CSVFILE (ResourceManager<CsvFile>::Instance())
 
 #include "Scene.h"
+#include "CsvFile.h"
 
-//sf::Texture, sf::Font, sf::SoundBuffer
+//sf::Texture, sf::Font, sf::SoundBuffer, CsvFile
 template<typename T>
 class ResourceManager final
 {
@@ -23,6 +25,8 @@ private:
 			unknownResource.loadFromFile("resource/Unknown.png");
 		else if (typeid(T).name() == typeid(sf::Font).name())
 			unknownResource.loadFromFile("resource/font/Sam3KRFont.ttf");
+		else if (typeid(T).name() == typeid(CsvFile).name())
+			unknownResource.loadFromFile("data/Unknown.csv");
 		//else if (typeid(T).name() == typeid(sf::SoundBuffer))
 	}
 

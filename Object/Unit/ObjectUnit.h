@@ -11,8 +11,10 @@ public:
 	enum class STATUS
 	{
 		NONE,
+
 		HOME,
 		WORK_PLACE,
+
 		WALK,
 		TO_HOME = WALK,
 		TO_WORK_PLACE,

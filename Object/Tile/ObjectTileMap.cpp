@@ -16,8 +16,9 @@ ObjectTileMap::~ObjectTileMap()
 std::shared_ptr<ObjectTileMap> ObjectTileMap::Create(std::weak_ptr<Scene> scene)
 {
 	std::shared_ptr<ObjectTileMap> objectTileMap = std::make_shared<ObjectTileMap>(scene);
-	objectTileMap->Init();
 	scene.lock()->AddObject(objectTileMap);
+	objectTileMap->Init();
+	objectTileMap->Reset();
 	return objectTileMap;
 }
 
@@ -102,7 +103,6 @@ void ObjectTileMap::Init()
 {
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
 	tileMap.setPrimitiveType(sf::Quads);
-	Reset();
 
 }
 

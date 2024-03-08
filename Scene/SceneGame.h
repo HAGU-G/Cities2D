@@ -1,6 +1,7 @@
 #pragma once
 #include "Scene.h"
 #include "Defines.h"
+#include "RCIManager.h"
 
 class ObjectTileMap;
 
@@ -28,9 +29,9 @@ public:
 	void PreUpdate(float timeDelta, float timeScale) override;
 	void Update(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
+	void Reset() override;
 
 	bool CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord);
-	//정보 확인을 위해 생성된 nullptr를 제거
 	void OrganizeGridInfo();
 
 	void DeleteObjectTile(const sf::Vector2i& gridCoord);
@@ -42,6 +43,11 @@ public:
 	GridInfo& GetGridInfoRaw();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
 	inline const TileInfo& GetTileInfo(const sf::Vector2i& gridCoord) { return gridInfo[gridCoord.x][gridCoord.y]; }
+
+	void SaveGame();
+	void LoadGame();
+	bool LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord,
+		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, const RCI& rci);
 
 };
 

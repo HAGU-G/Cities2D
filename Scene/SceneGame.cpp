@@ -3,6 +3,8 @@
 #include "Test/ObjectTest.h"
 #include "_Include_Tile.h"
 #include "ObjectUnit.h"
+#include "CsvFile.h"
+#include <DataManager.h>
 
 SceneGame::SceneGame(const std::string& name)
 	:Scene(name)
@@ -13,17 +15,9 @@ void SceneGame::Init()
 {
 	resourcePathList.insert("resource/building/Buildings.png");
 
-	//선택된 타일 표시용 (임시)
-	AddObject(std::make_shared<ObjectTest>(This(), GAME_OBJECT_TYPE::BUILDING));
-
-	//바닥을 그려줄 타일 맵
-	groundTileMap = ObjectTileMap::Create(This());
-
 	Scene::Init();
 	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
 	//view.setCenter(worldCenter);
-
-	Reset();
 }
 
 void SceneGame::PreUpdate(float timeDelta, float timeScale)
@@ -91,18 +85,18 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		OrganizeGridInfo();
 	}
 
-	std::deque<sf::Vector2i> tttt;
-
 	if (IOManager::IsKeyDown(sf::Keyboard::F))
 	{
-		tttt = ObjectTile::FindShortPath(GetTileInfo(mousePosGrid).second, GAME_OBJECT_TAG::I);
-		while (!tttt.empty())
-		{
-			std::cout << tttt.front().x << " " << tttt.front().y << std::endl;
-			tttt.pop_front();
-		}
+		SaveGame();
 	}
-
+	if (IOManager::IsKeyDown(sf::Keyboard::G))
+	{
+		LoadGame();
+	}
+	if (IOManager::IsKeyDown(sf::Keyboard::R))
+	{
+		Reset();
+	}
 
 
 }
@@ -115,6 +109,20 @@ void SceneGame::Update(float timeDelta, float timeScale)
 void SceneGame::Draw(sf::RenderWindow& window)
 {
 	Scene::Draw(window);
+}
+
+void SceneGame::Reset()
+{
+	gridInfo.clear();
+	unitOnGrid.clear();
+	Scene::Reset();
+	groundTileMap.reset();
+
+	//선택된 타일 표시용 (임시)
+	AddObject(std::make_shared<ObjectTest>(This(), GAME_OBJECT_TYPE::BUILDING))->Init();
+
+	//바닥을 그려줄 타일 맵
+	groundTileMap = ObjectTileMap::Create(This());
 }
 
 bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord)
@@ -225,6 +233,46 @@ GridInfo& SceneGame::GetGridInfoRaw()
 {
 	OrganizeGridInfo();
 	return gridInfo;
+}
+
+void SceneGame::SaveGame()
+{
+	DataManager::SaveGame(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
+}
+
+void SceneGame::LoadGame()
+{
+	DataManager::LoadGame(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
+}
+
+bool SceneGame::LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord
+	, const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, const RCI& rci)
+{
+	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
+	{
+		switch (type)
+		{
+		case GAME_OBJECT_TYPE::ROAD:
+			gridInfo[gridCoord.x][gridCoord.y].first = type;
+			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord, tagList, rect);
+			groundTileMap->UpdateTile(gridCoord);
+			return true;
+			break;
+		case GAME_OBJECT_TYPE::BUILDING:
+		{
+			gridInfo[gridCoord.x][gridCoord.y].first = type;
+			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(This(), gridCoord, tagList, rect, rci);
+			groundTileMap->UpdateTile(gridCoord);
+			return true;
+			break;
+		}
+		default:
+			break;
+		}
+
+	}
+
+	return false;
 }
 
 void SceneGame::SetMousePosGrid()

@@ -45,7 +45,7 @@ typedef std::pair<GAME_OBJECT_TYPE, std::weak_ptr<ObjectTile>> TileInfo;
 typedef std::unordered_map<int, std::unordered_map<int, TileInfo>> GridInfo;
 typedef std::unordered_map<int, std::unordered_map<int, std::list<std::weak_ptr<ObjectUnit>>>> UnitOnGrid;
 
-
+using std::to_string;
 
 
 #endif // !DEFINES_H

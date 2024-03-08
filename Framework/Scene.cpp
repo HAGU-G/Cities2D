@@ -24,7 +24,6 @@ void Scene::Init()
 	{
 		pair.second->Init();
 	}
-	Reset();
 }
 
 void Scene::PreUpdate(float timeDelta, float timeScale)
@@ -90,17 +89,23 @@ void Scene::Draw(sf::RenderWindow& window)
 	window.setView(view);
 	for (auto& pair : drawList)
 	{
-		pair.second->Draw(window);
+		pair.second.lock()->Draw(window);
 	}
 	window.setView(preView);
 }
 
 void Scene::Reset()
 {
+	for (auto& pair : drawList)
+	{
+		pair.second.lock()->Reset();
+	}
+	drawList.clear();
 	for (auto& pair : gameObjectList)
 	{
 		pair.second->Reset();
 	}
+	gameObjectList.clear();
 }
 
 void Scene::Release()
@@ -169,7 +174,7 @@ const std::shared_ptr<GameObject>& Scene::AddObject(const std::shared_ptr<GameOb
 		auto drawIt = drawList.begin();
 		while (drawIt != drawList.end())
 		{
-			if (it.first->second->GetDrawLayer() < drawIt->second->GetDrawLayer())
+			if (it.first->second->GetDrawLayer() < drawIt->second.lock()->GetDrawLayer())
 			{
 				drawList.insert(drawIt,*it.first);
 				return object;
@@ -191,7 +196,7 @@ void Scene::ResetDrawList()
 	{
 		if (drawList.empty())
 			drawList.push_back(pair);
-		else if (pair.second->GetDrawLayer() >= drawList.front().second->GetDrawLayer())
+		else if (pair.second->GetDrawLayer() >= drawList.front().second.lock()->GetDrawLayer())
 			drawList.push_back(pair);
 		else
 			drawList.push_front(pair);

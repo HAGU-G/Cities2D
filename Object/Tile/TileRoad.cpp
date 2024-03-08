@@ -17,6 +17,23 @@ std::shared_ptr<ObjectTile> TileRoad::Create(std::weak_ptr<Scene> scene, const s
 	std::shared_ptr<ObjectTile> tileRoad = std::make_shared<TileRoad>(scene, gridCoord);
 	scene.lock()->AddObject(tileRoad);
 	tileRoad->Init();
+	tileRoad->Reset();
+
+	return tileRoad;
+}
+
+std::shared_ptr<ObjectTile> TileRoad::Create(std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord,
+	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect)
+{
+	std::shared_ptr<ObjectTile> tileRoad = std::make_shared<TileRoad>(scene, gridCoord);
+	scene.lock()->AddObject(tileRoad);
+	tileRoad->Init();
+	tileRoad->Reset();
+	for (auto tag : tagList)
+	{
+		tileRoad->AddTag(tag);
+	}
+	tileRoad->SetTextureRect(rect);
 
 	return tileRoad;
 }

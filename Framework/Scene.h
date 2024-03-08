@@ -15,7 +15,7 @@ private:
 
 protected:
 	GameObjectList gameObjectList;
-	std::list<std::pair<std::string, std::shared_ptr<GameObject>>> drawList;
+	std::list<std::pair<std::string, std::weak_ptr<GameObject>>> drawList;
 	FilePathList resourcePathList; //파일 경로들이 담긴 컨테이너
 	std::deque<std::string> deleteDeque;
 

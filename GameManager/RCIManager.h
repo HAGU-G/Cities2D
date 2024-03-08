@@ -30,12 +30,6 @@ private:
 public:
 	~RCIManager() = default;
 
-	static RCIManager& Instance()
-	{
-		static RCIManager instance;
-		return instance;
-	}
-
 	void UpdateRCI() const;
 	void UpdateRCI(int r, int c, int i);
 
@@ -47,5 +41,10 @@ public:
 	void UseCommerce(int value);
 	void UseIndustry(int value);
 
+	static RCIManager& Instance()
+	{
+		static RCIManager instance;
+		return instance;
+	}
 };
 

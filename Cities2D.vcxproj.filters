@@ -66,6 +66,12 @@
     <ClCompile Include="Object\Tile\TileBuilding.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
+    <ClCompile Include="Framework\CsvFile.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
+    <ClCompile Include="GameManager\DataManager.cpp">
+      <Filter>소스 파일</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="pch.h">
@@ -123,6 +129,15 @@
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Object\Tile\_Include_Tile.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\rapidcsv.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="Framework\CsvFile.h">
+      <Filter>헤더 파일</Filter>
+    </ClInclude>
+    <ClInclude Include="GameManager\DataManager.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

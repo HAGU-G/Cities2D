@@ -155,6 +155,7 @@ void GameManager::AddScene()
 	SceneManager::AddUse(std::make_shared<SceneGame>("SceneGame"));
 	SceneManager::AddUse(std::make_shared<SceneGameUI>("SceneGameUI"));
 	SceneManager::Init();
+	SceneManager::Reset();
 }
 
 

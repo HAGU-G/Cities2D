@@ -2,11 +2,6 @@
 #ifndef IOMANAGER_H
 #define IOMANAGER_H
 
-
-
-
-
-
 static class IOManager final
 {
 public:
@@ -59,8 +54,26 @@ public:
 	static void ComboRecord(float timeLimit);
 	static void StopComboRecord();
 	static void ClearCombo();
-};
 
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+};
 
 
 #endif // !IOMANAGER_H

@@ -17,7 +17,6 @@ ObjectUnit::~ObjectUnit()
 void ObjectUnit::Init()
 {
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
-	Reset();
 }
 
 void ObjectUnit::Update(float timeDelta, float timeScale)
@@ -89,6 +88,7 @@ std::shared_ptr<ObjectUnit> ObjectUnit::Create(std::weak_ptr<Scene> scene)
 	std::shared_ptr<ObjectUnit> objectUnit = std::make_shared<ObjectUnit>(scene, GAME_OBJECT_TYPE::CITIZEN);
 	scene.lock()->AddObject(objectUnit);
 	objectUnit->Init();
+	objectUnit->Reset();
 	return objectUnit;
 }
 
@@ -116,7 +116,13 @@ void ObjectUnit::SetPosition(const sf::Vector2f& position)
 
 void ObjectUnit::GridUpdate()
 {
-	if (sceneGame.lock()->GetTileInfo(gridCoord).second.expired())
+	std::shared_ptr<SceneGame> sceneGame = this->sceneGame.lock();
+	std::shared_ptr<ObjectTile> currentTile = sceneGame->GetTileInfo(gridCoord).second.lock();
+	const std::list<GAME_OBJECT_TAG>& tagList = currentTile->GetGameObjectTagList();
+	if (sceneGame->GetTileInfo(gridCoord).second.expired()
+		|| (std::find(tagList.begin(), tagList.end(), GAME_OBJECT_TAG::MOVEABLE) == tagList.end()
+			&& (currentTile != home.lock() && currentTile != workPlace.lock())
+			))
 	{
 		if (hasHome && hasWorkPlace)
 		{
@@ -154,14 +160,14 @@ void ObjectUnit::GridUpdate()
 	{
 		const std::shared_ptr<ObjectUnit>& tempPtr = std::dynamic_pointer_cast<ObjectUnit, GameObject>(This());
 
-		sceneGame.lock()->unitOnGrid[preGridCoord.x][preGridCoord.y]
+		sceneGame->unitOnGrid[preGridCoord.x][preGridCoord.y]
 			.remove_if(
 				[tempPtr](std::weak_ptr<ObjectUnit> ptr)
 				{
 					return tempPtr.get() == ptr.lock().get();
 				});
 
-		sceneGame.lock()->unitOnGrid[gridCoord.x][gridCoord.y]
+		sceneGame->unitOnGrid[gridCoord.x][gridCoord.y]
 			.push_back(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
 		preGridCoord = gridCoord;
 	}
@@ -380,6 +386,10 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 	case STATUS::TO_WORK_PLACE:
 		if (hasWorkPlace)
 		{
+			if (destination.expired())
+			{
+				ResetWorkPlace();
+			}
 			Moving(timeDelta, timeScale);
 			if (!isMoving)
 			{
@@ -441,7 +451,11 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 			MovingReverse(timeDelta, timeScale);
 			if (!isMoving)
 			{
-				if (position == destination.lock()->GetGridCenterPos())
+				if (destination.expired())
+				{
+					ResetHome();
+				}
+				else if (position == destination.lock()->GetGridCenterPos())
 				{
 					startingPoint.reset();
 					destination.reset();

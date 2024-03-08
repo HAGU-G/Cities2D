@@ -18,12 +18,6 @@ TileBuilding::~TileBuilding()
 void TileBuilding::Init()
 {
 	ObjectTile::Init();
-	if (rci.residence > 0)
-		AddTag(GAME_OBJECT_TAG::R);
-	if (rci.commerce > 0)
-		AddTag(GAME_OBJECT_TAG::C);
-	if (rci.industry > 0)
-		AddTag(GAME_OBJECT_TAG::I);
 
 }
 
@@ -41,16 +35,34 @@ void TileBuilding::Draw(sf::RenderWindow& window)
 
 void TileBuilding::Reset()
 {
+	gameObjectTagList.clear();
+	if (rci.residence > 0)
+		AddTag(GAME_OBJECT_TAG::R);
+	if (rci.commerce > 0)
+		AddTag(GAME_OBJECT_TAG::C);
+	if (rci.industry > 0)
+		AddTag(GAME_OBJECT_TAG::I);
+
 	buildingSprite.setTexture(SFGM_TEXTURE.Get("resource/building/Buildings.png"));
+
 	std::initializer_list<int> elements = { rci.residence, rci.commerce, rci.industry };
 	int rciMax = std::max(elements);
 
 	if (rciMax == rci.commerce)
-		buildingSprite.setTextureRect({ 0, 0, 50, 50 });
+	{
+		textureRect = { 0, 0, 50, 50 };
+		buildingSprite.setTextureRect(textureRect);
+	}
 	else if (rciMax == rci.industry)
-		buildingSprite.setTextureRect({ 0, 50, 50, 100 });
+	{
+		textureRect = { 0, 50, 50, 100 };
+		buildingSprite.setTextureRect(textureRect);
+	}
 	else
-		buildingSprite.setTextureRect({ 0, 0, 50, 50 });
+	{
+		textureRect = { 0, 0, 50, 50 };
+		buildingSprite.setTextureRect(textureRect);
+	}
 
 	buildingSprite.setOrigin(buildingSprite.getLocalBounds().width * 0.5f,
 		buildingSprite.getLocalBounds().height - sceneGame.lock()->GetGridSize().y * 0.5f);
@@ -63,6 +75,21 @@ std::shared_ptr<ObjectTile> TileBuilding::Create(RCI rci, std::weak_ptr<Scene> s
 	std::shared_ptr<ObjectTile> tileBuilding = std::make_shared<TileBuilding>(rci, scene, gridCoord);
 	scene.lock()->AddObject(tileBuilding);
 	tileBuilding->Init();
+	tileBuilding->Reset();
+	return tileBuilding;
+}
+
+std::shared_ptr<ObjectTile> TileBuilding::Create(std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, const RCI& rci)
+{
+	std::shared_ptr<ObjectTile> tileBuilding = std::make_shared<TileBuilding>(rci, scene, gridCoord);
+	scene.lock()->AddObject(tileBuilding);
+	tileBuilding->Init();
+	tileBuilding->Reset();
+	for (auto tag : tagList)
+	{
+		tileBuilding->AddTag(tag);
+	}
+	tileBuilding->SetTextureRect(rect);
 
 	return tileBuilding;
 }

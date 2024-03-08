@@ -10,7 +10,7 @@ void SceneGameUI::Init()
 {
 	Scene::Init();
 	tempText.setFillColor(sf::Color::White);
-	tempText.setCharacterSize(60);
+	tempText.setCharacterSize(40);
 	tempText.setFont(SFGM_FONT.Get(""));
 }
 

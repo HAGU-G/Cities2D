@@ -181,10 +181,10 @@ void GameManager::DebugUpdate()
 
 	//텍스트
 	sf::Text text;
-	int fontSize = 30;
+	int fontSize = 24;
 	float infoY = 0.f;
 	text.setCharacterSize(fontSize);
-	text.setFont(SFGM_FONT.Get("BMHANNAPro.ttf"));
+	text.setFont(SFGM_FONT.Get(""));
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame>(SceneManager::Get("SceneGame"));
 
 	//렌더링
@@ -227,7 +227,7 @@ void GameManager::DebugUpdate()
 
 	text.setFillColor(sf::Color::White);
 	text.setString(
-		"[WolrdPos]\n" + std::to_string(sceneGame->GetMousePosWorld().x) + "\n" + std::to_string(sceneGame->GetMousePosWorld().y)
+		"[WorldPos]\n" + std::to_string(sceneGame->GetMousePosWorld().x) + "\n" + std::to_string(sceneGame->GetMousePosWorld().y)
 	);
 	debugWindow.draw(text);
 	infoY += fontSize * 4;

@@ -5,6 +5,10 @@ class SceneGameUI : public Scene
 protected:
 	sf::Text tempText;
 
+	sf::Text textNewGame;
+	sf::Text textOption;
+	sf::Text textExit;
+
 public:
 	explicit SceneGameUI(const std::string& name);
 	~SceneGameUI() override = default;

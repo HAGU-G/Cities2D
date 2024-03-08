@@ -24,7 +24,7 @@ private:
 		if (typeid(T).name() == typeid(sf::Texture).name())
 			unknownResource.loadFromFile("resource/Unknown.png");
 		else if (typeid(T).name() == typeid(sf::Font).name())
-			unknownResource.loadFromFile("resource/font/Sam3KRFont.ttf");
+			unknownResource.loadFromFile("resource/font/ROKAF Sans Medium.ttf");
 		else if (typeid(T).name() == typeid(CsvFile).name())
 			unknownResource.loadFromFile("data/Unknown.csv");
 		//else if (typeid(T).name() == typeid(sf::SoundBuffer))

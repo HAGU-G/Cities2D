@@ -14,6 +14,7 @@ protected:
 
 	GridInfo gridInfo; //[x][y]
 	std::shared_ptr<ObjectTileMap> groundTileMap;
+	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> unitList;
 
 public:
 	UnitOnGrid unitOnGrid; //[x][y]
@@ -33,6 +34,7 @@ public:
 
 	bool CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord);
 	void OrganizeGridInfo();
+	std::shared_ptr<ObjectUnit> AddUnit(const std::shared_ptr<ObjectUnit>& unit);
 
 	void DeleteObjectTile(const sf::Vector2i& gridCoord);
 
@@ -43,6 +45,7 @@ public:
 	GridInfo& GetGridInfoRaw();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
 	inline const TileInfo& GetTileInfo(const sf::Vector2i& gridCoord) { return gridInfo[gridCoord.x][gridCoord.y]; }
+	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };
 
 	void SaveGame();
 	void LoadGame();

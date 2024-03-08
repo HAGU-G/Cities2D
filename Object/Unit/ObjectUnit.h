@@ -3,10 +3,12 @@
 
 class TileBuilding;
 class SceneGame;
+class DataManager;
 
 class ObjectUnit : public GameObject
 {
 	friend TileBuilding;
+	friend DataManager;
 public:
 	enum class STATUS
 	{

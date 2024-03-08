@@ -4,7 +4,9 @@
 #include "SceneGame.h"
 #include "RCIManager.h"
 #include "_Include_Tile.h"
-bool DataManager::LoadGame(const std::shared_ptr<SceneGame>& sceneGame)
+#include "ObjectUnit.h"
+
+bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 {
 	const CsvFile& csv = SFGM_CSVFILE.Load("data/save/Tiles.csv");
 	if (csv.IsUnknown())
@@ -142,7 +144,7 @@ bool DataManager::LoadGame(const std::shared_ptr<SceneGame>& sceneGame)
 	return false;
 }
 
-bool DataManager::SaveGame(const std::shared_ptr<SceneGame>& sceneGame)
+bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 {
 	const GridInfo& gridInfo = sceneGame->GetGridInfo();
 	if (gridInfo.empty())
@@ -161,8 +163,10 @@ bool DataManager::SaveGame(const std::shared_ptr<SceneGame>& sceneGame)
 	{
 		for (auto& y : x.second)
 		{
-			str = comma; //타입은 switch문에서 앞쪽에 넣어준다.
+			if (y.second.second.expired())
+				continue;
 
+			str = comma; //타입은 switch문에서 앞쪽에 넣어준다.
 			std::shared_ptr<ObjectTile> tile = y.second.second.lock();
 			str += to_string(tile->GetGridCoord().x) + slash + to_string(tile->GetGridCoord().y) + slash + comma;
 
@@ -205,4 +209,390 @@ bool DataManager::SaveGame(const std::shared_ptr<SceneGame>& sceneGame)
 	}
 	outFile.close();
 	return true;
+}
+
+
+
+
+bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
+{
+	const CsvFile& csv = SFGM_CSVFILE.Load("data/save/Units.csv");
+	if (csv.IsUnknown())
+		return false;
+	const rapidcsv::Document& doc = csv.GetDocument();
+
+	for (int i = 0; i < doc.GetRowCount(); i++)
+	{
+		auto row = doc.GetRow<std::string>(i);
+		int divide = 0; // '/'로 구분
+		std::string tempStr;
+		sf::Vector2i tempVi;
+		sf::Vector2f tempVf;
+
+		//타입
+		std::shared_ptr<ObjectUnit> unit = sceneGame->AddUnit(ObjectUnit::Create(sceneGame));
+		unit->SetPosition({ std::stof(row[1]), std::stof(row[2]) });
+
+		//집 직장 설정
+		divide = 0;
+		tempStr = "";
+		auto it = row[3].begin();
+		while (it != row[3].end())
+		{
+			if (*it == '/')
+			{
+				switch (divide)
+				{
+				case 0:
+					if (tempStr != "N")
+						tempVi.x = std::stoi(tempStr);
+					break;
+				case 1:
+					if (tempStr != "N")
+					{
+						tempVi.y = std::stoi(tempStr);
+						unit->home = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+					}
+					break;
+				case 2:
+					if (tempStr != "N")
+						tempVi.x = std::stoi(tempStr);
+				case 3:
+					if (tempStr != "N")
+					{
+						tempVi.y = std::stoi(tempStr);
+						unit->workPlace = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+					}
+					break;
+				default:
+					break;
+				}
+				tempStr = "";
+				divide++;
+			}
+			else
+			{
+				tempStr += *it;
+			}
+			it++;
+		}
+
+		//pathToWorkPlace
+		divide = 0;
+		tempStr = "";
+		if (row[4] != "N")
+		{
+			auto it = row[4].begin();
+			while (it != row[4].end())
+			{
+				if (*it == '/')
+				{
+					if (divide == 0)
+					{
+						tempVi.x = std::stoi(tempStr);
+						divide++;
+					}
+					else if (divide == 1)
+					{
+						tempVi.y = std::stoi(tempStr);
+						unit->pathToWorkPlace.push_back(tempVi);
+						divide--;
+					}
+					tempStr = "";
+				}
+				else
+				{
+					tempStr += *it;
+				}
+				it++;
+			}
+		}
+
+		//bool 형
+		unit->isCitizen = std::stoi(row[5]) & (1 << 3);
+		unit->hasHome = std::stoi(row[5]) & (1 << 2);
+		unit->hasWorkPlace = std::stoi(row[5]) & (1 << 1);
+		unit->isMoving = std::stoi(row[5]) & (1 << 0);
+
+		//find
+		unit->findTimer = std::stof(row[6]);
+		unit->findInterval = std::stof(row[7]);
+
+		//patience
+		unit->patience = std::stoi(row[8]);
+
+		//status
+		unit->status = ObjectUnit::STATUS(std::stoi(row[9]));
+
+		//life
+		unit->lifeTimer = std::stof(row[10]);
+		unit->lifeInterval = std::stof(row[11]);
+
+		//speed
+		unit->speed = std::stof(row[12]);
+
+		//walkPath
+		divide = 0;
+		tempStr = "";
+		if (row[13] != "N")
+		{
+			auto it = row[13].begin();
+			while (it != row[13].end())
+			{
+				if (*it == '/')
+				{
+					if (divide == 0)
+					{
+						tempVi.x = std::stoi(tempStr);
+						divide++;
+					}
+					else if (divide == 1)
+					{
+						tempVi.y = std::stoi(tempStr);
+						unit->walkPath.push_back(tempVi);
+						divide--;
+					}
+					tempStr = "";
+				}
+				else
+				{
+					tempStr += *it;
+				}
+				it++;
+			}
+		}
+
+		//길찾기,이전좌표
+		divide = 0;
+		tempStr = "";
+		auto it = row[14].begin();
+		while (it != row[14].end())
+		{
+			if (*it == '/')
+			{
+				switch (divide)
+				{
+				case 0:
+					if (tempStr != "N")
+						tempVi.x = std::stoi(tempStr);
+					break;
+				case 1:
+					if (tempStr != "N")
+					{
+						tempVi.y = std::stoi(tempStr);
+						unit->nextTile = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+					}
+					break;
+				case 2:
+					if (tempStr != "N")
+						tempVi.x = std::stoi(tempStr);
+				case 3:
+					if (tempStr != "N")
+					{
+						tempVi.y = std::stoi(tempStr);
+						unit->startingPoint = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+					}
+				case 4:
+					if (tempStr != "N")
+						tempVi.x = std::stoi(tempStr);
+					break;
+				case 5:
+					if (tempStr != "N")
+					{
+						tempVi.y = std::stoi(tempStr);
+						unit->destination = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+					}
+					break;
+				case 6:
+						tempVi.x = std::stoi(tempStr);
+				case 7:
+						tempVi.y = std::stoi(tempStr);
+						unit->preGridCoord = tempVi;
+					break;
+				default:
+					break;
+				}
+				tempStr = "";
+				divide++;
+			}
+			else
+			{
+				tempStr += *it;
+			}
+			it++;
+		}
+
+		//태그
+		std::list<GAME_OBJECT_TAG> tagList;
+		tempStr = "";
+		if (row[15] != "N")
+		{
+			it = row[15].begin();
+			while (it != row[15].end())
+			{
+				if (*it == '/')
+				{
+					tagList.push_back(GAME_OBJECT_TAG(std::stoi(tempStr)));
+					tempStr = "";
+				}
+				else
+				{
+					tempStr += *it;
+				}
+				it++;
+			}
+		}
+		unit->gameObjectTagList = tagList;
+	}
+
+	SFGM_CSVFILE.UnLoad();
+
+	return false;
+}
+
+bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
+{
+	const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& unitList = sceneGame->GetUnitList();
+	if (unitList.empty())
+		return false;
+
+	std::ofstream outFile("data/save/Units.csv");
+	if (!outFile.is_open())
+		return false;
+
+	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/HAS_HOME/HAS_WORK_PLACE/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS" << std::endl;
+
+	std::string str;
+	std::string comma = ",";
+	std::string slash = "/";
+	for (auto& pair : unitList)
+	{
+		if (pair.second.expired())
+			continue;
+
+		str = comma; //타입은 switch문에서 앞쪽에 넣어준다.
+		std::shared_ptr<ObjectUnit> unit = pair.second.lock();
+
+		//position
+		str += to_string(unit->GetPosition().x) + comma + to_string(unit->GetPosition().y) + comma;
+
+		//home, work grid
+		if (!unit->home.expired())
+		{
+			str += to_string(unit->home.lock()->GetGridCoord().x) + slash + to_string(unit->home.lock()->GetGridCoord().y) + slash;
+		}
+		else
+		{
+			str += "N/N/";
+		}
+		if (!unit->workPlace.expired())
+		{
+			str += to_string(unit->workPlace.lock()->GetGridCoord().x) + slash + to_string(unit->workPlace.lock()->GetGridCoord().y) + slash;
+		}
+		else
+		{
+			str += "N/N/,";
+		}
+		str += comma;
+
+		//PATH_TO_WORK_PLACE
+		if (!unit->pathToWorkPlace.empty())
+		{
+			for (auto& i : unit->pathToWorkPlace)
+			{
+				str += to_string(i.x) + slash + to_string(i.y) + slash;
+			}
+		}
+		else
+		{
+			str += "N";
+		}
+		str += comma;
+
+		//IS_CITIZEN / HAS_HOME / HAS_WORK_PLACE / IS_MOVING
+		str += to_string(((int)(unit->isCitizen) << 3) + ((int)(unit->hasHome) << 2) + ((int)(unit->hasWorkPlace) << 1) + ((int)(unit->isMoving) << 0)) + comma;
+
+		//FIND_TIMER, FIND_INTERVAL
+		str += to_string(unit->findTimer) + comma;
+		str += to_string(unit->findInterval) + comma;
+
+		//PATIENCE
+		str += to_string(unit->patience) + comma;
+
+		//STATUS
+		str += to_string((int)unit->status) + comma;
+
+		//LIFE_TIEMR, LIFE_INTERVAL
+		str += to_string(unit->lifeTimer) + comma;
+		str += to_string(unit->lifeInterval) + comma;
+
+		//SPEED
+		str += to_string(unit->speed) + comma;
+
+		//WALK_PATH
+		if (!unit->walkPath.empty())
+		{
+			for (auto& i : unit->walkPath)
+			{
+				str += to_string(i.x) + slash + to_string(i.y) + slash;
+			}
+		}
+		else
+		{
+			str += "N";
+		}
+		str += comma;
+
+		//NEXT / START / DEST / PRE_GRID
+		if (!unit->nextTile.expired())
+		{
+			str += to_string(unit->nextTile.lock()->GetGridCoord().x) + slash + to_string(unit->nextTile.lock()->GetGridCoord().y) + slash;
+		}
+		else
+		{
+			str += "N/N/";
+		}
+		if (!unit->destination.expired())
+		{
+			str += to_string(unit->destination.lock()->GetGridCoord().x) + slash + to_string(unit->destination.lock()->GetGridCoord().y) + slash;
+		}
+		else
+		{
+			str += "N/N/";
+		}
+		str += to_string(unit->preGridCoord.x) + slash + to_string(unit->preGridCoord.y) + slash + comma;
+
+		//TAGS
+		if (!unit->gameObjectTagList.empty())
+		{
+			for (auto& tag : unit->gameObjectTagList)
+			{
+				str += to_string((int)tag) + slash;
+			}
+		}
+		else
+		{
+			str += "N";
+		}
+
+		switch (unit->GetGameObjectType())
+		{
+
+		case GAME_OBJECT_TYPE::CITIZEN:
+		{
+			str = to_string((int)GAME_OBJECT_TYPE::ROAD) + str;
+			break;
+		}
+		default:
+			break;
+		}
+
+		outFile << str << std::endl;
+
+	}
+	outFile.close();
+	return true;
+
+
+
 }

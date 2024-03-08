@@ -77,7 +77,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::IsKeyDown(sf::Keyboard::Num3))
 	{
 
-		ObjectUnit::Create(This());
+		SceneGame::AddUnit(ObjectUnit::Create(This()));
 
 	}
 	if (IOManager::IsKeyDown(sf::Keyboard::F5))
@@ -123,6 +123,12 @@ void SceneGame::Reset()
 
 	//¹Ù´ÚÀ» ±×·ÁÁÙ Å¸ÀÏ ¸Ê
 	groundTileMap = ObjectTileMap::Create(This());
+}
+
+std::shared_ptr<ObjectUnit> SceneGame::AddUnit(const std::shared_ptr<ObjectUnit>& unit)
+{
+	unitList.insert(std::make_pair(unit->GetKey(), unit));
+	return unit;
 }
 
 bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord)
@@ -237,12 +243,13 @@ GridInfo& SceneGame::GetGridInfoRaw()
 
 void SceneGame::SaveGame()
 {
-	DataManager::SaveGame(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
+	DataManager::SaveTile(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
+	DataManager::SaveUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 }
 
 void SceneGame::LoadGame()
 {
-	DataManager::LoadGame(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
+	DataManager::LoadTile(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 }
 
 bool SceneGame::LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord

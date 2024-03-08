@@ -250,6 +250,7 @@ void SceneGame::SaveGame()
 void SceneGame::LoadGame()
 {
 	DataManager::LoadTile(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
+	DataManager::LoadUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 }
 
 bool SceneGame::LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord

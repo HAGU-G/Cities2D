@@ -56,7 +56,9 @@ protected:
 
 
 	void SetHome(std::weak_ptr<TileBuilding> building);
+	void NoHome();
 	void SetWorkPlace(std::weak_ptr<TileBuilding> building);
+	void NoWorkPlace();
 
 public:
 	explicit ObjectUnit(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType);

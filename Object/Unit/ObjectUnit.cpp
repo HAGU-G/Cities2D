@@ -389,6 +389,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 			if (destination.expired())
 			{
 				ResetWorkPlace();
+				CheckHome();
 			}
 			Moving(timeDelta, timeScale);
 			if (!isMoving)
@@ -454,6 +455,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				if (destination.expired())
 				{
 					ResetHome();
+					CheckWorkPlace();
 				}
 				else if (position == destination.lock()->GetGridCenterPos())
 				{
@@ -600,9 +602,23 @@ void ObjectUnit::SetHome(std::weak_ptr<TileBuilding> building)
 	}
 }
 
+void ObjectUnit::NoHome()
+{
+	GM_RCI.UseRegidence(-1);
+	home.reset();
+	hasHome = false;
+}
+
 void ObjectUnit::SetWorkPlace(std::weak_ptr<TileBuilding> building)
 {
 	ResetWorkPlace();
 	workPlace = building;
 	hasWorkPlace = true;
+}
+
+void ObjectUnit::NoWorkPlace()
+{
+	GM_RCI.UseIndustry(-1);
+	workPlace.reset();
+	hasWorkPlace = false;
 }

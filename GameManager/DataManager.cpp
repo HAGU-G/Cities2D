@@ -233,6 +233,10 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		std::shared_ptr<ObjectUnit> unit = sceneGame->AddUnit(ObjectUnit::Create(sceneGame));
 		unit->SetPosition({ std::stof(row[1]), std::stof(row[2]) });
 
+		//bool 형
+		unit->isCitizen = std::stoi(row[5]) & (1 << 3);
+		unit->isMoving = std::stoi(row[5]) & (1 << 0);
+
 		//집 직장 설정
 		divide = 0;
 		tempStr = "";
@@ -251,17 +255,26 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						unit->home = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						std::shared_ptr<TileBuilding> tempTile = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						if (tempTile != nullptr)
+						{
+							tempTile->MoveIn(unit);
+						}
 					}
 					break;
 				case 2:
 					if (tempStr != "N")
 						tempVi.x = std::stoi(tempStr);
+					break;
 				case 3:
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						unit->workPlace = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						std::shared_ptr<TileBuilding> tempTile = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						if (tempTile != nullptr)
+						{
+							tempTile->Join(unit);
+						}
 					}
 					break;
 				default:
@@ -308,11 +321,9 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 			}
 		}
 
-		//bool 형
-		unit->isCitizen = std::stoi(row[5]) & (1 << 3);
+		//bool형 2
 		unit->hasHome = std::stoi(row[5]) & (1 << 2);
 		unit->hasWorkPlace = std::stoi(row[5]) & (1 << 1);
-		unit->isMoving = std::stoi(row[5]) & (1 << 0);
 
 		//find
 		unit->findTimer = std::stof(row[6]);
@@ -365,7 +376,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		//길찾기,이전좌표
 		divide = 0;
 		tempStr = "";
-		auto it = row[14].begin();
+		it = row[14].begin();
 		while (it != row[14].end())
 		{
 			if (*it == '/')
@@ -386,6 +397,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 				case 2:
 					if (tempStr != "N")
 						tempVi.x = std::stoi(tempStr);
+					break;
 				case 3:
 					if (tempStr != "N")
 					{
@@ -405,6 +417,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					break;
 				case 6:
 						tempVi.x = std::stoi(tempStr);
+						break;
 				case 7:
 						tempVi.y = std::stoi(tempStr);
 						unit->preGridCoord = tempVi;
@@ -491,7 +504,7 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		}
 		else
 		{
-			str += "N/N/,";
+			str += "N/N/";
 		}
 		str += comma;
 
@@ -547,6 +560,14 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		if (!unit->nextTile.expired())
 		{
 			str += to_string(unit->nextTile.lock()->GetGridCoord().x) + slash + to_string(unit->nextTile.lock()->GetGridCoord().y) + slash;
+		}
+		else
+		{
+			str += "N/N/";
+		}
+		if (!unit->startingPoint.expired())
+		{
+			str += to_string(unit->startingPoint.lock()->GetGridCoord().x) + slash + to_string(unit->startingPoint.lock()->GetGridCoord().y) + slash;
 		}
 		else
 		{

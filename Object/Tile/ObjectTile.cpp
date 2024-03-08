@@ -316,13 +316,13 @@ void ObjectTile::Draw(sf::RenderWindow& window)
 }
 
 void ObjectTile::Reset()
-{
+ {
 
 	for (int i = 0; i < 8; i++)
 	{
-		edge[i].position = gridCenterPos;
+ 		edge[i].position = gridCenterPos;
 		edge[i].color = sf::Color::Magenta;
-	}
+ 	}
 
 	UpdateAdjacent();
 }

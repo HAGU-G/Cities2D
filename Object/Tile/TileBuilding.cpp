@@ -12,7 +12,8 @@ TileBuilding::TileBuilding(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector
 
 TileBuilding::~TileBuilding()
 {
-	GM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
+	Release();
+
 }
 
 void TileBuilding::Init()
@@ -36,6 +37,24 @@ void TileBuilding::Draw(sf::RenderWindow& window)
 void TileBuilding::Reset()
 {
 	gameObjectTagList.clear();
+
+	for (auto& pair : rci.residenceSlot)
+	{
+		if (!pair.second.expired())
+			pair.second.lock()->NoHome();
+	}
+	rci.residenceSlot.clear();
+	for (auto& pair : rci.commerceSlot)
+	{
+	}
+	rci.commerceSlot.clear();
+	for (auto& pair : rci.industrySlot)
+	{
+		if (!pair.second.expired())
+			pair.second.lock()->NoWorkPlace();
+	}
+	rci.industrySlot.clear();
+
 	if (rci.residence > 0)
 		AddTag(GAME_OBJECT_TAG::R);
 	if (rci.commerce > 0)
@@ -68,6 +87,29 @@ void TileBuilding::Reset()
 		buildingSprite.getLocalBounds().height - sceneGame.lock()->GetGridSize().y * 0.5f);
 
 	ObjectTile::Reset();
+}
+
+void TileBuilding::Release()
+{
+	for (auto& pair : rci.residenceSlot)
+	{
+		if (!pair.second.expired())
+			pair.second.lock()->NoHome();
+	}
+	rci.residenceSlot.clear();
+	for (auto& pair : rci.commerceSlot)
+	{
+	}
+	rci.commerceSlot.clear();
+	for (auto& pair : rci.industrySlot)
+	{
+		if (!pair.second.expired())
+			pair.second.lock()->NoWorkPlace();
+	}
+	rci.industrySlot.clear();
+
+	GM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
+	rci = RCI();
 }
 
 std::shared_ptr<ObjectTile> TileBuilding::Create(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord)

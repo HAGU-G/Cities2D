@@ -2,7 +2,19 @@
 #include "SceneManager.h"
 
 std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::usingSceneList;
+std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::unUseSceneList;
 std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::waitingSceneList;
+
+void SceneManager::Resource()
+{
+	for (auto& scene : waitingSceneList)
+	{
+		scene.second->Resource();
+	}
+	SFGM_FONT.Load();
+	SFGM_SOUNDBUFFER.Load();
+	SFGM_TEXTURE.Load();
+}
 
 void SceneManager::Init()
 {
@@ -69,8 +81,11 @@ void SceneManager::Use(const std::string& name)
 void SceneManager::UnUse(const std::string& name)
 {
 	auto scene = usingSceneList.find(name);
-	if(scene != usingSceneList.end())
+	if (scene != usingSceneList.end())
 	{
+		/*SFGM_FONT.
+		SFGM_SOUNDBUFFER.
+		SFGM_TEXTURE.*/
 		waitingSceneList.insert(std::make_pair(scene->first, scene->second));
 		usingSceneList.erase(name);
 	}

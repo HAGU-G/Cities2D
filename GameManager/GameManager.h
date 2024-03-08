@@ -36,9 +36,9 @@ public:
 
 	//Get
 	inline static const sf::RenderWindow& GetWindow() { return window; }
-	inline static const sf::Vector2u& GetWindowSize() { return currentSize; }
-	inline static const sf::Vector2i& GetMousePosScreen() { return sf::Mouse::getPosition(); }
-	inline static const sf::Vector2i& GetMousePosWindow() { return mousePosWindow; }
+	inline static sf::Vector2u GetWindowSize() { return currentSize; }
+	inline static sf::Vector2i GetMousePosScreen() { return sf::Mouse::getPosition(); }
+	inline static sf::Vector2i GetMousePosWindow() { return mousePosWindow; }
 	inline static float GetGlobalTimeScale() { return globalTimeScale; }
 	inline static float GetGlobalTimer() { return globalTimer; }
 

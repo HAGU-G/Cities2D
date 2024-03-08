@@ -1,7 +1,8 @@
 #include "pch.h"
 #include "GameManager.h"
 #include "SceneGame.h" 
-#include <SceneGameUI.h>
+#include "SceneGameUI.h"
+#include "SceneTitle.h"
 
 sf::RenderWindow GameManager::debugWindow;
 sf::VertexArray GameManager::fpsGraph = sf::VertexArray(sf::LinesStrip, 300);
@@ -47,7 +48,7 @@ void GameManager::Init()
 	//       디버그 윈도우
 	// 
 	/////////////////////////////
-	debugWindow.create(sf::VideoMode(200.f, 400.f), "Cities2D : Debug", sf::Style::Close);
+	debugWindow.create(sf::VideoMode(200, 400), "Cities2D : Debug", sf::Style::Close);
 	debugWindow.setPosition(sf::Vector2i(window.getPosition().x - debugWindow.getSize().x, window.getPosition().y));
 	window.requestFocus(); //메인 윈도우 포커싱
 	for (int i = 0; i <= fpsGraph.getVertexCount() - 4; i++)
@@ -61,10 +62,10 @@ void GameManager::Init()
 	// 
 	/////////////////////////////
 	AddScene();
-	//scene use list가 필요
-	SFGM_TEXTURE.Add(SceneManager::Get("SceneGame"));
-	SFGM_TEXTURE.Add(SceneManager::Get("SceneGameUI"));
-	SFGM_TEXTURE.Load();
+	window.clear();
+	SceneManager::Draw(window);
+	window.display();
+	
 
 	/////////////////////////////
 	// 
@@ -152,8 +153,9 @@ void GameManager::SetWindowPosition(sf::Vector2i position)
 
 void GameManager::AddScene()
 {
-	SceneManager::AddUse(std::make_shared<SceneGame>("SceneGame"));
-	SceneManager::AddUse(std::make_shared<SceneGameUI>("SceneGameUI"));
+	SceneManager::AddUse(std::make_shared<SceneTitle>("SceneTitle"));
+	SceneManager::Add(std::make_shared<SceneGame>("SceneGame"));
+	SceneManager::Add(std::make_shared<SceneGameUI>("SceneGameUI"));
 	SceneManager::Init();
 	SceneManager::Reset();
 }

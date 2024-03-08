@@ -2,7 +2,7 @@
 #ifndef IOMANAGER_H
 #define IOMANAGER_H
 
-static class IOManager final
+class IOManager final
 {
 public:
 	enum class KEY_STATE
@@ -23,6 +23,8 @@ private:
 	static float comboTimer;
 	static float comboTimeLimit;
 	static bool doComboRecord;
+
+	static bool isMouseInWindow;
 
 
 	//TODO 키설정 파일(txt?)에서 받아오자!
@@ -45,7 +47,7 @@ public:
 	static bool IsKeyPress(const sf::Mouse::Button mouse);
 	static bool IsKeyDown(const sf::Mouse::Button mouse);
 	static bool IsKeyUp(const sf::Mouse::Button mouse);
-
+	inline static bool IsMouseInWindow() { return isMouseInWindow; }
 
 	//콤보
 	static bool IsPerpectCombo(const SFGM_COMBO& combo);
@@ -54,18 +56,6 @@ public:
 	static void ComboRecord(float timeLimit);
 	static void StopComboRecord();
 	static void ClearCombo();
-
-
-	
-
-
-
-
-
-
-
-
-
 
 
 

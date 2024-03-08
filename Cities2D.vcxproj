@@ -148,6 +148,7 @@
     <ClCompile Include="Object\Tile\ObjectTileMap.cpp" />
     <ClCompile Include="Object\Tile\ObjectTile.cpp" />
     <ClCompile Include="GameManager\RCIManager.cpp" />
+    <ClCompile Include="Scene\SceneTitle.cpp" />
     <ClCompile Include="Scene\SceneGameUI.cpp" />
     <ClCompile Include="Test\ObjectTest.cpp" />
     <ClCompile Include="pch.cpp">
@@ -173,6 +174,7 @@
     <ClInclude Include="Object\Tile\ObjectTileMap.h" />
     <ClInclude Include="Object\Tile\ObjectTile.h" />
     <ClInclude Include="GameManager\RCIManager.h" />
+    <ClInclude Include="Scene\SceneTitle.h" />
     <ClInclude Include="Scene\SceneGameUI.h" />
     <ClInclude Include="Test\ObjectTest.h" />
     <ClInclude Include="pch.h" />

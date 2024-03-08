@@ -17,6 +17,10 @@ Scene::~Scene()
 	currentCount--;
 }
 
+void Scene::Resource()
+{
+}
+
 void Scene::Init()
 {
 	view = GameManager::GetWindow().getDefaultView();

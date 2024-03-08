@@ -9,6 +9,7 @@ std::deque<std::pair<sf::Keyboard::Key, IOManager::KEY_STATE>> IOManager::combo;
 float IOManager::comboTimer = 0.f;
 float IOManager::comboTimeLimit = 1.f;
 bool IOManager::doComboRecord = false;
+bool IOManager::isMouseInWindow = false;
 
 void IOManager::EventUpdate(const sf::Event& event)
 {
@@ -44,6 +45,12 @@ void IOManager::EventUpdate(const sf::Event& event)
 		keyUpList.push_back(MouseKeyConversion(event.mouseButton.button));
 		if (doComboRecord)
 			combo.push_back({ MouseKeyConversion(event.mouseButton.button), KEY_STATE::UP });
+		break;
+	case sf::Event::MouseLeft:
+		isMouseInWindow = false;
+		break;
+	case sf::Event::MouseEntered:
+		isMouseInWindow = true;
 		break;
 	}
 }

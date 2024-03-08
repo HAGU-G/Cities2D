@@ -4,15 +4,17 @@
 
 class Scene;
 
-static class SceneManager final
+class SceneManager final
 {
 private:
 	static std::unordered_map<std::string,std::shared_ptr<Scene>> usingSceneList;
 	static std::unordered_map<std::string,std::shared_ptr<Scene>> waitingSceneList;
+	static std::unordered_map<std::string, std::shared_ptr<Scene>> unUseSceneList;
 
 public:
 
 	//Management
+	static void Resource();
 	static void Init();
 	static void PreUpdate(float timeDelta); //Using
 	static void Update(float timeDelta); //Using

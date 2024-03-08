@@ -39,7 +39,7 @@ public:
 	void DeleteObjectTile(const sf::Vector2i& gridCoord);
 
 	inline const sf::Vector2i& GetMousePosGrid() const { return mousePosGrid; }
-	inline const sf::Vector2f& GetSelectGridPos() const { return sf::Vector2f(mousePosGrid) * gridSize.x; }
+	inline sf::Vector2f GetSelectGridPos() const { return sf::Vector2f(mousePosGrid) * gridSize.x; }
 	inline const sf::Vector2f& GetGridSize() const { return gridSize; }
 	const GridInfo& GetGridInfo();
 	GridInfo& GetGridInfoRaw();

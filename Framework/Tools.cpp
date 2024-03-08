@@ -37,4 +37,40 @@ namespace tool
 	{
 		return Magnitude(p2 - p1);
 	}
+
+	sf::Vector2f SetOrigin(sf::Transformable& transformable, ORIGIN origin, const sf::FloatRect& rect)
+	{
+		// Rect Width, Height
+		sf::Vector2f newOrigin(rect.width, rect.height);
+		newOrigin.x *= ((int)origin % 3) * 0.5f; // 0 1 2 => 0 0.5 1
+		newOrigin.y *= ((int)origin / 3) * 0.5f; // 0 1 2 => 0 0.5 1
+		transformable.setOrigin(newOrigin);
+
+		return newOrigin;
+	}
+	sf::Vector2f SetOrigin(sf::Sprite& sprite, ORIGIN origin)
+	{
+		return SetOrigin(sprite, origin, sprite.getLocalBounds());
+	}
+	sf::Vector2f SetOrigin(sf::Text& text, ORIGIN origin)
+	{
+		return SetOrigin(text, origin, text.getLocalBounds());
+	}
+	sf::Vector2f SetOrigin(sf::Shape& shape, ORIGIN origin)
+	{
+		return SetOrigin(shape, origin, shape.getLocalBounds());
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
 }

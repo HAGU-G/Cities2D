@@ -5,6 +5,11 @@ std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::usingScene
 std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::unuseSceneList;
 std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::waitingSceneList;
 
+bool SceneManager::canChange = true;
+std::deque<std::string> SceneManager::toUse;
+std::deque<std::string> SceneManager::toWait;
+std::deque<std::string> SceneManager::toUnuse;
+
 void SceneManager::Init()
 {
 	for (auto& scene : usingSceneList)
@@ -43,13 +48,19 @@ void SceneManager::PostUpdate(float timeDelta)
 	{
 		scene.second->PostUpdate(timeDelta, scene.second->GetTimeScale());
 	}
+	if (canChange)
+	{
+		Use();
+		Wait();
+		Unuse();
+	}
 }
 
-void SceneManager::PhygicsUpdate(float timeDelta)
+void SceneManager::PhysicsUpdate(float timeDelta)
 {
 	for (auto& scene : usingSceneList)
 	{
-		scene.second->PhygicsUpdate(timeDelta, scene.second->GetTimeScale());
+		scene.second->PhysicsUpdate(timeDelta, scene.second->GetTimeScale());
 	}
 }
 
@@ -65,72 +76,106 @@ void SceneManager::DrawOnLayer(sf::RenderWindow& window)
 {
 }
 
-void SceneManager::Use(const std::string& name)
+void SceneManager::Use()
 {
-	auto scene = waitingSceneList.find(name);
-	if (scene != waitingSceneList.end())
+	std::string name;
+	while (!toUse.empty())
 	{
-		usingSceneList.insert(std::make_pair(scene->first, scene->second));
-		waitingSceneList.erase(name);
-	}
-	else
-	{
-		auto scene = unuseSceneList.find(name);
-		if (scene != unuseSceneList.end())
-		{
-			Wait(name);
-			Use(name);
-		}
-	}
-}
+		name = toUse.front();
+		toUse.pop_front();
 
-void SceneManager::Wait(const std::string& name)
-{
-	auto usingScene = usingSceneList.find(name);
-	if (usingScene != usingSceneList.end())
-	{
-		waitingSceneList.insert(std::make_pair(usingScene->first, usingScene->second));
-		usingSceneList.erase(name);
-	}
-	else
-	{
-		auto unuseScene = unuseSceneList.find(name);
-		if (unuseScene != unuseSceneList.end())
+		auto scene = waitingSceneList.find(name);
+		if (scene != waitingSceneList.end())
 		{
-			waitingSceneList.insert(std::make_pair(unuseScene->first, unuseScene->second));
-			unuseScene->second->AddResource();
-			unuseSceneList.erase(name);
-		}
-	}
-	SFGM_TEXTURE.Load();
-	SFGM_FONT.Load();
-	SFGM_SOUNDBUFFER.Load();
-	SFGM_CSVFILE.Load();
-}
-
-void SceneManager::Unuse(const std::string& name)
-{
-	auto usingScene = usingSceneList.find(name);
-	if (usingScene != usingSceneList.end())
-	{
-		unuseSceneList.insert(std::make_pair(usingScene->first, usingScene->second));
-		usingScene->second->RemoveResource();
-		usingSceneList.erase(name);
-	}
-	else
-	{
-		auto watingScene = waitingSceneList.find(name);
-		if (watingScene != waitingSceneList.end())
-		{
-			unuseSceneList.insert(std::make_pair(watingScene->first, watingScene->second));
-			watingScene->second->RemoveResource();
+			usingSceneList.insert(std::make_pair(scene->first, scene->second));
 			waitingSceneList.erase(name);
 		}
+		else
+		{
+			auto scene = unuseSceneList.find(name);
+			if (scene != unuseSceneList.end())
+			{
+				Wait(name,true);
+				Use(name,true);
+			}
+		}
 	}
-	SFGM_TEXTURE.UnLoad();
-	SFGM_FONT.UnLoad();
-	SFGM_SOUNDBUFFER.UnLoad();
-	SFGM_CSVFILE.UnLoad();
+}
+
+void SceneManager::Wait()
+{
+	std::string name;
+	bool doLoad = false;
+	while (!toWait.empty())
+	{
+		name = toWait.front();
+		toWait.pop_front();
+
+		auto usingScene = usingSceneList.find(name);
+		if (usingScene != usingSceneList.end())
+		{
+			waitingSceneList.insert(std::make_pair(usingScene->first, usingScene->second));
+			usingSceneList.erase(name);
+			doLoad = true;
+		}
+		else
+		{
+			auto unuseScene = unuseSceneList.find(name);
+			if (unuseScene != unuseSceneList.end())
+			{
+				waitingSceneList.insert(std::make_pair(unuseScene->first, unuseScene->second));
+				unuseScene->second->AddResource();
+				unuseSceneList.erase(name);
+				doLoad = true;
+			}
+		}
+	}
+
+	if (doLoad)
+	{
+		SFGM_TEXTURE.Load();
+		SFGM_FONT.Load();
+		SFGM_SOUNDBUFFER.Load();
+		SFGM_CSVFILE.Load();
+	}
+}
+
+void SceneManager::Unuse()
+{
+	std::string name;
+	bool doUnLoad = false;
+	while (!toUnuse.empty())
+	{
+		name = toUnuse.front();
+		toUnuse.pop_front();
+
+		auto usingScene = usingSceneList.find(name);
+		if (usingScene != usingSceneList.end())
+		{
+			unuseSceneList.insert(std::make_pair(usingScene->first, usingScene->second));
+			usingScene->second->RemoveResource();
+			usingSceneList.erase(name);
+			doUnLoad = true;
+		}
+		else
+		{
+			auto watingScene = waitingSceneList.find(name);
+			if (watingScene != waitingSceneList.end())
+			{
+				unuseSceneList.insert(std::make_pair(watingScene->first, watingScene->second));
+				watingScene->second->RemoveResource();
+				waitingSceneList.erase(name);
+				doUnLoad = true;
+			}
+		}
+	}
+	if (doUnLoad)
+	{
+		SFGM_TEXTURE.UnLoad();
+		SFGM_FONT.UnLoad();
+		SFGM_SOUNDBUFFER.UnLoad();
+		SFGM_CSVFILE.UnLoad();
+	}
 }
 
 void SceneManager::Add(const std::shared_ptr<Scene>& scene)
@@ -192,4 +237,26 @@ void SceneManager::Release()
 	usingSceneList.clear();
 	waitingSceneList.clear();
 	unuseSceneList.clear();
+}
+
+void SceneManager::Use(const std::string& name, bool doForce)
+{
+	toUse.push_back(name);
+	if (doForce)
+		Use();
+}
+
+void SceneManager::Wait(const std::string& name, bool doForce)
+{
+	std::cout << "Wait\n";
+	toWait.push_back(name);
+	if (doForce)
+		Wait();
+}
+
+void SceneManager::Unuse(const std::string& name, bool doForce)
+{
+	toUnuse.push_back(name);
+	if (doForce)
+		Unuse();
 }

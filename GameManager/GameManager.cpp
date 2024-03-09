@@ -39,7 +39,7 @@ void GameManager::Init()
 	setting.antialiasingLevel = 8;
 
 	window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::Close, setting);
-	SetWindowSize(1280);
+	SetWindowSize(1440);
 	SetWindowPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width - currentSize.x) / 2,
 		(sf::VideoMode::getDesktopMode().height - currentSize.y) / 2)); //스크린 중앙에 위치하도록
 	//window.setFramerateLimit(60);
@@ -54,7 +54,7 @@ void GameManager::Init()
 	window.requestFocus(); //메인 윈도우 포커싱
 	for (int i = 0; i <= fpsGraph.getVertexCount() - 4; i++)
 	{
-		fpsGraph[i + 2].position = { 1.f + i * 198.f / (fpsGraph.getVertexCount() - 4) ,30.f };
+		fpsGraph[i + 2].position = { 1.f + i * 198.f / (fpsGraph.getVertexCount() - 4) ,1.f };
 	}
 
 	/////////////////////////////
@@ -157,7 +157,9 @@ void GameManager::AddScene()
 	SceneManager::Add(std::make_shared<SceneGameUI>("SceneGameUI"));
 	SceneManager::Init();
 	SceneManager::Reset();
-	SceneManager::Use("SceneTitle");
+	SceneManager::canChange = false;
+	SceneManager::Use("SceneTitle", true);
+	SceneManager::canChange = true;
 }
 
 
@@ -184,6 +186,7 @@ void GameManager::DebugUpdate()
 	//텍스트
 	sf::Text text;
 	int fontSize = 24;
+	float graphRatio = fontSize / 165.f;
 	float infoY = 0.f;
 	text.setCharacterSize(fontSize);
 	text.setFont(SFGM_FONT.Get(""));
@@ -198,10 +201,10 @@ void GameManager::DebugUpdate()
 		fpsGraph[0].color = sf::Color::Green;
 		fpsGraph[fpsGraph.getVertexCount() - 1].position = fpsGraph[0].position;
 		fpsGraph[fpsGraph.getVertexCount() - 1].color = sf::Color::Green;
-		fpsGraph[fpsGraph.getVertexCount() - 2].position = sf::Vector2f(199.f, fontSize - (1.f / globalTimeDelta) * 0.15f);
-		if (fpsGraph[fpsGraph.getVertexCount() - 2].position.y >= fontSize - 30.f * 0.15f)
+		fpsGraph[fpsGraph.getVertexCount() - 2].position = sf::Vector2f(199.f, fontSize - (1.f / globalTimeDelta) * graphRatio);
+		if (fpsGraph[fpsGraph.getVertexCount() - 2].position.y >= fontSize - 30.f * graphRatio)
 			fpsGraph[fpsGraph.getVertexCount() - 2].color = sf::Color::Red;
-		else if (fpsGraph[fpsGraph.getVertexCount() - 2].position.y >= fontSize - 60.f * 0.15f)
+		else if (fpsGraph[fpsGraph.getVertexCount() - 2].position.y >= fontSize - 60.f * graphRatio)
 			fpsGraph[fpsGraph.getVertexCount() - 2].color = sf::Color::Yellow;
 		else
 			fpsGraph[fpsGraph.getVertexCount() - 2].color = sf::Color::Green;
@@ -209,9 +212,9 @@ void GameManager::DebugUpdate()
 		for (int i = 0; i <= fpsGraph.getVertexCount() - 5; i++)
 		{
 			fpsGraph[i + 2].position = { 1.f + i * 198.f / (fpsGraph.getVertexCount() - 4) ,fpsGraph[i + 3].position.y };
-			if (fpsGraph[i + 2].position.y >= fontSize - 30.f * 0.15f)
+			if (fpsGraph[i + 2].position.y >= fontSize - 30.f * graphRatio)
 				fpsGraph[i + 2].color = sf::Color::Red;
-			else if (fpsGraph[i + 2].position.y >= fontSize - 60.f * 0.15f)
+			else if (fpsGraph[i + 2].position.y >= fontSize - 60.f * graphRatio)
 				fpsGraph[i + 2].color = sf::Color::Yellow;
 			else
 				fpsGraph[i + 2].color = sf::Color::Green;

@@ -83,11 +83,11 @@ void Scene::PostUpdate(float timeDelta, float timeScale)
 	}
 }
 
-void Scene::PhygicsUpdate(float timeDelta, float timeScale)
+void Scene::PhysicsUpdate(float timeDelta, float timeScale)
 {
 	for (auto& pair : gameObjectList)
 	{
-		pair.second->PhygicsUpdate(timeDelta, timeScale);
+		pair.second->PhysicsUpdate(timeDelta, timeScale);
 	}
 }
 

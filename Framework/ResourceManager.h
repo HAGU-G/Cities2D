@@ -164,6 +164,7 @@ public:
 				it = resourceObjectList.erase(it);
 				count++;
 			}
+			it++;
 		}
 		return count;
 	}

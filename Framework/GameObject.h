@@ -41,7 +41,7 @@ public:
 	virtual void PreUpdate(float timeDelta, float timeScale); //empty
 	virtual void Update(float timeDelta, float timeScale); //empty
 	virtual void PostUpdate(float timeDelta, float timeScale); //empty
-	virtual void PhygicsUpdate(float timeDelta, float timeScale); //empty
+	virtual void PhysicsUpdate(float timeDelta, float timeScale); //empty
 	virtual void Draw(sf::RenderWindow& window); //empty
 	virtual void Reset(); //empty
 	virtual void Release();

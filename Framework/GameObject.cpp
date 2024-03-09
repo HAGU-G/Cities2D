@@ -62,7 +62,7 @@ void GameObject::PostUpdate(float timeDelta, float timeScale)
 {
 }
 
-void GameObject::PhygicsUpdate(float timeDelta, float timeScale)
+void GameObject::PhysicsUpdate(float timeDelta, float timeScale)
 {
 }
 

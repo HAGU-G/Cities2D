@@ -32,7 +32,7 @@ void SceneTitle::Update(float timeDelta, float timeScale)
 	Scene::Update(timeDelta, timeScale);
 	if (firstLoad)
 		PostInit();
-
+	loadingIcon.rotate(360 * timeDelta * timeScale);
 	if (moveTimer <= 3.8f)
 	{
 		moveTimer += timeDelta * timeScale;
@@ -48,9 +48,9 @@ void SceneTitle::Update(float timeDelta, float timeScale)
 
 	if (IOManager::IsMouseInWindow())
 	{
-		background00.setPosition(background00.getPosition() + ((mousePosWorld - viewCenter) * 0.01f + viewCenter - background00.getPosition()) * timeDelta * timeScale);
-		background01.setPosition(background01.getPosition() + ((mousePosWorld - viewCenter) * 0.03f + viewCenter - background01.getPosition()) * timeDelta * timeScale);
-		background02.setPosition(background02.getPosition() + ((mousePosWorld - viewCenter) * 0.05f + viewCenter - background02.getPosition()) * timeDelta * timeScale);
+		background00.setPosition(background00.getPosition() + ((mousePosWorld - viewCenter) * -0.01f + viewCenter - background00.getPosition()) * timeDelta * timeScale);
+		background01.setPosition(background01.getPosition() + ((mousePosWorld - viewCenter) * -0.03f + viewCenter - background01.getPosition()) * timeDelta * timeScale);
+		background02.setPosition(background02.getPosition() + ((mousePosWorld - viewCenter) * -0.05f + viewCenter - background02.getPosition()) * timeDelta * timeScale);
 	}
 	else
 	{
@@ -61,17 +61,17 @@ void SceneTitle::Update(float timeDelta, float timeScale)
 
 	if (isLoaded)
 	{
+		isLoaded = false;
+		loadingIcon.setColor(sf::Color::Transparent);
 		SceneManager::Use("SceneGame");
 		SceneManager::Use("SceneGameUI");
+		//SceneManager::Unuse("SceneTitle");
 	}
 }
 
 void SceneTitle::PostInit()
 {
 	firstLoad = false;
-
-	musicGameStart.setBuffer(SFGM_SOUNDBUFFER.Load("resource/music/Title.wav"));
-	musicGameStart.play();
 
 	textTitle.setFillColor(sf::Color::White);
 	textTitle.setFont(SFGM_FONT.Load("resource/font/ROKAF Sans Bold.ttf"));
@@ -92,7 +92,19 @@ void SceneTitle::PostInit()
 	textTitleShadow.setString(textTitle.getString());
 	tool::SetOrigin(textTitleShadow, ORIGIN::TC);
 
-	LoadingGame();
+	musicGameStart.setBuffer(SFGM_SOUNDBUFFER.Load("resource/music/Title.wav"));
+	musicGameStart.play();
+
+	loadingIcon.setTexture(SFGM_TEXTURE.Load("resource/ui/loading.png"));
+	tool::SetOrigin(loadingIcon, ORIGIN::CC);
+	loadingIcon.setScale(0.5f, 0.5f);
+	loadingIcon.setPosition(view.getSize().x-loadingIcon.getGlobalBounds().width*0.5f, loadingIcon.getGlobalBounds().height * 0.5f);
+
+
+
+
+	std::thread t1(&SceneTitle::LoadingGame, this);
+	t1.detach();
 }
 
 void SceneTitle::Draw(sf::RenderWindow& window)
@@ -112,6 +124,7 @@ void SceneTitle::Draw(sf::RenderWindow& window)
 		window.draw(textTitleShadow);
 		window.draw(textTitle);
 		window.draw(background02);
+		window.draw(loadingIcon);
 	}
 }
 
@@ -122,9 +135,10 @@ void SceneTitle::LoadingGame()
 	GameManager::rg = new std::mt19937((*GameManager::rd)());
 
 	//리소스 준비
+	SceneManager::canChange = false;
 	SceneManager::Wait("SceneGame");
 	SceneManager::Wait("SceneGameUI");
-	SceneManager::Wait("SceneMenu");
-
+	SceneManager::Wait("SceneMenu",true);
+	SceneManager::canChange = true;
 	isLoaded = true;
 }

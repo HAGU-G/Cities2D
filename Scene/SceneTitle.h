@@ -3,6 +3,10 @@
 class SceneTitle :
     public Scene
 {
+private:
+	bool isLoaded = false;
+	void LoadingGame();
+
 protected:
 	sf::Sprite background00;
 	sf::Sprite background01;
@@ -13,11 +17,12 @@ protected:
 	sf::Text textTitle2;
 	sf::Text textTitleShadow;
 
+	sf::Sprite loadingIcon;
+
 	float moveTimer = 0.f;
 	sf::Vector2f viewCenter;;
 
 	bool firstLoad = true;
-	bool isLoaded = false;
 
 public:
 	explicit SceneTitle(const std::string& name);
@@ -32,6 +37,5 @@ public:
 	void Update(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
 
-	void LoadingGame();
 };
 

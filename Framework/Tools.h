@@ -11,7 +11,7 @@ enum class ORIGIN
 	TL = LT, TR = RT, BL = LB, BR = RB,
 	TC = CT, MT = CT, TM = CT,
 	CL = LC, ML = LC, LM = LC,
-	CM = CC, MC = CC, MM = CC,
+	CM = CC, MC = CC, MM = CC, C = CC, M = CC,
 	CR = RC, MR = RC, RM = RC,
 	BC = CB, MB = CB, BM = CB
 };

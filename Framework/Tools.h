@@ -17,9 +17,6 @@ enum class ORIGIN
 };
 
 namespace tool {
-	float RandomBetween(float a, float b);
-	int RandomBetween(int a, int b);
-
 	float Magnitude(const sf::Vector2f& vec);
 	sf::Vector2f GetNormalize(const sf::Vector2f& vec);
 	void Normalize(sf::Vector2f& vec);

@@ -1,9 +1,11 @@
 #pragma once
 #include "RenderWindowRBR.h"
 
+class SceneTitle;
 
 class GameManager final
 {
+	friend SceneTitle;
 private:
 	static sf::RenderWindow debugWindow;
 	static sf::VertexArray fpsGraph;
@@ -21,6 +23,9 @@ private:
 	static float globalTimeDelta;
 	static float globalTimeScale;
 	static float globalTimer;
+
+	static std::random_device* rd; // randomDevice
+	static std::mt19937* rg; //randomGenerator
 
 public:
 	static void Init();
@@ -47,5 +52,10 @@ public:
 
 	//DebugWindow
 	static void DebugUpdate();
+
+	//Random
+	inline static unsigned int Random() { return (*rg)(); }
+	static float RandomRange(float a, float b);
+	static int RandomRange(int a, int b);
 };
 

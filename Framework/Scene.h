@@ -37,7 +37,8 @@ protected:
 public:
 	virtual ~Scene();
 
-	virtual void Resource();//empty
+	virtual void AddResource();//empty
+	virtual void RemoveResource();//empty
 	virtual void Init();
 	virtual void PreUpdate(float timeDelta, float timeScale);	//생성
 	virtual void Update(float timeDelta, float timeScale);		//메인 업데이트

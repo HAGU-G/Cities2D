@@ -17,7 +17,11 @@ Scene::~Scene()
 	currentCount--;
 }
 
-void Scene::Resource()
+void Scene::AddResource()
+{
+}
+
+void Scene::RemoveResource()
 {
 }
 

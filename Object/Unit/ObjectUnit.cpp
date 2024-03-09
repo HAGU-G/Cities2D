@@ -48,10 +48,10 @@ void ObjectUnit::Draw(sf::RenderWindow& window)
 
 void ObjectUnit::Reset()
 {
-	findInterval = tool::RandomBetween(0.1f, 1.f);
+	findInterval = GameManager::RandomRange(0.1f, 1.f);
 
-	tempRender.setRadius(tool::RandomBetween(5.f, 7.f));
-	tempRender.setFillColor(sf::Color(tool::RandomBetween(0, 255), tool::RandomBetween(0, 255), tool::RandomBetween(0, 255), 255));
+	tempRender.setRadius(GameManager::RandomRange(5.f, 7.f));
+	tempRender.setFillColor(sf::Color(GameManager::RandomRange(0, 255), GameManager::RandomRange(0, 255), GameManager::RandomRange(0, 255), 255));
 	tempRender.setOrigin(tempRender.getLocalBounds().getSize() * 0.5f);
 	tempRender.setOutlineColor(sf::Color::Black);
 	tempRender.setOutlineThickness(1);

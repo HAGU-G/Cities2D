@@ -20,7 +20,8 @@ float GameManager::globalTimer = 0.f;
 sf::Vector2i  GameManager::mousePosScreen;
 sf::Vector2i  GameManager::mousePosWindow;
 
-
+std::random_device* GameManager::rd = nullptr; // randomDevice
+std::mt19937* GameManager::rg = nullptr; //randomGenerator
 
 
 void GameManager::Init()
@@ -58,21 +59,19 @@ void GameManager::Init()
 
 	/////////////////////////////
 	// 
-	//       씬 & 리소스 관리
+	//       씬
 	// 
 	/////////////////////////////
 	AddScene();
 	window.clear();
 	SceneManager::Draw(window);
 	window.display();
-	
 
 	/////////////////////////////
 	// 
 	//       초기화 완료 작업
 	// 
-	/////////////////////////////
-	srand(time(NULL) + unsigned(SceneManager::Get("SceneGame").get()) + GetMousePosScreen().x * GetMousePosScreen().y);
+	/////////////////////////////	
 	globalClock.restart();
 }
 
@@ -153,11 +152,12 @@ void GameManager::SetWindowPosition(sf::Vector2i position)
 
 void GameManager::AddScene()
 {
-	SceneManager::AddUse(std::make_shared<SceneTitle>("SceneTitle"));
+	SceneManager::Add(std::make_shared<SceneTitle>("SceneTitle"));
 	SceneManager::Add(std::make_shared<SceneGame>("SceneGame"));
 	SceneManager::Add(std::make_shared<SceneGameUI>("SceneGameUI"));
 	SceneManager::Init();
 	SceneManager::Reset();
+	SceneManager::Use("SceneTitle");
 }
 
 
@@ -250,5 +250,17 @@ void GameManager::DebugUpdate()
 	text.setPosition(0.f, infoY);
 
 	debugWindow.display();
+}
+
+float GameManager::RandomRange(float a, float b)
+{
+	std::uniform_real_distribution<float> urf(std::min(a, b), std::max(a, b)); //uniformed random float
+	return urf((*rg));
+}
+
+int GameManager::RandomRange(int a, int b)
+{
+	std::uniform_int_distribution<int> uri(std::min(a, b), std::max(a, b)); //uniformed random float
+	return uri((*rg));
 }
 

@@ -11,6 +11,39 @@ SceneGame::SceneGame(const std::string& name)
 {
 }
 
+void SceneGame::AddResource()
+{
+	//Texture
+	SFGM_TEXTURE.Add("resource/tile/Buildings.png");
+	SFGM_TEXTURE.Add("resource/tile/Tile.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat-1-Run.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat-1-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat-2-Run.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat-2-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat-5-Run.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat-5-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat-6-Run.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat-6-Walk.png");
+
+	//Music
+	SFGM_SOUNDBUFFER.Add("resource/music/LittleClose.wav");
+	SFGM_SOUNDBUFFER.Add("resource/music/LittleFar.wav");
+	SFGM_SOUNDBUFFER.Add("resource/music/MiddleClose.wav");
+	SFGM_SOUNDBUFFER.Add("resource/music/MiddleFar.wav");
+	SFGM_SOUNDBUFFER.Add("resource/music/NightClose.wav");
+	SFGM_SOUNDBUFFER.Add("resource/music/NightFar.wav");
+
+	//sfx
+	SFGM_SOUNDBUFFER.Add("resource/sfx/build.wav");
+	SFGM_SOUNDBUFFER.Add("resource/sfx/cat_purring.wav");
+	SFGM_SOUNDBUFFER.Add("resource/sfx/destroy.wav");
+	SFGM_SOUNDBUFFER.Add("resource/sfx/Konbini.wav");
+	SFGM_SOUNDBUFFER.Add("resource/sfx/sparrows.wav");
+	SFGM_SOUNDBUFFER.Add("resource/sfx/type_in.wav");
+
+
+}
+
 void SceneGame::Init()
 {
 	resourcePathList.insert("resource/building/Buildings.png");
@@ -145,7 +178,7 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 			break;
 		case GAME_OBJECT_TYPE::BUILDING:
 		{
-			RCI rci = { tool::RandomBetween(1, 3),0,0 };
+			RCI rci = { GameManager::RandomRange(1, 3),0,0 };
 			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
 			groundTileMap->UpdateTile(gridCoord);
@@ -154,7 +187,7 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 		}
 		case GAME_OBJECT_TYPE::GROUND:
 		{
-			RCI rci = { 0,0,tool::RandomBetween(1,3) };
+			RCI rci = { 0,0,GameManager::RandomRange(1,3) };
 			gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::BUILDING;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
 			groundTileMap->UpdateTile(gridCoord);

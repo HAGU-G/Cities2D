@@ -7,7 +7,7 @@ protected:
 	sf::Sprite background00;
 	sf::Sprite background01;
 	sf::Sprite background02;
-	sf::Music musicGameStart;
+	sf::Sound musicGameStart;
 
 	sf::Text textTitle;
 	sf::Text textTitle2;
@@ -15,6 +15,9 @@ protected:
 
 	float moveTimer = 0.f;
 	sf::Vector2f viewCenter;;
+
+	bool firstLoad = true;
+	bool isLoaded = false;
 
 public:
 	explicit SceneTitle(const std::string& name);
@@ -24,9 +27,11 @@ public:
 	SceneTitle& operator=(const SceneTitle&) = delete;
 	SceneTitle& operator=(SceneTitle&&) = delete;
 
-	void Resource() override;
 	void Init() override;
+	void PostInit();
 	void Update(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
+
+	void LoadingGame();
 };
 

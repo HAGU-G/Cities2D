@@ -26,6 +26,7 @@ public:
 	SceneGame& operator=(const SceneGame&) = delete;
 	SceneGame& operator=(SceneGame&&) = delete;
 
+	void AddResource() override;
 	void Init() override;
 	void PreUpdate(float timeDelta, float timeScale) override;
 	void Update(float timeDelta, float timeScale) override;

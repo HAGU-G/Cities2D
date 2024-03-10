@@ -170,6 +170,14 @@ void SceneManager::Unuse()
 	}
 	if (doUnLoad)
 	{
+		for (auto& pair : usingSceneList)
+		{
+			pair.second->AddResource();
+		}
+		for (auto& pair : waitingSceneList)
+		{
+			pair.second->AddResource();
+		}
 		SFGM_TEXTURE.UnLoad();
 		SFGM_FONT.UnLoad();
 		SFGM_SOUNDBUFFER.UnLoad();

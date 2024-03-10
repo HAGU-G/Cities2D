@@ -29,10 +29,6 @@ void Scene::Init()
 {
 	view.setSize(GameManager::GetDefaultSize().x, GameManager::GetDefaultSize().x / GameManager::GetWindowRatio().x * GameManager::GetWindowRatio().y);
 	view.setCenter(view.getSize() * 0.5f);
-	for (auto& pair : gameObjectList)
-	{
-		pair.second->Init();
-	}
 }
 
 void Scene::PreUpdate(float timeDelta, float timeScale)

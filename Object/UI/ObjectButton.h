@@ -3,16 +3,12 @@
 class ObjectButton : public GameObject
 {
 protected:
-	sf::RenderStates renderStates;
-	sf::Vector2u textureSize;
 	sf::Sprite icon;
-
-	sf::Text text;
-	sf::VertexArray nineSlicing;
+	std::string iconName;
 	sf::FloatRect bound;
 
 	sf::Vector2f origin;
-	sf::Vector2f scale = {0.5f,0.5f};
+	sf::Vector2f scale = {1.f,1.f};
 	float rotate = 0.f;
 
 	sf::Color color = {150,120,100,220};
@@ -20,12 +16,13 @@ protected:
 	int state = 0; //0:NONE, 1:HOVER, 2:DOWN
 
 	std::function<void()> func;
-	sf::Sound hover;
+	sf::Sound mouseOn;
 	sf::Sound click;
+	bool doToggle = false;
+	bool isSelect = false;
 
 public:
-	explicit ObjectButton(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::string& str ="", const std::function<void()>& func = nullptr);
-	explicit ObjectButton(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::wstring& str =L"", const std::function<void()>& func = nullptr);
+	explicit ObjectButton(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::function<void()>& func = nullptr);
 	ObjectButton(const ObjectButton&) = delete;
 	ObjectButton(ObjectButton&&) = delete;
 	ObjectButton& operator=(const ObjectButton&) = delete;
@@ -35,20 +32,14 @@ public:
 	void Update(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
 
-	void SetOrigin(ORIGIN origin);
-	void SetOrigin(sf::Vector2f origin);
-	void SetPosition(const sf::Vector2f& position) override;
-	void SetState(int state);
-
-	void SetSize(sf::Vector2f size);
-
-	void SetString(const std::string& str);
-	void SetString(const std::wstring& wstr);
-
+	virtual void SetOrigin(ORIGIN origin);
+	virtual void SetOrigin(const sf::Vector2f& origin);
+	virtual void SetPosition(const sf::Vector2f& position) override;
+	virtual void SetState(int state);
 	void SetIcon(const std::string& path);
-	void SetClickFunc();
+	void UnSelect() { isSelect = false; }
 
-	void ContentsUpdate();
-	//void SetSize() override;
+	static std::shared_ptr<ObjectButton> Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::function<void()>& func = nullptr, bool toggle = true);
+
 };
 

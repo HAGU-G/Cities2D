@@ -98,6 +98,10 @@ public:
 				it = resourcePathList.erase(it);
 				count++;
 			}
+			else
+			{
+				it++;
+			}
 		}
 		return count;
 	}
@@ -165,7 +169,10 @@ public:
 				it = resourceObjectList.erase(it);
 				count++;
 			}
-			it++;
+			else
+			{
+				it++;
+			}
 		}
 		return count;
 	}

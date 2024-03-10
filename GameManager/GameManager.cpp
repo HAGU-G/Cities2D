@@ -38,7 +38,7 @@ void GameManager::Init()
 	windowRatio = sf::Vector2f(currentSize);
 
 	sf::ContextSettings setting;
-	setting.antialiasingLevel = 8;
+	setting.antialiasingLevel = 0;
 
 	window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::Close, setting);
 	currentMode = WINDOW_MODE::WINDOW;

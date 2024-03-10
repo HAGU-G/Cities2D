@@ -3,6 +3,7 @@
 class SceneMenu : public Scene
 {
 protected:
+	sf::Sound menuBgm;
 public:
 	explicit SceneMenu(const std::string& name);
 	~SceneMenu() override = default;
@@ -14,5 +15,9 @@ public:
 	void AddResource() override;
 	void Init() override;
 	void Draw(sf::RenderWindow& window) override;
+
+	void Continue();
+	void New();
+	void Option();
 };
 

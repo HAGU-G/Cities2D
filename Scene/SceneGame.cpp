@@ -46,10 +46,16 @@ void SceneGame::AddResource()
 
 void SceneGame::Init()
 {
+
+
 	//선택된 타일 표시용 (임시)
 	Scene::Init();
 	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
 	//view.setCenter(worldCenter);
+
+	background.setFillColor({ 20,120,20,255 });
+	background.setSize(view.getSize());
+	tool::SetOrigin(background, ORIGIN::M);
 
 	AddObject(std::make_shared<ObjectTest>(This(), GAME_OBJECT_TYPE::NONE))->Init();
 	groundTileMap = ObjectTileMap::Create(This());
@@ -133,8 +139,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	{
 		Reset();
 	}
-
-
+	background.setPosition(view.getCenter());
 }
 
 void SceneGame::Update(float timeDelta, float timeScale)
@@ -144,6 +149,10 @@ void SceneGame::Update(float timeDelta, float timeScale)
 
 void SceneGame::Draw(sf::RenderWindow& window)
 {
+	const sf::View& preView = window.getView();
+	window.setView(view);
+	window.draw(background);
+	window.setView(preView);
 	Scene::Draw(window);
 }
 
@@ -152,33 +161,13 @@ void SceneGame::Reset()
 	gridInfo.clear();
 	unitOnGrid.clear();
 
-	auto it = gameObjectList.begin();
-	while (it != gameObjectList.end())
-	{
-		if (it->second->GetGameObjectType() >= GAME_OBJECT_TYPE::TILE && it->second->GetGameObjectType() <= GAME_OBJECT_TYPE::UNIT_END)
-		{
-			auto drawIt = drawList.begin();
-			while (drawIt != drawList.end())
-			{
-				if (drawIt->first == it->first)
-				{
-					drawList.erase(drawIt);
-					break;
-				}
-				{
-					drawIt++;
-				}
-			}
-			it = gameObjectList.erase(it);
-		}
-		else
-		{
-			it++;
-		}
-	}
+	gameObjectList.clear();
+	drawList.clear();
 
+	AddObject(groundTileMap);
 	Scene::Reset();
 
+	
 }
 
 void SceneGame::Release()

@@ -11,6 +11,7 @@ protected:
 	sf::Vector2i mousePosGrid;
 	void SetMousePosGrid();
 	sf::Vector2f gridSize = { 50.f, 50.f };
+	sf::RectangleShape background;
 
 	GridInfo gridInfo; //[x][y]
 	std::shared_ptr<ObjectTileMap> groundTileMap;

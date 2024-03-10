@@ -84,7 +84,7 @@
     <ClCompile Include="Object\UI\ButtonNineSlice.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="ObjectNameTag.cpp">
+    <ClCompile Include="Object\UI\ButtonNameTag.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
   </ItemGroup>
@@ -167,7 +167,7 @@
     <ClInclude Include="Object\UI\ButtonNineSlice.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="ObjectNameTag.h">
+    <ClInclude Include="Object\UI\ButtonNameTag.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
   </ItemGroup>

@@ -5,11 +5,12 @@ ObjectButton::ObjectButton(std::weak_ptr<Scene> scene, sf::Vector2f position, co
 	:GameObject(scene, GAME_OBJECT_TYPE::BUTTON), func(func), iconName(iconName)
 {
 	this->position = position;
-	SetIcon(iconName);
+
 }
 
 void ObjectButton::Init()
 {
+	SetIcon(iconName);
 	icon.setOrigin(0.f, icon.getLocalBounds().height * 0.5f);
 	icon.setScale(0.25f, 0.25f);
 

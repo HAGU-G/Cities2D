@@ -2,6 +2,7 @@
 #include "Scene.h"
 #include "RCIManager.h"
 class ObjectButton;
+class ButtonNameTag;
 
 class SceneGameUI : public Scene
 {
@@ -23,6 +24,10 @@ protected:
 	std::shared_ptr<ObjectButton> buttonC;
 	std::shared_ptr<ObjectButton> buttonI;
 	std::shared_ptr<ObjectButton> buttonDestroy;
+	std::shared_ptr<ButtonNameTag> buttonRCI;
+	std::shared_ptr<ButtonNameTag> buttonGrid;
+	std::shared_ptr<ButtonNameTag> buttonCitizen;
+	std::shared_ptr<ButtonNameTag> buttonMoney;
 
 
 	RCI rci;

@@ -1,6 +1,7 @@
 #include "pch.h"
 #include "SceneGameUI.h"
 #include <ObjectButton.h>
+#include <ButtonNameTag.h>
 
 SceneGameUI::SceneGameUI(const std::string& name)
 	:Scene(name)
@@ -34,9 +35,17 @@ void SceneGameUI::AddResource()
 	SFGM_TEXTURE.Add("resource/ui/pauseOn.png");
 	SFGM_TEXTURE.Add("resource/ui/pauseDown.png");
 	SFGM_TEXTURE.Add("resource/ui/rci.png");
+	SFGM_TEXTURE.Add("resource/ui/rciOn.png");
+	SFGM_TEXTURE.Add("resource/ui/rciDown.png");
 	SFGM_TEXTURE.Add("resource/ui/citizen.png");
+	SFGM_TEXTURE.Add("resource/ui/citizenOn.png");
+	SFGM_TEXTURE.Add("resource/ui/citizenDown.png");
 	SFGM_TEXTURE.Add("resource/ui/grid.png");
+	SFGM_TEXTURE.Add("resource/ui/gridOn.png");
+	SFGM_TEXTURE.Add("resource/ui/gridDown.png");
 	SFGM_TEXTURE.Add("resource/ui/money.png");
+	SFGM_TEXTURE.Add("resource/ui/moneyOn.png");
+	SFGM_TEXTURE.Add("resource/ui/moneyDown.png");
 
 	SFGM_FONT.Add("resource/font/ROKAF Sans Medium.ttf");
 
@@ -63,9 +72,11 @@ void SceneGameUI::Init()
 
 	//2´Ü
 	float secondFloarY = view.getSize().y - 105.f;
-	ObjectButton::Create(This(), { 5.f, secondFloarY }, "rci")->SetOrigin(ORIGIN::LM);
+	buttonRCI = ButtonNameTag::Create(This(), { 5.f, secondFloarY }, "rci", "rci");
+	buttonRCI->SetOrigin(ORIGIN::LM);
+	buttonRCI->SetWidth(200);
 	buttonRoad = ObjectButton::Create(This(), { view.getCenter().x - 71.5f, secondFloarY }, "road");
-	buttonRoad-> SetOrigin(ORIGIN::RM);
+	buttonRoad->SetOrigin(ORIGIN::RM);
 	buttonR = ObjectButton::Create(This(), { view.getCenter().x - 2.5f, secondFloarY }, "r_");
 	buttonR->SetOrigin(ORIGIN::RM);
 	buttonC = ObjectButton::Create(This(), { view.getCenter().x + 2.5f, secondFloarY }, "c_");
@@ -76,13 +87,20 @@ void SceneGameUI::Init()
 	buttonDestroy->SetOrigin(ORIGIN::RM);
 
 	//1´Ü
-	float firstFloarY = view.getSize().y-35.f;
+	float firstFloarY = view.getSize().y - 35.f;
 	buttonPlay = ObjectButton::Create(This(), { 5.f, firstFloarY }, "play");
 	buttonPlay->SetOrigin(ORIGIN::LM);
 	buttonPause = ObjectButton::Create(This(), { 74.f, firstFloarY }, "pause");
 	buttonPause->SetOrigin(ORIGIN::LM);
-	ObjectButton::Create(This(), { view.getSize().x - 5.f, firstFloarY }, "citizen")->SetOrigin(ORIGIN::RM);
-	ObjectButton::Create(This(), { view.getSize().x - 74.f, firstFloarY }, "grid")->SetOrigin(ORIGIN::RM);
+	buttonGrid = ButtonNameTag::Create(This(), { view.getSize().x - 685.f, firstFloarY }, "grid", "grid");
+	buttonGrid->SetOrigin(ORIGIN::RM);
+	buttonGrid->SetWidth(300);
+	buttonCitizen = ButtonNameTag::Create(This(), { view.getSize().x - 345.f, firstFloarY }, "citizen", L"½Ã¹Î");
+	buttonCitizen->SetOrigin(ORIGIN::RM);
+	buttonCitizen->SetWidth(300);
+	buttonMoney = ButtonNameTag::Create(This(), { view.getSize().x - 5.f, firstFloarY }, "money", "money");
+	buttonMoney->SetOrigin(ORIGIN::RM);
+	buttonMoney->SetWidth(300);
 
 
 	tempText.setFillColor(sf::Color::White);

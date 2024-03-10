@@ -8,10 +8,12 @@ class ObjectTileMap : public GameObject
 protected:
 	sf::VertexArray tileMap;
 	sf::VertexArray gridLine;
+	sf::RenderStates renderStates;
+
 	std::weak_ptr<SceneGame> sceneGame;
 	int tileCount = 0;
 	std::unordered_map<int, std::unordered_map<int, int>> usingVertexList; //[x][y] = vertexIndex (4개 중 첫번째)
-	std::list<int> watingVertexList; //vertexIndex (4개 중 첫번째)
+	std::list<int> waitingVertexList; //vertexIndex (4개 중 첫번째)
 
 	bool doDrawLine = false;
 

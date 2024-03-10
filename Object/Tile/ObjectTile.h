@@ -7,8 +7,7 @@ class ObjectTile : public GameObject
 {
 private:
 	static size_t tileCount;
-
-protected:
+public:
 	//인접 방향 Adjacent direction
 	enum ADDIREC
 	{
@@ -17,6 +16,7 @@ protected:
 		AD_LEFT = 1,
 		AD_RIGHT = ~AD_LEFT,
 	};
+protected:
 
 	std::weak_ptr<SceneGame> sceneGame;
 	sf::Vector2i gridCoord;
@@ -51,6 +51,7 @@ public:
 	inline const sf::Vector2f& GetGridCenterPos() { return gridCenterPos; }
 	inline const sf::IntRect& GetTextureRect() { return textureRect; }
 	inline static size_t GetTileCount() { return tileCount; }
+	inline std::unordered_map<ADDIREC, std::weak_ptr<ObjectTile>>& GetAdjacent() { return adjacent; }
 
 	//fromTile에서 목표 태그 찾기
 	static std::deque<sf::Vector2i> FindShortPath(

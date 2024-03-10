@@ -81,9 +81,9 @@ void SceneGameUI::Init()
 
 	//2´Ü
 	float secondFloarY = view.getSize().y - 105.f;
-	buttonRCI = ButtonNameTag::Create(This(), { 5.f, secondFloarY }, "rci", "rci");
+	buttonRCI = ButtonNameTag::Create(This(), { 5.f, secondFloarY }, "rci");
 	buttonRCI->SetOrigin(ORIGIN::LM);
-	buttonRCI->SetWidth(200);
+	buttonRCI->SetWidth(330);
 	buttonRoad = ObjectButton::Create(This(), { view.getCenter().x - 71.5f, secondFloarY }, "road", std::bind(&SceneGameUI::Road, this));
 	buttonRoad->SetOrigin(ORIGIN::RM);
 	buttonR = ObjectButton::Create(This(), { view.getCenter().x - 2.5f, secondFloarY }, "r_", std::bind(&SceneGameUI::R, this));
@@ -94,6 +94,21 @@ void SceneGameUI::Init()
 	buttonI->SetOrigin(ORIGIN::LM);
 	buttonDestroy = ObjectButton::Create(This(), { view.getSize().x - 5.f, secondFloarY }, "destroy", std::bind(&SceneGameUI::Destroy, this));
 	buttonDestroy->SetOrigin(ORIGIN::RM);
+
+	rBar.setFillColor(sf::Color::Green);
+	rBar.setSize({ buttonRCI->GetBound().width - 90.f, 20.f });
+	rBar.setOrigin(0.f, 30.f);
+	rBar.setPosition(buttonRCI->GetPosition()+sf::Vector2f(65.f,0.f));
+
+	cBar.setFillColor(sf::Color::Blue);
+	cBar.setSize({ buttonRCI->GetBound().width - 90.f, 20.f });
+	cBar.setOrigin(0.f, 10.f);
+	cBar.setPosition(buttonRCI->GetPosition() + sf::Vector2f(65.f, 0.f));
+
+	iBar.setFillColor(sf::Color::Yellow);
+	iBar.setSize({ buttonRCI->GetBound().width - 90.f, 20.f });
+	iBar.setOrigin(0.f, -10.f);
+	iBar.setPosition(buttonRCI->GetPosition() + sf::Vector2f(65.f, 0.f));
 
 	//1´Ü
 	float firstFloarY = view.getSize().y - 35.f;
@@ -136,9 +151,15 @@ void SceneGameUI::Draw(sf::RenderWindow& window)
 	window.draw(underBarBack);
 	window.draw(underBarFront);
 	window.draw(tempText);
-	window.setView(preView);
+
 
 	Scene::Draw(window);
+
+	window.draw(rBar);
+	window.draw(cBar);
+	window.draw(iBar);
+
+	window.setView(preView);
 
 }
 void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
@@ -184,6 +205,12 @@ void SceneGameUI::Update(float timeDelta, float timeScale)
 	Scene::Update(timeDelta, timeScale);
 	buttonCitizen->SetString(to_string(ObjectUnit::GetUnitCount()));
 	buttonGrid->SetString(to_string(ObjectTile::GetTileCount()));
+
+	float max = std::max(GM_RCI.NeedRegidence() + GM_RCI.NeedCommerce() + GM_RCI.NeedIndustry(),10);
+	rBar.setScale(GM_RCI.NeedRegidence() / max, 1.f);
+	cBar.setScale(GM_RCI.NeedCommerce() / max, 1.f);
+	iBar.setScale(GM_RCI.NeedIndustry() / max, 1.f);
+
 }
 
 void SceneGameUI::Menu()

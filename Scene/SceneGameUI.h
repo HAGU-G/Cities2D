@@ -19,6 +19,10 @@ protected:
 	sf::RectangleShape underBarBack;
 	sf::RectangleShape underBarFront;
 
+	sf::RectangleShape rBar;
+	sf::RectangleShape cBar;
+	sf::RectangleShape iBar;
+
 	std::shared_ptr<ObjectButton> buttonMenu;
 	std::shared_ptr<ObjectButton> buttonPlay;
 	std::shared_ptr<ObjectButton> button4x;

@@ -24,7 +24,7 @@
     <ClCompile Include="Scene\SceneGame.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
-    <ClCompile Include="Test\ObjectTest.cpp">
+    <ClCompile Include="Object\UI\ObjectIndicater.cpp">
       <Filter>소스 파일</Filter>
     </ClCompile>
     <ClCompile Include="Framework\GameObject.cpp">
@@ -95,7 +95,7 @@
     <ClInclude Include="Scene\SceneGame.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
-    <ClInclude Include="Test\ObjectTest.h">
+    <ClInclude Include="Object\UI\ObjectIndicater.h">
       <Filter>헤더 파일</Filter>
     </ClInclude>
     <ClInclude Include="Framework\Defines.h">

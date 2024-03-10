@@ -1,6 +1,6 @@
 #include "pch.h"
 #include "SceneGame.h"
-#include "Test/ObjectTest.h"
+#include "ObjectIndicater.h"
 #include "_Include_Tile.h"
 #include "ObjectUnit.h"
 #include "CsvFile.h"
@@ -57,7 +57,6 @@ void SceneGame::Init()
 	background.setSize(view.getSize());
 	tool::SetOrigin(background, ORIGIN::M);
 
-	AddObject(std::make_shared<ObjectTest>(This(), GAME_OBJECT_TYPE::NONE))->Init();
 	groundTileMap = ObjectTileMap::Create(This());
 
 }
@@ -212,7 +211,7 @@ void SceneGame::Draw(sf::RenderWindow& window)
 {
 	const sf::View& preView = window.getView();
 	window.setView(view);
-	window.draw(background);
+	//window.draw(background);
 	window.setView(preView);
 	Scene::Draw(window);
 }
@@ -228,7 +227,7 @@ void SceneGame::Reset()
 	AddObject(groundTileMap);
 	Scene::Reset();
 
-
+	AddObject(std::make_shared<ObjectIndicater>(This(), GAME_OBJECT_TYPE::NONE))->Init();
 }
 
 void SceneGame::Release()
@@ -249,36 +248,36 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 {
 	if (gridInfo[gridCoord.x][gridCoord.y].second.expired())
 	{
+		gridInfo[gridCoord.x][gridCoord.y].first = type;
 		switch (type)
 		{
 		case GAME_OBJECT_TYPE::ROAD:
-			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord);
-			groundTileMap->UpdateTile(gridCoord);
-			return true;
 			break;
 		case GAME_OBJECT_TYPE::HOME:
 		{
 			RCI rci = { GameManager::RandomRange(1, 3),0,0 };
-			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
-			groundTileMap->UpdateTile(gridCoord);
-			return true;
 			break;
 		}
 		case GAME_OBJECT_TYPE::WORK_PLACE:
-		{
+		{		
 			RCI rci = { 0,0,GameManager::RandomRange(1,3) };
-			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
-			groundTileMap->UpdateTile(gridCoord);
-			return true;
 			break;
 		}
 		default:
+			return false;
 			break;
 		}
 
+
+		groundTileMap->UpdateTile(gridCoord);
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, -1));
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, 1));
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(1, 0));
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(-1, 0));
+		return true;
 	}
 
 	return false;
@@ -318,11 +317,26 @@ void SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
 {
 	if (gridInfo[gridCoord.x][gridCoord.y].second.expired())
 		return;
+	auto& adjacent = gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetAdjacent();
 	DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetKey());
 	gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::NONE;
 	gridInfo[gridCoord.x][gridCoord.y].second.reset();
 
+	if (!adjacent.empty())
+	{
+		for (auto& pair : adjacent)
+		{
+			if (!pair.second.expired())
+				pair.second.lock()->RemoveAdjacent(ObjectTile::ADDIREC(~pair.first));
+		}
+		adjacent.clear();
+	}
+
 	groundTileMap->UpdateTile(gridCoord);
+	groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, -1));
+	groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, 1));
+	groundTileMap->UpdateTile(gridCoord + sf::Vector2i(1, 0));
+	groundTileMap->UpdateTile(gridCoord + sf::Vector2i(-1, 0));
 
 	if (unitOnGrid[gridCoord.x][gridCoord.y].size() > 0)
 	{
@@ -374,34 +388,34 @@ bool SceneGame::LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCo
 {
 	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
+		gridInfo[gridCoord.x][gridCoord.y].first = type;
 		switch (type)
 		{
 		case GAME_OBJECT_TYPE::ROAD:
-			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord, tagList, rect);
-			groundTileMap->UpdateTile(gridCoord);
-			return true;
 			break;
 		case GAME_OBJECT_TYPE::HOME:
 		{
-			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(This(), gridCoord, tagList, rect, rci);
-			groundTileMap->UpdateTile(gridCoord);
-			return true;
 			break;
 		}
 		case GAME_OBJECT_TYPE::WORK_PLACE:
 		{
-			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(This(), gridCoord, tagList, rect, rci);
-			groundTileMap->UpdateTile(gridCoord);
-			return true;
 			break;
 		}
 		default:
+			return false;
 			break;
 		}
 
+
+		groundTileMap->UpdateTile(gridCoord);
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, -1));
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, 1));
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(1, 0));
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(-1, 0));
+		return true;
 	}
 
 	return false;

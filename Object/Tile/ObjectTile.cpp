@@ -316,7 +316,7 @@ void ObjectTile::Init()
 
 void ObjectTile::Draw(sf::RenderWindow& window)
 {
-	window.draw(edge);
+	//window.draw(edge);
 }
 
 void ObjectTile::Reset()

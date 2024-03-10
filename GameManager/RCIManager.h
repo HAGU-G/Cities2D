@@ -42,6 +42,12 @@ public:
 	void UseIndustry(int value);
 
 	int LeftRegidence() const { return totalRegidence - usingRegidence; }
+	int LeftCommerce() const { return totalCommerce - usingCommerce; }
+	int LeftIndustry() const { return totalIndustry - usingIndustry; }
+
+	int NeedRegidence() const { return std::max(1,std::max(LeftCommerce(),LeftIndustry())-LeftRegidence()); }
+	int NeedCommerce() const { return std::max(0, LeftRegidence() - LeftIndustry()); }
+	int NeedIndustry() const { return std::max(0, LeftRegidence() - LeftCommerce()); }
 
 	static RCIManager& Instance()
 	{

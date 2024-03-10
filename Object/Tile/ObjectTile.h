@@ -5,6 +5,9 @@
 
 class ObjectTile : public GameObject
 {
+private:
+	static size_t tileCount;
+
 protected:
 	//인접 방향 Adjacent direction
 	enum ADDIREC
@@ -47,6 +50,7 @@ public:
 	inline const sf::Vector2i& GetGridCoord() { return gridCoord; }
 	inline const sf::Vector2f& GetGridCenterPos() { return gridCenterPos; }
 	inline const sf::IntRect& GetTextureRect() { return textureRect; }
+	inline static size_t GetTileCount() { return tileCount; }
 
 	//fromTile에서 목표 태그 찾기
 	static std::deque<sf::Vector2i> FindShortPath(

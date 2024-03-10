@@ -19,7 +19,9 @@ protected:
 	sf::RectangleShape underBarBack;
 	sf::RectangleShape underBarFront;
 
+	std::shared_ptr<ObjectButton> buttonMenu;
 	std::shared_ptr<ObjectButton> buttonPlay;
+	std::shared_ptr<ObjectButton> button4x;
 	std::shared_ptr<ObjectButton> buttonPause;
 	std::shared_ptr<ObjectButton> buttonRoad;
 	std::shared_ptr<ObjectButton> buttonR;
@@ -33,7 +35,7 @@ protected:
 
 
 	RCI rci;
-	GAME_OBJECT_TYPE type;
+	GAME_OBJECT_TYPE type = GAME_OBJECT_TYPE::NONE;
 	int clickMode = 0; //0:Nothing 1:build -1:destroy
 	sf::Vector2i selectTile;
 
@@ -55,6 +57,7 @@ public:
 	void SetTempText(const std::string& str);
 
 	void Play();
+	void Fast();
 	void Pause();
 	void Road();
 	void R();

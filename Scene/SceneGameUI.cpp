@@ -2,8 +2,11 @@
 #include "SceneGameUI.h"
 #include "SceneGame.h"
 #include "SceneMenu.h"
-#include <ObjectButton.h>
-#include <ButtonNameTag.h>
+#include "ObjectButton.h"
+#include "ButtonNameTag.h"
+#include "ObjectUnit.h"
+#include "ObjectTile.h"
+#include "ObjectTileMap.h"
 
 SceneGameUI::SceneGameUI(const std::string& name)
 	:Scene(name)
@@ -48,6 +51,9 @@ void SceneGameUI::AddResource()
 	SFGM_TEXTURE.Add("resource/ui/money.png");
 	SFGM_TEXTURE.Add("resource/ui/moneyOn.png");
 	SFGM_TEXTURE.Add("resource/ui/moneyDown.png");
+	SFGM_TEXTURE.Add("resource/ui/fast.png");
+	SFGM_TEXTURE.Add("resource/ui/fastOn.png");
+	SFGM_TEXTURE.Add("resource/ui/fastDown.png");
 
 	SFGM_FONT.Add("resource/font/ROKAF Sans Medium.ttf");
 
@@ -61,8 +67,8 @@ void SceneGameUI::Init()
 	Scene::Init();
 
 	//상단
-	ObjectButton::Create(This(), { view.getSize().x - 5.f, 5.f }, "optionSquare", std::bind(&SceneGameUI::Menu, this))->SetOrigin(ORIGIN::TR);
-
+	buttonMenu = ObjectButton::Create(This(), { view.getSize().x - 5.f, 5.f }, "optionSquare", std::bind(&SceneGameUI::Menu, this), false);
+	buttonMenu->SetOrigin(ORIGIN::TR);
 	//하단
 	underBarBack.setSize({ view.getSize().x, 140.f });
 	underBarFront.setSize({ view.getSize().x, 70.f });
@@ -91,15 +97,19 @@ void SceneGameUI::Init()
 
 	//1단
 	float firstFloarY = view.getSize().y - 35.f;
-	buttonPlay = ObjectButton::Create(This(), { 5.f, firstFloarY }, "play", std::bind(&SceneGameUI::Play, this));
-	buttonPlay->SetOrigin(ORIGIN::LM);
-	buttonPlay->OnlyDown();
-	buttonPause = ObjectButton::Create(This(), { 74.f, firstFloarY }, "pause", std::bind(&SceneGameUI::Pause, this));
+	buttonPause = ObjectButton::Create(This(), { 5.f, firstFloarY }, "pause", std::bind(&SceneGameUI::Pause, this));
 	buttonPause->SetOrigin(ORIGIN::LM);
 	buttonPause->OnlyDown();
+	buttonPlay = ObjectButton::Create(This(), { 74.f, firstFloarY }, "play", std::bind(&SceneGameUI::Play, this));
+	buttonPlay->SetOrigin(ORIGIN::LM);
+	buttonPlay->OnlyDown();
+	button4x = ObjectButton::Create(This(), { 141.f, firstFloarY }, "fast", std::bind(&SceneGameUI::Fast, this));
+	button4x->SetOrigin(ORIGIN::LM);
+	button4x->OnlyDown();
 	buttonGrid = ButtonNameTag::Create(This(), { view.getSize().x - 685.f, firstFloarY }, "grid", "grid");
 	buttonGrid->SetOrigin(ORIGIN::RM);
 	buttonGrid->SetWidth(300);
+	buttonGrid->SetFuntion(std::bind(&ObjectTileMap::TurnDrawLine, sceneGame.lock()->GetTileMap().lock().get()));
 	buttonCitizen = ButtonNameTag::Create(This(), { view.getSize().x - 345.f, firstFloarY }, "citizen", L"시민");
 	buttonCitizen->SetOrigin(ORIGIN::RM);
 	buttonCitizen->SetWidth(300);
@@ -135,7 +145,8 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 {
 	std::shared_ptr<SceneGame> sceneGame = this->sceneGame.lock();
 
-	if (IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld()))
+	if (IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld())
+		&& !buttonMenu->GetBound().contains(GetMousePosWorld()))
 	{
 		switch (clickMode)
 		{
@@ -171,6 +182,8 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 void SceneGameUI::Update(float timeDelta, float timeScale)
 {
 	Scene::Update(timeDelta, timeScale);
+	buttonCitizen->SetString(to_string(ObjectUnit::GetUnitCount()));
+	buttonGrid->SetString(to_string(ObjectTile::GetTileCount()));
 }
 
 void SceneGameUI::Menu()
@@ -205,15 +218,24 @@ void SceneGameUI::SetTempText(const std::string& str)
 }
 
 
-void SceneGameUI::Play()
-{
-	buttonPause->UnSelect();
-	sceneGame.lock()->SetTimeScale(1.f);
-}
+
 void SceneGameUI::Pause()
 {
 	buttonPlay->UnSelect();
+	button4x->UnSelect();
 	sceneGame.lock()->SetTimeScale(0.f);
+}
+void SceneGameUI::Play()
+{
+	buttonPause->UnSelect();
+	button4x->UnSelect();
+	sceneGame.lock()->SetTimeScale(1.f);
+}
+void SceneGameUI::Fast()
+{
+	buttonPause->UnSelect();
+	buttonPlay->UnSelect();
+	sceneGame.lock()->SetTimeScale(4.f);
 }
 
 void SceneGameUI::Road()

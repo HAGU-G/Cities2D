@@ -4,13 +4,17 @@
 #include "SceneGame.h"
 #include "Scene.h"
 
+size_t ObjectUnit::UnitCount = 0;
+
 ObjectUnit::ObjectUnit(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
 	:GameObject(scene, objectType)
 {
+	UnitCount++;
 }
 
 ObjectUnit::~ObjectUnit()
 {
+	UnitCount--;
 	Release();
 }
 

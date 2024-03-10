@@ -36,7 +36,7 @@ void ObjectTileMap::UpdateTile(int x, int y)
 		ResetTile(x, y);
 		return;
 	case GAME_OBJECT_TYPE::ROAD:
-		color = {100,100,100,255};
+		color = { 100,100,100,255 };
 		break;
 	case GAME_OBJECT_TYPE::WORK_PLACE:
 	case GAME_OBJECT_TYPE::HOME:
@@ -48,14 +48,14 @@ void ObjectTileMap::UpdateTile(int x, int y)
 
 	//타일에 무언가 있을 때
 	sf::Vector2f gridSize = sceneGame.lock()->GetGridSize();
-	sf::Vector2f zeroPos = {x * gridSize.x, y * gridSize.y };
+	sf::Vector2f zeroPos = { x * gridSize.x, y * gridSize.y };
 
 
 
 
 	if (watingVertexList.empty())
 	{
-		usingVertexList[x][y] = tileCount*4;
+		usingVertexList[x][y] = tileCount * 4;
 
 		tileMap.append(sf::Vertex(zeroPos, color));
 		tileMap.append(sf::Vertex({ zeroPos.x + gridSize.x, zeroPos.y }, color));
@@ -105,11 +105,48 @@ void ObjectTileMap::Init()
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
 	tileMap.setPrimitiveType(sf::Quads);
 
+
+	gridLine.setPrimitiveType(sf::Lines);
+	gridLine.resize(80);
+}
+
+void ObjectTileMap::Update(float timeDelta, float timeScale)
+{
+	if (doDrawLine)
+	{
+		sf::Vector2f gridSize = SCENE_SCENEGAME(sceneGame.lock())->GetGridSize();
+		sf::Vector2f gridPos = SCENE_SCENEGAME(sceneGame.lock())->GetSelectGridPos();
+
+		sf::Vector2f hLeft(-9, -10);
+		sf::Vector2f hRight(10, -10);
+		sf::Vector2f vUp(-10, -9);
+		sf::Vector2f vDown(-10, 10);
+
+		sf::Vector2f right(1, 0);
+		sf::Vector2f down(0, 1);
+
+		for (int i = 0; i < gridLine.getVertexCount() / 4; i++)
+		{
+
+			gridLine[4 * i].position = gridPos + (hLeft += down) * gridSize.x;
+			gridLine[4 * i + 1].position = gridPos + (hRight += down) * gridSize.x;
+			gridLine[4 * i + 2].position = gridPos + (vUp += right) * gridSize.x;
+			gridLine[4 * i + 3].position = gridPos + (vDown += right) * gridSize.x;
+
+			gridLine[4 * i].color = sf::Color::Black;
+			gridLine[4 * i + 1].color = sf::Color::Black;
+			gridLine[4 * i + 2].color = sf::Color::Black;
+			gridLine[4 * i + 3].color = sf::Color::Black;
+
+		}
+	}
 }
 
 void ObjectTileMap::Draw(sf::RenderWindow& window)
 {
 	window.draw(tileMap);
+	if (doDrawLine)
+		window.draw(gridLine);
 }
 
 void ObjectTileMap::Reset()

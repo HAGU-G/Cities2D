@@ -7,8 +7,12 @@ class DataManager;
 
 class ObjectUnit : public GameObject
 {
+private:
 	friend TileBuilding;
 	friend DataManager;
+	
+	static size_t UnitCount;
+
 public:
 	enum class STATUS
 	{
@@ -79,6 +83,7 @@ public:
 	void SetPosition(const sf::Vector2f& position) override;
 
 	inline std::weak_ptr<ObjectTile> GetNextTile() const { return nextTile; }
+	inline static size_t GetUnitCount() { return UnitCount; }
 
 	void UpdateHome(float timeDelta, float timeScale);
 	void UpdateWorkSpace(float timeDelta, float timeScale);

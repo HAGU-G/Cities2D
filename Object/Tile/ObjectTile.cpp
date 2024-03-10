@@ -1,14 +1,18 @@
 #include "pch.h"
 #include "ObjectTile.h"
 
+size_t ObjectTile::tileCount = 0;
+
+
 ObjectTile::ObjectTile(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord)
 	:GameObject(scene, objectType), gridCoord(gridCoord)
 {
-
+	tileCount++;
 }
 
 ObjectTile::~ObjectTile()
 {
+	tileCount--;
 	Release();
 }
 

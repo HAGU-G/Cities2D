@@ -38,6 +38,8 @@ public:
 	virtual void SetPosition(const sf::Vector2f& position) override;
 	virtual void SetState(int state);
 	void SetIcon(const std::string& path);
+	inline void SetFuntion(std::function<void()> func) { this->func = func; }
+
 	inline void OnlyDown() { isOnlyDown = !isOnlyDown; }
 	void UnSelect();
 	void Select();
@@ -46,6 +48,7 @@ public:
 
 	inline int GetState() const { return state; }
 	inline bool IsSelete() const { return isSelect; }
+	inline const sf::FloatRect& GetBound() const { return bound; }
 
 };
 

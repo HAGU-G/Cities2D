@@ -57,10 +57,9 @@ public:
 	const GridInfo& GetGridInfo();
 	GridInfo& GetGridInfoRaw();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
-	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord) { 
-		gridInfo;
-		return gridInfo[gridCoord.x][gridCoord.y]; }
+	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord){	return gridInfo[gridCoord.x][gridCoord.y]; }
 	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };
+	inline const std::weak_ptr<ObjectTileMap> GetTileMap() { return groundTileMap; }
 
 	void SaveGame();
 	void LoadGame();

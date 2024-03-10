@@ -46,11 +46,14 @@ void SceneGame::AddResource()
 
 void SceneGame::Init()
 {
-	resourcePathList.insert("resource/building/Buildings.png");
-
+	//선택된 타일 표시용 (임시)
 	Scene::Init();
 	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
 	//view.setCenter(worldCenter);
+
+	AddObject(std::make_shared<ObjectTest>(This(), GAME_OBJECT_TYPE::NONE))->Init();
+	groundTileMap = ObjectTileMap::Create(This());
+
 }
 
 void SceneGame::PreUpdate(float timeDelta, float timeScale)
@@ -148,14 +151,42 @@ void SceneGame::Reset()
 {
 	gridInfo.clear();
 	unitOnGrid.clear();
+
+	auto it = gameObjectList.begin();
+	while (it != gameObjectList.end())
+	{
+		if (it->second->GetGameObjectType() >= GAME_OBJECT_TYPE::TILE && it->second->GetGameObjectType() <= GAME_OBJECT_TYPE::UNIT_END)
+		{
+			auto drawIt = drawList.begin();
+			while (drawIt != drawList.end())
+			{
+				if (drawIt->first == it->first)
+				{
+					drawList.erase(drawIt);
+					break;
+				}
+				{
+					drawIt++;
+				}
+			}
+			it = gameObjectList.erase(it);
+		}
+		else
+		{
+			it++;
+		}
+	}
+
 	Scene::Reset();
+
+}
+
+void SceneGame::Release()
+{
 	groundTileMap.reset();
-
-	//선택된 타일 표시용 (임시)
-	AddObject(std::make_shared<ObjectTest>(This(), GAME_OBJECT_TYPE::BUILDING))->Init();
-
-	//바닥을 그려줄 타일 맵
-	groundTileMap = ObjectTileMap::Create(This());
+	unitList.clear();
+	unitOnGrid.clear();
+	Scene::Release();
 }
 
 std::shared_ptr<ObjectUnit> SceneGame::AddUnit(const std::shared_ptr<ObjectUnit>& unit)

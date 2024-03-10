@@ -7,14 +7,14 @@ class GameManager final
 {
 	friend SceneTitle;
 private:
+	static sf::RenderWindow window;
 	static sf::RenderWindow debugWindow;
 	static sf::VertexArray fpsGraph;
 
-	static sf::RenderWindow window;
 	static WINDOW_MODE currentMode;
 	static sf::Vector2u currentSize;
-	static unsigned int ratioX;
-	static unsigned int ratioY;
+	static sf::Vector2f windowRatio;
+	static sf::Vector2f defaultSize;
 
 	static sf::Vector2i mousePosScreen;
 	static sf::Vector2i mousePosWindow; // = mousePosView
@@ -32,6 +32,10 @@ public:
 	static void MainLoop();
 	static void Release();
 
+	//Window
+	static void DebugUpdate();
+	static void Exit();
+
 	//Set
 	inline static float SetGlobalTimeScale(float value) { globalTimeScale = value; }
 	inline static void SetWindowMode(WINDOW_MODE mode) { currentMode = mode; }
@@ -40,8 +44,10 @@ public:
 	static void SetWindowPosition(sf::Vector2i position);
 
 	//Get
-	inline static const sf::RenderWindow& GetWindow() { return window; }
+	inline static sf::RenderWindow& GetWindow() { return window; }
 	inline static sf::Vector2u GetWindowSize() { return currentSize; }
+	inline static sf::Vector2f GetWindowRatio() { return windowRatio; }
+	inline static sf::Vector2f GetDefaultSize() { return defaultSize; }
 	inline static sf::Vector2i GetMousePosScreen() { return sf::Mouse::getPosition(); }
 	inline static sf::Vector2i GetMousePosWindow() { return mousePosWindow; }
 	inline static float GetGlobalTimeScale() { return globalTimeScale; }
@@ -49,9 +55,6 @@ public:
 
 	//AddScene
 	static void AddScene();
-
-	//DebugWindow
-	static void DebugUpdate();
 
 	//Random
 	inline static unsigned int Random() { return (*rg)(); }

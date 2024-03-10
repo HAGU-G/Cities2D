@@ -4,7 +4,6 @@ class ObjectTest : public GameObject
 {
 protected:
 	sf::Sprite sprite;
-	sf::Sprite sprite2;
 
 public:
 	explicit ObjectTest(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType);

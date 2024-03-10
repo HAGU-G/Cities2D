@@ -3,14 +3,16 @@
 #include "SceneGame.h" 
 #include "SceneGameUI.h"
 #include "SceneTitle.h"
+#include <SceneMenu.h>
 
-sf::RenderWindow GameManager::debugWindow;
-sf::VertexArray GameManager::fpsGraph = sf::VertexArray(sf::LinesStrip, 300);
 sf::RenderWindow GameManager::window;
+sf::RenderWindow GameManager::debugWindow;
+sf::VertexArray GameManager::fpsGraph(sf::LinesStrip, 300);
+
 WINDOW_MODE GameManager::currentMode = WINDOW_MODE::WINDOW;
-sf::Vector2u GameManager::currentSize;
-unsigned int GameManager::ratioX = 16;
-unsigned int GameManager::ratioY = 9;
+sf::Vector2f GameManager::defaultSize = { 1920, 1080 };
+sf::Vector2u GameManager::currentSize = sf::Vector2u(GameManager::defaultSize);
+sf::Vector2f GameManager::windowRatio = GameManager::defaultSize;
 
 sf::Clock GameManager::globalClock;
 float GameManager::globalTimeDelta = 0.f;
@@ -31,31 +33,36 @@ void GameManager::Init()
 	//       윈도우
 	// 
 	/////////////////////////////
-	currentSize = { 1920, 1080 };
-	ratioX = 16;
-	ratioY = 9;
+	//currentSize = {sf::VideoMode::getDesktopMode().width ,sf::VideoMode::getDesktopMode().height };
+	currentSize = { 1920,1080 };
+	windowRatio = sf::Vector2f(currentSize);
 
 	sf::ContextSettings setting;
 	setting.antialiasingLevel = 8;
 
 	window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::Close, setting);
+	currentMode = WINDOW_MODE::WINDOW;
 	SetWindowSize(1440);
 	SetWindowPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width - currentSize.x) / 2,
 		(sf::VideoMode::getDesktopMode().height - currentSize.y) / 2)); //스크린 중앙에 위치하도록
 	//window.setFramerateLimit(60);
+	window.display();
 
 	/////////////////////////////
-	// 
+	//	
 	//       디버그 윈도우
 	// 
 	/////////////////////////////
 	debugWindow.create(sf::VideoMode(200, 400), "Cities2D : Debug", sf::Style::Close);
 	debugWindow.setPosition(sf::Vector2i(window.getPosition().x - debugWindow.getSize().x, window.getPosition().y));
+	debugWindow.display();
 	window.requestFocus(); //메인 윈도우 포커싱
 	for (int i = 0; i <= fpsGraph.getVertexCount() - 4; i++)
 	{
 		fpsGraph[i + 2].position = { 1.f + i * 198.f / (fpsGraph.getVertexCount() - 4) ,1.f };
 	}
+
+
 
 	/////////////////////////////
 	// 
@@ -95,8 +102,8 @@ void GameManager::MainLoop()
 		{
 			if (event.type == sf::Event::Closed)
 			{
-				window.close();
 				debugWindow.close();
+				window.close();
 			}
 			IOManager::EventUpdate(event);
 		}
@@ -130,19 +137,20 @@ void GameManager::MainLoop()
 
 void GameManager::Release()
 {
+	while (debugWindow.isOpen()) {}
 	SceneManager::Release();
 }
 
 void GameManager::SetWindowSize(unsigned int x)
 {
 	currentSize.x = x;
-	currentSize.y = x / ratioX * ratioY;
+	currentSize.y = x / windowRatio.x * windowRatio.y;
 	window.setSize(currentSize);
 }
 void GameManager::SetWindowRatio(unsigned int x, unsigned int y)
 {
-	ratioX = x;
-	ratioY = y;
+	windowRatio.x = x;
+	windowRatio.y = y;
 	SetWindowSize(currentSize.x);
 }
 void GameManager::SetWindowPosition(sf::Vector2i position)
@@ -155,8 +163,7 @@ void GameManager::AddScene()
 	SceneManager::Add(std::make_shared<SceneTitle>("SceneTitle"));
 	SceneManager::Add(std::make_shared<SceneGame>("SceneGame"));
 	SceneManager::Add(std::make_shared<SceneGameUI>("SceneGameUI"));
-	SceneManager::Init();
-	SceneManager::Reset();
+	SceneManager::Add(std::make_shared<SceneMenu>("SceneMenu"));
 	SceneManager::canChange = false;
 	SceneManager::Use("SceneTitle", true);
 	SceneManager::canChange = true;
@@ -176,6 +183,7 @@ void GameManager::AddScene()
 /////////////////////////////
 void GameManager::DebugUpdate()
 {
+
 	sf::Event event;
 	while (debugWindow.pollEvent(event))
 	{
@@ -189,7 +197,7 @@ void GameManager::DebugUpdate()
 	float graphRatio = fontSize / 165.f;
 	float infoY = 0.f;
 	text.setCharacterSize(fontSize);
-	text.setFont(SFGM_FONT.Get(""));
+	text.setFont(SFGM_FONT.Load("resource/font/ROKAF Sans Medium.ttf"));
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame>(SceneManager::Get("SceneGame"));
 
 	//렌더링
@@ -253,6 +261,12 @@ void GameManager::DebugUpdate()
 	text.setPosition(0.f, infoY);
 
 	debugWindow.display();
+}
+
+void GameManager::Exit()
+{
+	debugWindow.close();
+	window.close();
 }
 
 float GameManager::RandomRange(float a, float b)

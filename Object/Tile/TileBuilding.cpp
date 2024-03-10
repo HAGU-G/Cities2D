@@ -62,7 +62,7 @@ void TileBuilding::Reset()
 	if (rci.industry > 0)
 		AddTag(GAME_OBJECT_TAG::I);
 
-	buildingSprite.setTexture(SFGM_TEXTURE.Get("resource/building/Buildings.png"));
+	buildingSprite.setTexture(SFGM_TEXTURE.Get("resource/tile/Buildings.png"));
 
 	std::initializer_list<int> elements = { rci.residence, rci.commerce, rci.industry };
 	int rciMax = std::max(elements);

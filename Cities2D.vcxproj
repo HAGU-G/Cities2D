@@ -144,10 +144,12 @@
     <ClCompile Include="Framework\Tools.cpp" />
     <ClCompile Include="GameManager\GameManager.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Object\UI\ObjectButton.cpp" />
     <ClCompile Include="Object\Unit\ObjectUnit.cpp" />
     <ClCompile Include="Object\Tile\ObjectTileMap.cpp" />
     <ClCompile Include="Object\Tile\ObjectTile.cpp" />
     <ClCompile Include="GameManager\RCIManager.cpp" />
+    <ClCompile Include="Scene\SceneMenu.cpp" />
     <ClCompile Include="Scene\SceneTitle.cpp" />
     <ClCompile Include="Scene\SceneGameUI.cpp" />
     <ClCompile Include="Test\ObjectTest.cpp" />
@@ -170,10 +172,12 @@
     <ClInclude Include="Framework\SceneManager.h" />
     <ClInclude Include="Framework\Tools.h" />
     <ClInclude Include="GameManager\GameManager.h" />
+    <ClInclude Include="Object\UI\ObjectButton.h" />
     <ClInclude Include="Object\Unit\ObjectUnit.h" />
     <ClInclude Include="Object\Tile\ObjectTileMap.h" />
     <ClInclude Include="Object\Tile\ObjectTile.h" />
     <ClInclude Include="GameManager\RCIManager.h" />
+    <ClInclude Include="Scene\SceneMenu.h" />
     <ClInclude Include="Scene\SceneTitle.h" />
     <ClInclude Include="Scene\SceneGameUI.h" />
     <ClInclude Include="Test\ObjectTest.h" />

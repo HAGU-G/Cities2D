@@ -144,6 +144,7 @@ public:
 		{
 			return *resourceObjectList.insert(std::make_pair(resourcePath, tempObject)).first->second;
 		}
+		std::cout << "\"" + resourcePath + "\"를 찾을 수 없습니다." << std::endl;
 		return unknownResource;
 	}
 
@@ -195,6 +196,7 @@ public:
 		auto it = resourceObjectList.find(path);
 		if (it == resourceObjectList.end())
 		{
+			std::cout << "\"" + path + "\"를 찾을 수 없습니다." << std::endl;
 			return unknownResource;
 		}
 		return *(it->second);

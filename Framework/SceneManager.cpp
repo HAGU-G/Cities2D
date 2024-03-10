@@ -105,7 +105,6 @@ void SceneManager::Use()
 void SceneManager::Wait()
 {
 	std::string name;
-	bool doLoad = false;
 	while (!toWait.empty())
 	{
 		name = toWait.front();
@@ -116,7 +115,6 @@ void SceneManager::Wait()
 		{
 			waitingSceneList.insert(std::make_pair(usingScene->first, usingScene->second));
 			usingSceneList.erase(name);
-			doLoad = true;
 		}
 		else
 		{
@@ -125,18 +123,17 @@ void SceneManager::Wait()
 			{
 				waitingSceneList.insert(std::make_pair(unuseScene->first, unuseScene->second));
 				unuseScene->second->AddResource();
+
+				SFGM_TEXTURE.Load();
+				SFGM_FONT.Load();
+				SFGM_SOUNDBUFFER.Load();
+				SFGM_CSVFILE.Load();
+
+				unuseScene->second->Init();
+				unuseScene->second->Reset();
 				unuseSceneList.erase(name);
-				doLoad = true;
 			}
 		}
-	}
-
-	if (doLoad)
-	{
-		SFGM_TEXTURE.Load();
-		SFGM_FONT.Load();
-		SFGM_SOUNDBUFFER.Load();
-		SFGM_CSVFILE.Load();
 	}
 }
 
@@ -154,6 +151,7 @@ void SceneManager::Unuse()
 		{
 			unuseSceneList.insert(std::make_pair(usingScene->first, usingScene->second));
 			usingScene->second->RemoveResource();
+			usingScene->second->Release();
 			usingSceneList.erase(name);
 			doUnLoad = true;
 		}
@@ -164,6 +162,7 @@ void SceneManager::Unuse()
 			{
 				unuseSceneList.insert(std::make_pair(watingScene->first, watingScene->second));
 				watingScene->second->RemoveResource();
+				usingScene->second->Release();
 				waitingSceneList.erase(name);
 				doUnLoad = true;
 			}
@@ -248,7 +247,6 @@ void SceneManager::Use(const std::string& name, bool doForce)
 
 void SceneManager::Wait(const std::string& name, bool doForce)
 {
-	std::cout << "Wait\n";
 	toWait.push_back(name);
 	if (doForce)
 		Wait();

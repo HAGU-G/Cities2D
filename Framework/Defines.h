@@ -32,7 +32,11 @@ enum class GAME_OBJECT_TYPE
 
 	UNIT,
 	CITIZEN = UNIT,
-	UNIT_END //UNIT_END - UNIT = UNIT_COUNT
+	UNIT_END,
+
+	UI,
+	BUTTON = UI,
+	UI_END
 };
 
 class GameObject;

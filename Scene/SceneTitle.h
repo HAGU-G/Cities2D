@@ -14,13 +14,14 @@ protected:
 	sf::Sound musicGameStart;
 
 	sf::Text textTitle;
-	sf::Text textTitle2;
 	sf::Text textTitleShadow;
+	sf::Vector2f titlePos;
+	sf::Text textTitle2;
+	sf::Vector2f title2Pos;
 
 	sf::Sprite loadingIcon;
 
-	float moveTimer = 0.f;
-	sf::Vector2f viewCenter;;
+	sf::Vector2f viewCenter;
 
 	bool firstLoad = true;
 

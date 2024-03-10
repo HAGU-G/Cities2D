@@ -140,7 +140,6 @@ bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 	}
 
 	SFGM_CSVFILE.UnLoad();
-
 	return false;
 }
 
@@ -459,7 +458,6 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 	}
 
 	SFGM_CSVFILE.UnLoad();
-
 	return false;
 }
 

@@ -33,19 +33,23 @@ void SceneTitle::Update(float timeDelta, float timeScale)
 	if (firstLoad)
 		PostInit();
 	loadingIcon.rotate(360 * timeDelta * timeScale);
-	if (moveTimer <= 3.8f)
+
+	if (textTitle.getPosition() != titlePos)
 	{
-		moveTimer += timeDelta * timeScale;
-		textTitle.setPosition(textTitle.getPosition() + sf::Vector2f(0.f, -220.f) * timeDelta * timeScale);
-		textTitle2.setPosition(textTitle.getPosition());
+		sf::Vector2f titleDir = tool::GetNormalize(titlePos - textTitle.getPosition());
+		textTitle.setPosition( textTitle.getPosition() + titleDir * 220.f * timeDelta * timeScale);
+		if (tool::Distance(titlePos, textTitle.getPosition()) <= 220.f * timeDelta * timeScale)
+			textTitle.setPosition(titlePos);
 		textTitleShadow.setPosition(textTitle.getPosition() + sf::Vector2f(10.f, 10.f));
 	}
-	else if (moveTimer < 5.7f)
-	{
-		moveTimer += timeDelta * timeScale;
-		textTitle2.setPosition(textTitle2.getPosition() + sf::Vector2f(0.f, -150.f) * timeDelta * timeScale);
-	}
 
+	if (textTitle2.getPosition() != title2Pos)
+	{
+		sf::Vector2f title2Dir = tool::GetNormalize(title2Pos - textTitle2.getPosition());
+		textTitle2.setPosition(textTitle2.getPosition() + title2Dir * 220.f * timeDelta * timeScale);
+		if (tool::Distance(title2Pos, textTitle2.getPosition()) <= 220.f * timeDelta * timeScale)
+			textTitle2.setPosition(title2Pos);
+	}
 	if (IOManager::IsMouseInWindow())
 	{
 		background00.setPosition(background00.getPosition() + ((mousePosWorld - viewCenter) * -0.01f + viewCenter - background00.getPosition()) * timeDelta * timeScale);
@@ -63,8 +67,9 @@ void SceneTitle::Update(float timeDelta, float timeScale)
 	{
 		isLoaded = false;
 		loadingIcon.setColor(sf::Color::Transparent);
+		SceneManager::Use("SceneMenu");
 		SceneManager::Use("SceneGame");
-		SceneManager::Use("SceneGameUI");
+		//SceneManager::Use("SceneGameUI");
 		//SceneManager::Unuse("SceneTitle");
 	}
 }
@@ -77,14 +82,17 @@ void SceneTitle::PostInit()
 	textTitle.setFont(SFGM_FONT.Load("resource/font/ROKAF Sans Bold.ttf"));
 	textTitle.setCharacterSize(180);
 	textTitle.setString("CITIES");
-	textTitle.setPosition(view.getSize().x * 0.5f - 5.f, view.getSize().y);
 	tool::SetOrigin(textTitle, ORIGIN::TC);
+	textTitle.setPosition(viewCenter.x - 5.f, view.getSize().y);
+	titlePos = viewCenter - sf::Vector2f(- 5.f, view.getSize().y * 0.33);
 
 	textTitle2.setFillColor({ 20,20,20,230 });
 	textTitle2.setFont(SFGM_FONT.Load("resource/font/DOSIyagiBoldface.ttf"));
 	textTitle2.setCharacterSize(340);
 	textTitle2.setString("2D");
 	tool::SetOrigin(textTitle2, ORIGIN::TC);
+	textTitle2.setPosition(viewCenter.x, view.getSize().y);
+	title2Pos = titlePos - sf::Vector2f(5.f,textTitle2.getGlobalBounds().getSize().y*1.05f);
 
 	textTitleShadow.setFillColor({ 0,0,50,140 });
 	textTitleShadow.setFont(SFGM_FONT.Load("resource/font/ROKAF Sans Bold.ttf"));
@@ -109,6 +117,8 @@ void SceneTitle::PostInit()
 
 void SceneTitle::Draw(sf::RenderWindow& window)
 {
+	Scene::Draw(window);
+
 	if (firstLoad)
 	{
 		window.draw(background00);
@@ -117,7 +127,6 @@ void SceneTitle::Draw(sf::RenderWindow& window)
 	}
 	else
 	{
-		Scene::Draw(window);
 		window.draw(background00);
 		window.draw(textTitle2);
 		window.draw(background01);

@@ -27,7 +27,8 @@ void Scene::RemoveResource()
 
 void Scene::Init()
 {
-	view = GameManager::GetWindow().getDefaultView();
+	view.setSize(GameManager::GetDefaultSize().x, GameManager::GetDefaultSize().x / GameManager::GetWindowRatio().x * GameManager::GetWindowRatio().y);
+	view.setCenter(view.getSize() * 0.5f);
 	for (auto& pair : gameObjectList)
 	{
 		pair.second->Init();
@@ -104,16 +105,10 @@ void Scene::Draw(sf::RenderWindow& window)
 
 void Scene::Reset()
 {
-	for (auto& pair : drawList)
-	{
-		pair.second.lock()->Reset();
-	}
-	drawList.clear();
 	for (auto& pair : gameObjectList)
 	{
 		pair.second->Reset();
 	}
-	gameObjectList.clear();
 }
 
 void Scene::Release()
@@ -173,7 +168,7 @@ const std::shared_ptr<GameObject>& Scene::AddObject(const std::shared_ptr<GameOb
 		return std::shared_ptr<GameObject>(nullptr);
 
 	if (drawList.empty())
-	{ 
+	{
 		drawList.push_back(*it.first);
 		return object;
 	}
@@ -184,7 +179,7 @@ const std::shared_ptr<GameObject>& Scene::AddObject(const std::shared_ptr<GameOb
 		{
 			if (it.first->second->GetDrawLayer() < drawIt->second.lock()->GetDrawLayer())
 			{
-				drawList.insert(drawIt,*it.first);
+				drawList.insert(drawIt, *it.first);
 				return object;
 			}
 			else

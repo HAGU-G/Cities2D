@@ -115,6 +115,9 @@ void ObjectTileMap::Reset()
 {
 	const GridInfo& gridInfo = sceneGame.lock()->GetGridInfo();
 	tileMap.resize(0);
+	watingVertexList.clear();
+	watingVertexList.clear();
+	tileCount = 0;
 	for (auto& x : gridInfo)
 	{
 		for (auto& y : x.second)
@@ -126,5 +129,8 @@ void ObjectTileMap::Reset()
 
 void ObjectTileMap::Release()
 {
+	watingVertexList.clear();
+	watingVertexList.clear();
+	tileCount = 0;
 	GameObject::Release();
 }

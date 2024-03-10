@@ -32,6 +32,7 @@ public:
 	void Update(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
 	void Reset() override;
+	void Release() override;
 
 	bool CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord);
 	void OrganizeGridInfo();

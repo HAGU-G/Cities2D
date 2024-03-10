@@ -29,6 +29,7 @@ void Scene::Init()
 {
 	view.setSize(GameManager::GetDefaultSize().x, GameManager::GetDefaultSize().x / GameManager::GetWindowRatio().x * GameManager::GetWindowRatio().y);
 	view.setCenter(view.getSize() * 0.5f);
+	resetView = view;
 }
 
 void Scene::PreUpdate(float timeDelta, float timeScale)
@@ -36,7 +37,8 @@ void Scene::PreUpdate(float timeDelta, float timeScale)
 	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), view);
 	for (auto& pair : gameObjectList)
 	{
-		pair.second->PreUpdate(timeDelta, timeScale);
+		if (pair.second->GetActive())
+			pair.second->PreUpdate(timeDelta, timeScale);
 	}
 }
 
@@ -44,14 +46,16 @@ void Scene::Update(float timeDelta, float timeScale)
 {
 	for (auto& pair : gameObjectList)
 	{
-		pair.second->Update(timeDelta, timeScale);
+		if (pair.second->GetActive())
+			pair.second->Update(timeDelta, timeScale);
 	}
 }
 void Scene::PostUpdate(float timeDelta, float timeScale)
 {
 	for (auto& pair : gameObjectList)
 	{
-		pair.second->PostUpdate(timeDelta, timeScale);
+		if (pair.second->GetActive())
+			pair.second->PostUpdate(timeDelta, timeScale);
 	}
 
 
@@ -84,7 +88,8 @@ void Scene::PhysicsUpdate(float timeDelta, float timeScale)
 {
 	for (auto& pair : gameObjectList)
 	{
-		pair.second->PhysicsUpdate(timeDelta, timeScale);
+		if (pair.second->GetActive())
+			pair.second->PhysicsUpdate(timeDelta, timeScale);
 	}
 }
 
@@ -94,7 +99,8 @@ void Scene::Draw(sf::RenderWindow& window)
 	window.setView(view);
 	for (auto& pair : drawList)
 	{
-		pair.second.lock()->Draw(window);
+		if (pair.second.lock()->GetActive())
+			pair.second.lock()->Draw(window);
 	}
 	window.setView(preView);
 }

@@ -10,6 +10,7 @@ float IOManager::comboTimer = 0.f;
 float IOManager::comboTimeLimit = 1.f;
 bool IOManager::doComboRecord = false;
 bool IOManager::isMouseInWindow = false;
+float IOManager::wheelDelta = 0;
 
 void IOManager::EventUpdate(const sf::Event& event)
 {
@@ -52,6 +53,9 @@ void IOManager::EventUpdate(const sf::Event& event)
 	case sf::Event::MouseEntered:
 		isMouseInWindow = true;
 		break;
+	case sf::Event::MouseWheelScrolled:
+			wheelDelta = event.mouseWheelScroll.delta;
+		break;
 	}
 }
 
@@ -59,6 +63,7 @@ void IOManager::Update(float timedetla, float timeScale)
 {
 	keyDownList.clear();
 	keyUpList.clear();
+	wheelDelta = 0.f;
 	if (doComboRecord && (comboTimer += timedetla * timeScale) > comboTimeLimit)
 	{
 		doComboRecord = false;
@@ -110,6 +115,10 @@ bool IOManager::IsKeyUp(const sf::Mouse::Button mouse)
 	return IsKeyUp(MouseKeyConversion(mouse));
 }
 
+float IOManager::GetWheelDelta()
+{
+	return wheelDelta;
+}
 
 bool IOManager::IsPerpectCombo(const SFGM_COMBO& combo)
 {

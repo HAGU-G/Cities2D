@@ -25,6 +25,7 @@ protected:
 	bool useGlobalTimeScale = true;
 
 	sf::View view;
+	sf::View resetView;
 	sf::Vector2f mousePosWorld;
 	sf::Vector2f worldCenter = { 0.f, 0.f };
 
@@ -61,6 +62,7 @@ public:
 	const FilePathList& GetResourcePathList() const;
 	float GetTimeScale() const;
 	inline const sf::View& GetView() const { return view; }
+	inline const sf::View& GetResetView() const { return resetView; }
 	inline const sf::Vector2f& GetMousePosWorld() const { return mousePosWorld; }
 
 	//gameObjectsList

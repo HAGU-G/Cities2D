@@ -38,7 +38,8 @@ void ObjectTileMap::UpdateTile(int x, int y)
 	case GAME_OBJECT_TYPE::ROAD:
 		color = {100,100,100,255};
 		break;
-	case GAME_OBJECT_TYPE::BUILDING:
+	case GAME_OBJECT_TYPE::WORK_PLACE:
+	case GAME_OBJECT_TYPE::HOME:
 		color = { 70,190,110,255 };
 		break;
 	default:

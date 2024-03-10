@@ -240,7 +240,7 @@ bool ObjectUnit::FindHome()
 		{
 			for (auto& y : x.second)
 			{
-				if (y.second.first != GAME_OBJECT_TYPE::BUILDING)
+				if (y.second.first < GAME_OBJECT_TYPE::BUILDING || y.second.first >= GAME_OBJECT_TYPE::BUILDING_END)
 					continue;
 
 				if (std::dynamic_pointer_cast<TileBuilding, ObjectTile>(y.second.second.lock())

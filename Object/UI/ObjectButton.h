@@ -19,6 +19,7 @@ protected:
 	sf::Sound mouseOn;
 	sf::Sound click;
 	bool doToggle = false;
+	bool isOnlyDown = false;
 	bool isSelect = false;
 
 public:
@@ -37,9 +38,14 @@ public:
 	virtual void SetPosition(const sf::Vector2f& position) override;
 	virtual void SetState(int state);
 	void SetIcon(const std::string& path);
-	void UnSelect() { isSelect = false; }
+	inline void OnlyDown() { isOnlyDown = !isOnlyDown; }
+	void UnSelect();
+	void Select();
 
 	static std::shared_ptr<ObjectButton> Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::function<void()>& func = nullptr, bool toggle = true);
+
+	inline int GetState() const { return state; }
+	inline bool IsSelete() const { return isSelect; }
 
 };
 

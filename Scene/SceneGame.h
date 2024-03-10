@@ -9,13 +9,23 @@ class SceneGame : public Scene
 {
 protected:
 	sf::Vector2i mousePosGrid;
-	void SetMousePosGrid();
+	float viewZoom = 0.0f;
+	sf::Vector2f viewZoomTarget;
+	bool isTilt = false;
+	float startTilt = 0.f;
+	float tilt = 0.f;
+
 	sf::Vector2f gridSize = { 50.f, 50.f };
 	sf::RectangleShape background;
 
 	GridInfo gridInfo; //[x][y]
 	std::shared_ptr<ObjectTileMap> groundTileMap;
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> unitList;
+
+	float citizenTimer = 0.f;
+	float citizenInterval = 1.f;
+	
+	void SetMousePosGrid();
 
 public:
 	UnitOnGrid unitOnGrid; //[x][y]

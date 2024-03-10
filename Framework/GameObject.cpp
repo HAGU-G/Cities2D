@@ -109,6 +109,11 @@ void GameObject::SetPhygicsLayer(int value)
 	drawLayer = value;
 }
 
+void GameObject::SetActive(bool value)
+{
+	active = value;
+}
+
 const std::shared_ptr<GameObject>& GameObject::This()
 {
 	return scene.lock()->GetObject(key);

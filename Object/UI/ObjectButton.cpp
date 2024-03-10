@@ -51,11 +51,15 @@ void ObjectButton::Update(float timeDelta, float timeScale)
 			{
 				if (doToggle)
 					isSelect = !isSelect;
-				SetState(1);
+				if (!isOnlyDown)
+				{
+					SetState(1);
+				}
+
 				if (func != nullptr)
 					func();
 			}
-			else
+			else if(!isOnlyDown)
 			{
 				SetState(0);
 			}
@@ -106,18 +110,11 @@ void ObjectButton::SetState(int state)
 		break;
 	case 1:
 		this->state = state;
-		if (isSelect)
-		{
-			SetIcon(iconName + "Down");
-		}
-		else
-		{
-			SetIcon(iconName + "On");
-		}
+		SetIcon(iconName + "On");
 		break;
 	case 2:
 		this->state = state;
-		SetIcon(iconName+"Down");
+		SetIcon(iconName + "Down");
 		break;
 	default:
 		break;
@@ -135,6 +132,18 @@ void ObjectButton::SetPosition(const sf::Vector2f& position)
 void ObjectButton::SetIcon(const std::string& iconName)
 {
 	icon.setTexture(SFGM_TEXTURE.Get("resource/ui/" + iconName + ".png"));
+}
+
+void ObjectButton::UnSelect()
+{
+	isSelect = false;
+	SetState(0);
+}
+
+void ObjectButton::Select()
+{
+	isSelect = true;
+	SetState(2);
 }
 
 std::shared_ptr<ObjectButton> ObjectButton::Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath,

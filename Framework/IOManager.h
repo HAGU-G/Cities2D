@@ -25,7 +25,7 @@ private:
 	static bool doComboRecord;
 
 	static bool isMouseInWindow;
-
+	static float wheelDelta;
 
 	//TODO 키설정 파일(txt?)에서 받아오자!
 
@@ -47,6 +47,7 @@ public:
 	static bool IsKeyPress(const sf::Mouse::Button mouse);
 	static bool IsKeyDown(const sf::Mouse::Button mouse);
 	static bool IsKeyUp(const sf::Mouse::Button mouse);
+	static float GetWheelDelta();
 	inline static bool IsMouseInWindow() { return isMouseInWindow; }
 
 	//콤보

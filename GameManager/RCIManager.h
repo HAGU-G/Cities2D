@@ -41,6 +41,8 @@ public:
 	void UseCommerce(int value);
 	void UseIndustry(int value);
 
+	int LeftRegidence() const { return totalRegidence - usingRegidence; }
+
 	static RCIManager& Instance()
 	{
 		static RCIManager instance;

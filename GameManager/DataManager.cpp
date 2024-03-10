@@ -189,9 +189,10 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 
 				break;
 			}
-			case GAME_OBJECT_TYPE::BUILDING:
+			case GAME_OBJECT_TYPE::HOME:
+			case GAME_OBJECT_TYPE::WORK_PLACE:
 			{
-				str = std::to_string((int)GAME_OBJECT_TYPE::BUILDING) + str;
+				str = std::to_string((int)y.second.first) + str;
 				std::shared_ptr<TileBuilding> building = std::dynamic_pointer_cast<TileBuilding, ObjectTile>(tile);
 
 				const RCI& rci = building->GetRCI();
@@ -415,11 +416,11 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					}
 					break;
 				case 6:
-						tempVi.x = std::stoi(tempStr);
-						break;
+					tempVi.x = std::stoi(tempStr);
+					break;
 				case 7:
-						tempVi.y = std::stoi(tempStr);
-						unit->preGridCoord = tempVi;
+					tempVi.y = std::stoi(tempStr);
+					unit->preGridCoord = tempVi;
 					break;
 				default:
 					break;

@@ -46,12 +46,12 @@ void SceneGame::AddResource()
 
 void SceneGame::Init()
 {
-
+	useGlobalTimeScale = false;
 
 	//선택된 타일 표시용 (임시)
 	Scene::Init();
 	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
-	//view.setCenter(worldCenter);
+	viewZoomTarget = view.getSize();
 
 	background.setFillColor({ 20,120,20,255 });
 	background.setSize(view.getSize());
@@ -66,6 +66,13 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 {
 	Scene::PreUpdate(timeDelta, timeScale);
 	SetMousePosGrid();
+
+	citizenTimer += timeDelta * timeScale;
+	if (GM_RCI.Instance().LeftRegidence() > 0 && citizenTimer >= citizenInterval)
+	{
+		citizenTimer = 0.f;
+		SceneGame::AddUnit(ObjectUnit::Create(This()));
+	}
 
 	//TESTCODE 이 밑으로 전부 테스트 코드
 
@@ -95,7 +102,41 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	}
 
 
-	if (IOManager::IsKeyDown(sf::Mouse::Left))
+	if (IOManager::GetWheelDelta() > 0)
+	{
+		viewZoom += 0.1;
+		viewZoomTarget /= 1 + viewZoom;
+	}
+	else if (IOManager::GetWheelDelta() < 0)
+	{
+		viewZoom += 0.1;
+		viewZoomTarget *= 1 + viewZoom;
+	}
+	if (IOManager::IsKeyPress(sf::Mouse::Middle))
+	{
+		if (!isTilt)
+		{
+			isTilt = true;
+			startTilt = GameManager::GetMousePosWindow().y;
+		}
+		else
+		{
+			tilt = startTilt - GameManager::GetMousePosWindow().y;
+			view.setSize(view.getSize().x, view.getSize().y + tilt);
+			startTilt = GameManager::GetMousePosWindow().y;
+		}
+	}
+	if (IOManager::IsKeyUp(sf::Mouse::Middle))
+	{
+		isTilt = false;
+	}
+	if (IOManager::IsKeyDown(sf::Keyboard::Num0))
+	{
+		view = resetView;
+	}
+
+
+	/*if (IOManager::IsKeyDown(sf::Mouse::Left))
 	{
 		if (gridInfo[mousePosGrid.x][mousePosGrid.y].second.expired())
 			CreateObjectTile(GAME_OBJECT_TYPE::BUILDING, mousePosGrid);
@@ -119,7 +160,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::IsKeyDown(sf::Keyboard::Num3))
 	{
 
-		SceneGame::AddUnit(ObjectUnit::Create(This()));
+
 
 	}
 	if (IOManager::IsKeyDown(sf::Keyboard::F5))
@@ -138,12 +179,32 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::IsKeyDown(sf::Keyboard::R))
 	{
 		Reset();
-	}
+	}*/
 	background.setPosition(view.getCenter());
 }
 
 void SceneGame::Update(float timeDelta, float timeScale)
 {
+	if (view.getSize().x > viewZoomTarget.x)
+	{
+		view.zoom(1 / (1 + viewZoom * timeDelta * timeScale));
+
+		if (abs(viewZoomTarget.x - view.getSize().x) < 1 / (1 + viewZoom * timeDelta * timeScale))
+		{
+			view.setSize(viewZoomTarget);
+			viewZoom = 0.f;
+		}
+	}
+	else if (view.getSize().x < viewZoomTarget.x)
+	{
+		view.zoom(1 + viewZoom * timeDelta * timeScale);
+
+		if (abs(viewZoomTarget.x - view.getSize().x) < 1 + viewZoom * timeDelta * timeScale)
+		{
+			view.setSize(viewZoomTarget);
+			viewZoom = 0.f;
+		}
+	}
 	Scene::Update(timeDelta, timeScale);
 }
 
@@ -167,7 +228,7 @@ void SceneGame::Reset()
 	AddObject(groundTileMap);
 	Scene::Reset();
 
-	
+
 }
 
 void SceneGame::Release()
@@ -186,7 +247,7 @@ std::shared_ptr<ObjectUnit> SceneGame::AddUnit(const std::shared_ptr<ObjectUnit>
 
 bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord)
 {
-	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
+	if (gridInfo[gridCoord.x][gridCoord.y].second.expired())
 	{
 		switch (type)
 		{
@@ -196,7 +257,7 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 			groundTileMap->UpdateTile(gridCoord);
 			return true;
 			break;
-		case GAME_OBJECT_TYPE::BUILDING:
+		case GAME_OBJECT_TYPE::HOME:
 		{
 			RCI rci = { GameManager::RandomRange(1, 3),0,0 };
 			gridInfo[gridCoord.x][gridCoord.y].first = type;
@@ -205,10 +266,10 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 			return true;
 			break;
 		}
-		case GAME_OBJECT_TYPE::GROUND:
+		case GAME_OBJECT_TYPE::WORK_PLACE:
 		{
 			RCI rci = { 0,0,GameManager::RandomRange(1,3) };
-			gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::BUILDING;
+			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
 			groundTileMap->UpdateTile(gridCoord);
 			return true;
@@ -255,6 +316,8 @@ void SceneGame::OrganizeGridInfo()
 
 void SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
 {
+	if (gridInfo[gridCoord.x][gridCoord.y].second.expired())
+		return;
 	DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetKey());
 	gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::NONE;
 	gridInfo[gridCoord.x][gridCoord.y].second.reset();
@@ -319,7 +382,15 @@ bool SceneGame::LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCo
 			groundTileMap->UpdateTile(gridCoord);
 			return true;
 			break;
-		case GAME_OBJECT_TYPE::BUILDING:
+		case GAME_OBJECT_TYPE::HOME:
+		{
+			gridInfo[gridCoord.x][gridCoord.y].first = type;
+			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(This(), gridCoord, tagList, rect, rci);
+			groundTileMap->UpdateTile(gridCoord);
+			return true;
+			break;
+		}
+		case GAME_OBJECT_TYPE::WORK_PLACE:
 		{
 			gridInfo[gridCoord.x][gridCoord.y].first = type;
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(This(), gridCoord, tagList, rect, rci);

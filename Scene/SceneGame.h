@@ -27,9 +27,18 @@ protected:
 	float citizenTimer = 0.f;
 	float citizenInterval = 1.f;
 
-	int money = 5000;
-	
 	void SetMousePosGrid();
+
+	//도시의 정보
+	int money = 5000;
+	unsigned int moneyProfit = 0;
+	unsigned int moneyLoss = 0;
+	time_t cityTime;
+	int lastDay;
+	int lastMonth;
+	bool doPayTex = false;
+	float cityTimer = 0.f;
+	float cityInterval = 1.f;
 
 public:
 	UnitOnGrid unitOnGrid; //[x][y]
@@ -52,11 +61,15 @@ public:
 
 	bool CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type);
 	std::shared_ptr<ObjectUnit> AddUnit(const std::shared_ptr<ObjectUnit>& unit);
+
+	void UpdateCityTime(float timeDelta, float TimeScale);
+	inline const time_t& GetCityTime() const { return cityTime; }
 	void MoneyProfit(unsigned int value);
+	void MoneyLoss(unsigned int value);
+	void MoneyReport();
+	bool MoneyUse(unsigned int value);
 
-	bool MoneyLoss(unsigned int value);
 	void DeleteObjectTile(const sf::Vector2i& gridCoord);
-
 
 	inline const sf::Vector2i& GetMouseGridCoord() const { return mousePosGrid; }
 	inline sf::Vector2f GetSelectGridPos() const { return sf::Vector2f(mousePosGrid) * gridSize.x; }
@@ -64,10 +77,11 @@ public:
 	const GridInfo& GetGridInfo();
 	GridInfo& GetGridInfoRaw();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
-	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord){	return gridInfo[gridCoord.x][gridCoord.y]; }
+	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord) { return gridInfo[gridCoord.x][gridCoord.y]; }
 	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };
 	inline const std::weak_ptr<ObjectTileMap> GetTileMap() { return groundTileMap; }
 	inline int GetMoney() const { return money; }
+	inline bool DoPayTex() const { return doPayTex; }
 
 	void OrganizeGridInfo();
 	void SaveGame();

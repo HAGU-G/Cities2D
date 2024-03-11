@@ -98,7 +98,7 @@ void SceneGameUI::Init()
 	rBar.setFillColor(sf::Color::Green);
 	rBar.setSize({ buttonRCI->GetBound().width - 90.f, 20.f });
 	rBar.setOrigin(0.f, 30.f);
-	rBar.setPosition(buttonRCI->GetPosition()+sf::Vector2f(65.f,0.f));
+	rBar.setPosition(buttonRCI->GetPosition() + sf::Vector2f(65.f, 0.f));
 
 	cBar.setFillColor(sf::Color::Blue);
 	cBar.setSize({ buttonRCI->GetBound().width - 90.f, 20.f });
@@ -121,6 +121,10 @@ void SceneGameUI::Init()
 	button4x = ObjectButton::Create(This(), { 141.f, firstFloarY }, "fast", std::bind(&SceneGameUI::Fast, this));
 	button4x->SetOrigin(ORIGIN::LM);
 	button4x->OnlyDown();
+	buttonCityTime = ButtonNameTag::Create(This(), { 206.f, firstFloarY }, "grid", "0");
+	buttonCityTime->SetOrigin(ORIGIN::LM);
+	buttonCityTime->SetWidth(400);
+
 	buttonGrid = ButtonNameTag::Create(This(), { view.getSize().x - 685.f, firstFloarY }, "grid", "0");
 	buttonGrid->SetOrigin(ORIGIN::RM);
 	buttonGrid->SetWidth(300);
@@ -162,6 +166,12 @@ void SceneGameUI::Draw(sf::RenderWindow& window)
 	window.setView(preView);
 
 }
+void SceneGameUI::Reset()
+{
+	Scene::Reset();
+	SetCityTimeString(sceneGame.lock()->GetCityTime());
+	
+}
 void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 {
 	std::shared_ptr<SceneGame> sceneGame = this->sceneGame.lock();
@@ -170,7 +180,7 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld())
 		&& !buttonMenu->GetBound().contains(GetMousePosWorld()))
 	{
-		
+
 		switch (clickMode)
 		{
 		case -1:
@@ -181,7 +191,7 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 		case 1:
 			if (sceneGame->GetTileInfo(sceneGame->GetMouseGridCoord()).first == GAME_OBJECT_TYPE::NONE)
 			{
-				if (sceneGame->MoneyLoss(rci.cost))
+				if (sceneGame->MoneyUse(rci.cost))
 					sceneGame->CreateObjectTile(rci, sceneGame->GetMouseGridCoord(), type);
 			}
 			break;
@@ -211,7 +221,7 @@ void SceneGameUI::Update(float timeDelta, float timeScale)
 	buttonCitizen->SetString(to_string(ObjectUnit::GetUnitCount()));
 	buttonGrid->SetString(to_string(ObjectTile::GetTileCount()));
 
-	float max = std::max(GM_RCI.NeedRegidence() + GM_RCI.NeedCommerce() + GM_RCI.NeedIndustry(),10);
+	float max = std::max(GM_RCI.NeedRegidence() + GM_RCI.NeedCommerce() + GM_RCI.NeedIndustry(), 10);
 	rBar.setScale(GM_RCI.NeedRegidence() / max, 1.f);
 	cBar.setScale(GM_RCI.NeedCommerce() / max, 1.f);
 	iBar.setScale(GM_RCI.NeedIndustry() / max, 1.f);
@@ -249,6 +259,22 @@ void SceneGameUI::UpdateRCIGraph(int r, int c, int i)
 void SceneGameUI::SetTempText(const std::string& str)
 {
 	tempText.setString(str);
+}
+
+void SceneGameUI::SetCityTimeString(const time_t& cityTime)
+{
+	tm cT;
+	localtime_s(&cT, &cityTime);
+
+	std::wstring hourZero;
+	if (cT.tm_hour < 10)
+		hourZero = L"0";
+
+	buttonCityTime->SetString(
+		std::to_wstring(cT.tm_year+1900) + L"년 "
+		+ std::to_wstring(cT.tm_mon+1) + L"월 "
+		+ std::to_wstring(cT.tm_mday) + L"일 "
+		+ hourZero + std::to_wstring(cT.tm_hour) + L"시");
 }
 
 
@@ -313,6 +339,7 @@ void SceneGameUI::R()
 
 		rci = RCI();
 		rci.cost = 10;
+		rci.tex = 10;
 		rci.residence = 10;
 		rci.commerce = 0;
 		rci.industry = 0;
@@ -337,8 +364,9 @@ void SceneGameUI::C()
 
 		rci = RCI();
 		rci.cost = 20;
+		rci.tex = 20;
 		rci.residence = 0;
-		rci.commerce =10;
+		rci.commerce = 10;
 		rci.industry = 0;
 		type = GAME_OBJECT_TYPE::SHOP;
 	}
@@ -362,6 +390,7 @@ void SceneGameUI::I()
 
 		rci = RCI();
 		rci.cost = 30;
+		rci.tex = 30;
 		rci.residence = 0;
 		rci.commerce = 0;
 		rci.industry = 10;

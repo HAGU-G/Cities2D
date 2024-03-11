@@ -1,10 +1,14 @@
 #include "pch.h"
 #include "SceneGame.h"
-#include "ObjectIndicater.h"
-#include "_Include_Tile.h"
-#include "ObjectUnit.h"
+
+#include <ctime>
 #include "CsvFile.h"
-#include <DataManager.h>
+
+#include "_Include_Tile.h"
+#include "ObjectIndicater.h"
+#include "ObjectUnit.h"
+#include "DataManager.h"
+#include "SceneGameUI.h"
 
 SceneGame::SceneGame(const std::string& name)
 	:Scene(name)
@@ -65,6 +69,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 {
 	Scene::PreUpdate(timeDelta, timeScale);
 	SetMousePosGrid();
+	UpdateCityTime(timeDelta, timeScale);
 
 	citizenTimer += timeDelta * timeScale;
 	if (GM_RCI.Instance().LeftRegidence() > 0 && citizenTimer >= citizenInterval)
@@ -260,6 +265,7 @@ void SceneGame::PostUpdate(float timeDelta, float timeScale)
 	}
 
 	Scene::PostUpdate(timeDelta, timeScale);
+	doPayTex = false;
 }
 
 void SceneGame::Draw(sf::RenderWindow& window)
@@ -284,7 +290,16 @@ void SceneGame::Reset()
 
 	AddObject(std::make_shared<ObjectIndicater>(This(), GAME_OBJECT_TYPE::NONE))->Init();
 
+
 	money = 5000;
+	time_t cT_t = time(NULL);
+	tm cT;
+	localtime_s(&cT, &cT_t);
+	cT.tm_hour = 6;
+	cityTime = mktime(&cT);
+	lastMonth = cT.tm_mon;
+	lastDay = cT.tm_mday;
+
 }
 
 void SceneGame::Release()
@@ -301,10 +316,46 @@ std::shared_ptr<ObjectUnit> SceneGame::AddUnit(const std::shared_ptr<ObjectUnit>
 	return unit;
 }
 
+void SceneGame::UpdateCityTime(float timeDelta, float TimeScale)
+{
+	cityTimer += timeDelta * TimeScale;
+	if (cityTimer > cityInterval)
+	{
+		cityTimer = 0.f;
+		cityTime += 3600;
+
+		tm tex;
+		localtime_s(&tex, &cityTime);
+		if (lastDay != tex.tm_mday)
+		{
+			lastDay = tex.tm_mday;
+			MoneyReport();
+		}
+		if (lastMonth != tex.tm_mon)
+		{
+			lastMonth = tex.tm_mon;
+			doPayTex = true;
+			money -= moneyLoss;
+			moneyLoss = 0;
+		}
+		std::dynamic_pointer_cast<SceneGameUI, Scene>(SceneManager::Get("SceneGameUI"))->SetCityTimeString(cityTime);
+	}
+}
+
 void SceneGame::MoneyProfit(unsigned int value)
 {
+	moneyProfit += value;
+}
 
-	money += value;
+void SceneGame::MoneyLoss(unsigned int value)
+{
+	moneyLoss += value;
+}
+
+void SceneGame::MoneyReport()
+{
+	money += moneyProfit;
+	moneyProfit = 0;
 }
 
 bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
@@ -369,7 +420,7 @@ void SceneGame::OrganizeGridInfo()
 	}
 }
 
-bool SceneGame::MoneyLoss(unsigned int value)
+bool SceneGame::MoneyUse(unsigned int value)
 {
 	if (money < value)
 		return false;

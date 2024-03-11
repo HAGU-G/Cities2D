@@ -316,7 +316,7 @@ bool ObjectUnit::FindHome()
 
 	}
 
-	patience++;
+	patience--;
 	return false;
 }
 
@@ -400,6 +400,12 @@ void ObjectUnit::CheckWorkPlace()
 
 void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 {
+	if (sceneGame.lock()->DoPayTex())
+	{
+		sceneGame.lock()->MoneyProfit(money * 0.01);
+		money -= money * 0.01;
+	}
+
 	sf::Vector2f gridSize = sceneGame.lock()->GetGridSize();
 	switch (status)
 	{
@@ -508,6 +514,8 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 					walkPath = pathToWorkPlace;
 					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
 					destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+					money += 9;
+					sceneGame.lock()->MoneyProfit(1);
 					status = STATUS::TO_HOME;
 				}
 			}

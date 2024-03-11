@@ -36,6 +36,7 @@ protected:
 	std::shared_ptr<ButtonNameTag> buttonGrid;
 	std::shared_ptr<ButtonNameTag> buttonCitizen;
 	std::shared_ptr<ButtonNameTag> buttonMoney;
+	std::shared_ptr<ButtonNameTag> buttonCityTime;
 
 
 	RCI rci;
@@ -56,9 +57,11 @@ public:
 	void PreUpdate(float timeDelta, float timeScale) override;
 	void Update(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
+	void Reset() override;
 
-	void UpdateRCIGraph(int r, int c, int i);
-	void SetTempText(const std::string& str);
+	void UpdateRCIGraph(int r, int c, int i); //Debug
+	void SetTempText(const std::string& str); //Debug
+	void SetCityTimeString(const time_t& cityTime);
 
 	void Play();
 	void Fast();

@@ -26,6 +26,11 @@ void TileBuilding::Update(float timeDelta, float timeScale)
 {
 	ObjectTile::Update(timeDelta, timeScale);
 	buildingSprite.setRotation(scene.lock()->GetView().getRotation());
+
+	if (sceneGame.lock()->DoPayTex())
+	{
+		sceneGame.lock()->MoneyLoss(rci.tex);
+	}
 }
 
 void TileBuilding::Draw(sf::RenderWindow& window)

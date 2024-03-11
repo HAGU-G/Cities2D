@@ -45,7 +45,7 @@ void GameManager::Init()
 	SetWindowSize(1440);
 	SetWindowPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width - currentSize.x) / 2,
 		(sf::VideoMode::getDesktopMode().height - currentSize.y) / 2)); //스크린 중앙에 위치하도록
-	//window.setFramerateLimit(60);
+	//window.setFramerateLimit(20);
 	window.display();
 
 	/////////////////////////////

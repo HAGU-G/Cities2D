@@ -10,6 +10,7 @@ struct RCI
 	int industry = 0; //»ê¾÷
 
 	int cost = 0;
+	int tex = 0;
 
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> residenceSlot;
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> commerceSlot;

@@ -224,7 +224,6 @@ const std::shared_ptr<GameObject>& Scene::GetObject(std::weak_ptr<GameObject> ob
 void Scene::DeleteObject(const std::string& key)
 {
 	deleteDeque.push_back(key);
-
 }
 
 

@@ -5,11 +5,11 @@ class ObjectUnit;
 
 struct RCI
 {
-	int cost = 0;
-
 	int residence = 0; //주거
 	int commerce = 0; //상업
 	int industry = 0; //산업
+
+	int cost = 0;
 
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> residenceSlot;
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> commerceSlot;

@@ -55,9 +55,9 @@ typedef std::unordered_map<int, std::unordered_map<int, std::list<std::weak_ptr<
 
 using std::to_string;
 
-#define SCENE_SCENEGAME std::dynamic_pointer_cast<SceneGame, Scene>
-#define TILE_BUILDING std::dynamic_pointer_cast<TileBuilding, ObjectTile>
-
+#define C_SCENE_GAME std::dynamic_pointer_cast<SceneGame, Scene>
+#define C_TILE_BUILDING std::dynamic_pointer_cast<TileBuilding, ObjectTile>
+#define C_OBJECT_UNIT std::dynamic_pointer_cast<ObjectUnit, GameObject>
 
 
 #endif // !DEFINES_H

@@ -275,8 +275,8 @@ void ObjectTileMap::Update(float timeDelta, float timeScale)
 {
 	if (doDrawLine)
 	{
-		sf::Vector2f gridSize = SCENE_SCENEGAME(sceneGame.lock())->GetGridSize();
-		sf::Vector2f gridPos = SCENE_SCENEGAME(sceneGame.lock())->GetSelectGridPos();
+		sf::Vector2f gridSize = C_SCENE_GAME(sceneGame.lock())->GetGridSize();
+		sf::Vector2f gridPos = C_SCENE_GAME(sceneGame.lock())->GetSelectGridPos();
 
 		sf::Vector2f hLeft(-9, -10);
 		sf::Vector2f hRight(10, -10);

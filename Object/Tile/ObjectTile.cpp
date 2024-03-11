@@ -4,7 +4,7 @@
 size_t ObjectTile::tileCount = 0;
 
 
-ObjectTile::ObjectTile(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord)
+ObjectTile::ObjectTile(std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE objectType)
 	:GameObject(scene, objectType), gridCoord(gridCoord)
 {
 	tileCount++;
@@ -24,7 +24,7 @@ void ObjectTile::SetPosition(const sf::Vector2f& position)
 
 bool ObjectTile::AddAdjacent(ADDIREC ad, std::weak_ptr<ObjectTile> ptr)
 {
-	if (adjacent.find(ad) == adjacent.end())
+	if (adjacent.find(ad) == adjacent.end() && !ptr.expired())
 	{
 		adjacent[ad] = ptr;
 		ptr.lock()->AddAdjacent(ADDIREC(~ad), std::dynamic_pointer_cast<ObjectTile, GameObject>(This()));

@@ -4,17 +4,29 @@
 #include "SceneGame.h"
 #include "Scene.h"
 
-size_t ObjectUnit::UnitCount = 0;
+size_t ObjectUnit::citizenCount = 0;
+
+void ObjectUnit::NoHome()
+{
+	home.reset();
+	hasHome = false;
+	GM_RCI.UseRegidence(-1);
+}
+
+void ObjectUnit::NoWorkPlace()
+{
+	workPlace.reset();
+	hasWorkPlace = false;
+	GM_RCI.UseIndustry(-1);
+}
 
 ObjectUnit::ObjectUnit(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
 	:GameObject(scene, objectType)
 {
-	UnitCount++;
 }
 
 ObjectUnit::~ObjectUnit()
 {
-	UnitCount--;
 	Release();
 }
 
@@ -23,10 +35,15 @@ void ObjectUnit::Init()
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
 }
 
-void ObjectUnit::Update(float timeDelta, float timeScale)
+void ObjectUnit::PreUpdate(float timeDelta, float timeScale)
 {
 	UpdateHome(timeDelta, timeScale);
 	UpdateWorkSpace(timeDelta, timeScale);
+}
+
+void ObjectUnit::Update(float timeDelta, float timeScale)
+{
+
 	if (isCitizen)
 	{
 		GridUpdate();
@@ -63,7 +80,7 @@ void ObjectUnit::Reset()
 	ResetHome();
 	ResetWorkPlace();
 
-	isCitizen = false;
+	NoCitizen();
 	status = STATUS::NONE;
 
 	pathToWorkPlace.clear();
@@ -79,8 +96,10 @@ void ObjectUnit::Reset()
 
 void ObjectUnit::Release()
 {
+	GameObject::Release();
 	ResetHome();
 	ResetWorkPlace();
+	NoCitizen();
 	sceneGame.reset();
 	nextTile.reset();
 	startingPoint.reset();
@@ -184,10 +203,7 @@ void ObjectUnit::UpdateHome(float timeDelta, float timeScale)
 		if (findTimer >= findInterval)
 		{
 			findTimer = 0.f;
-			if (FindHome())
-				patience++;
-			else
-				patience--;
+			FindHome();
 		}
 		else
 		{
@@ -196,7 +212,7 @@ void ObjectUnit::UpdateHome(float timeDelta, float timeScale)
 	}
 	else //집이 있을 때
 	{
-		if (home.expired()) //집이 부숴졌을 때
+		if (home.expired()) //집이 없어졌을 때
 		{
 			hasHome = false;
 			GM_RCI.UseRegidence(-1);
@@ -213,10 +229,7 @@ void ObjectUnit::UpdateWorkSpace(float timeDelta, float timeScale)
 			if (findTimer >= findInterval)
 			{
 				findTimer = 0.f;
-				if (FindWorkSpace())
-					patience++;
-				else
-					patience--;
+				FindWorkSpace();
 			}
 			else
 			{
@@ -234,6 +247,24 @@ void ObjectUnit::UpdateWorkSpace(float timeDelta, float timeScale)
 	}
 }
 
+void ObjectUnit::BeCitizen()
+{
+	if (!isCitizen)
+	{
+		isCitizen = true;
+		citizenCount++;
+	}
+}
+
+void ObjectUnit::NoCitizen()
+{
+	if (isCitizen)
+	{
+		isCitizen = false;
+		citizenCount--;
+	}
+}
+
 bool ObjectUnit::FindHome()
 {
 	if (!isCitizen)
@@ -247,26 +278,46 @@ bool ObjectUnit::FindHome()
 				if (y.second.first < GAME_OBJECT_TYPE::BUILDING || y.second.first >= GAME_OBJECT_TYPE::BUILDING_END)
 					continue;
 
-				if (std::dynamic_pointer_cast<TileBuilding, ObjectTile>(y.second.second.lock())
-					->MoveIn(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This())) == true)
+				std::shared_ptr<TileBuilding> home = C_TILE_BUILDING(y.second.second.lock());
+				if (home->CanUseR(C_OBJECT_UNIT(This())))
+				{
+					patience++;
+					home->UseR(C_OBJECT_UNIT(This()));
+					SetHome(home);
 					return true;
+				}
 			}
 		}
-		return false;
 	}
 	else
 	{
 		std::deque<sf::Vector2i> pathToHome = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, GAME_OBJECT_TAG::R);
 
 		if (pathToHome.empty())
+		{
+			patience--;
 			return false;
-		if (sceneGame.lock()->GetTileInfo(pathToHome.back()).second.expired())
-			return false;
+		}
 
-		std::dynamic_pointer_cast<TileBuilding, ObjectTile>(sceneGame.lock()->GetTileInfo(pathToHome.back()).second.lock())
-			->MoveIn(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
-		return true;
+		if (sceneGame.lock()->GetTileInfo(pathToHome.back()).second.expired())
+		{
+			patience--;
+			return false;
+		}
+
+		std::shared_ptr<TileBuilding> home = C_TILE_BUILDING(sceneGame.lock()->GetTileInfo(pathToHome.back()).second.lock());
+		if (home->CanUseR(C_OBJECT_UNIT(This())))
+		{
+			patience++;
+			home->UseR(C_OBJECT_UNIT(This()));
+			SetHome(home);
+			return true;
+		}
+
 	}
+
+	patience++;
+	return false;
 }
 
 bool ObjectUnit::FindWorkSpace()
@@ -274,19 +325,32 @@ bool ObjectUnit::FindWorkSpace()
 	pathToWorkPlace = ObjectTile::FindShortPath(home, GAME_OBJECT_TAG::I);
 
 	if (pathToWorkPlace.empty())
+	{
+		patience--;
 		return false;
+	}
+	else
+	{
+		std::shared_ptr<TileBuilding> workPlace = C_TILE_BUILDING(sceneGame.lock()->GetTileInfo(pathToWorkPlace.back()).second.lock());
+		if (workPlace->CanUseI(C_OBJECT_UNIT(This())))
+		{
+			workPlace->UseI(C_OBJECT_UNIT(This()));
+			SetWorkPlace(workPlace);
+			patience++;
+			return true;
+		}
+	}
 
-	std::dynamic_pointer_cast<TileBuilding, ObjectTile>(sceneGame.lock()->GetTileInfo(pathToWorkPlace.back()).second.lock())
-		->Join(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
-	return true;
+	patience--;
+	return false;
+
 }
 
 void ObjectUnit::ResetHome()
 {
 	if (!home.expired())
 	{
-		home.lock()->MoveOut(GetKey());
-		GM_RCI.UseRegidence(-1);
+		home.lock()->UnuseR(GetKey());
 	}
 	home.reset();
 	hasHome = false;
@@ -296,8 +360,7 @@ void ObjectUnit::ResetWorkPlace()
 {
 	if (!workPlace.expired())
 	{
-		workPlace.lock()->Quit(GetKey());
-		GM_RCI.UseIndustry(-1);
+		workPlace.lock()->UnuseI(GetKey());
 	}
 	workPlace.reset();
 	hasWorkPlace = false;
@@ -584,7 +647,7 @@ void ObjectUnit::MovingReverse(float timeDelta, float timeScale)
 	}
 }
 
-void ObjectUnit::SetHome(std::weak_ptr<TileBuilding> building)
+void ObjectUnit::SetHome(std::shared_ptr<TileBuilding> building)
 {
 	ResetHome();
 	home = building;
@@ -592,25 +655,18 @@ void ObjectUnit::SetHome(std::weak_ptr<TileBuilding> building)
 
 	if (!isCitizen)
 	{
-		isCitizen = true;
+		BeCitizen();
 		SetPosition(home.lock()->GetGridCenterPos());
 		status = STATUS::HOME;
 		sceneGame.lock()->unitOnGrid[gridCoord.x][gridCoord.y]
-			.push_back(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
+			.push_back(C_OBJECT_UNIT(This()));
 		preGridCoord = gridCoord;
 	}
 
-	if (hasWorkPlace)
+	if (!workPlace.expired())
 	{
 		pathToWorkPlace = ObjectTile::FindShortPath(home, workPlace);
 	}
-}
-
-void ObjectUnit::NoHome()
-{
-	GM_RCI.UseRegidence(-1);
-	home.reset();
-	hasHome = false;
 }
 
 void ObjectUnit::SetWorkPlace(std::weak_ptr<TileBuilding> building)
@@ -618,11 +674,4 @@ void ObjectUnit::SetWorkPlace(std::weak_ptr<TileBuilding> building)
 	ResetWorkPlace();
 	workPlace = building;
 	hasWorkPlace = true;
-}
-
-void ObjectUnit::NoWorkPlace()
-{
-	GM_RCI.UseIndustry(-1);
-	workPlace.reset();
-	hasWorkPlace = false;
 }

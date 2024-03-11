@@ -26,7 +26,7 @@ protected:
 	sf::VertexArray edge;
 	sf::IntRect textureRect;
 
-	explicit ObjectTile(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType, const sf::Vector2i& gridCoord);
+	explicit ObjectTile(std::weak_ptr<Scene> scene,const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE objectType);
 public:
 	~ObjectTile() override;
 	ObjectTile(const ObjectTile&) = delete;

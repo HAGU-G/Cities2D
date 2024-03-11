@@ -4,8 +4,8 @@
 #include <algorithm>
 
 
-TileBuilding::TileBuilding(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord)
-	:ObjectTile(scene, GAME_OBJECT_TYPE::BUILDING, gridCoord), rci(rci)
+TileBuilding::TileBuilding(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
+	:ObjectTile(scene, gridCoord, type), rci(rci)
 {
 	GM_RCI.UpdateRCI(rci.residence, rci.commerce, rci.industry);
 }
@@ -43,17 +43,12 @@ void TileBuilding::Reset()
 		if (!pair.second.expired())
 			pair.second.lock()->NoHome();
 	}
-	rci.residenceSlot.clear();
-	for (auto& pair : rci.commerceSlot)
-	{
-	}
 	rci.commerceSlot.clear();
 	for (auto& pair : rci.industrySlot)
 	{
 		if (!pair.second.expired())
 			pair.second.lock()->NoWorkPlace();
 	}
-	rci.industrySlot.clear();
 
 	if (rci.residence > 0)
 		AddTag(GAME_OBJECT_TAG::R);
@@ -91,14 +86,10 @@ void TileBuilding::Reset()
 
 void TileBuilding::Release()
 {
-	for (auto& pair : rci.residenceSlot)
+	for (auto& pair :rci.residenceSlot)
 	{
 		if (!pair.second.expired())
 			pair.second.lock()->NoHome();
-	}
-	rci.residenceSlot.clear();
-	for (auto& pair : rci.commerceSlot)
-	{
 	}
 	rci.commerceSlot.clear();
 	for (auto& pair : rci.industrySlot)
@@ -106,27 +97,24 @@ void TileBuilding::Release()
 		if (!pair.second.expired())
 			pair.second.lock()->NoWorkPlace();
 	}
-	rci.industrySlot.clear();
 
 	GM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
 	rci = RCI();
 }
 
-std::shared_ptr<ObjectTile> TileBuilding::Create(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord)
+std::shared_ptr<TileBuilding> TileBuilding::Create(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
 {
-	std::shared_ptr<ObjectTile> tileBuilding = std::make_shared<TileBuilding>(rci, scene, gridCoord);
+	std::shared_ptr<TileBuilding> tileBuilding = std::make_shared<TileBuilding>(rci, scene, gridCoord, type);
 	scene.lock()->AddObject(tileBuilding);
 	tileBuilding->Init();
 	tileBuilding->Reset();
 	return tileBuilding;
 }
 
-std::shared_ptr<ObjectTile> TileBuilding::Create(std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, const RCI& rci)
+std::shared_ptr<TileBuilding> TileBuilding::Create(const RCI& rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord,
+	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type)
 {
-	std::shared_ptr<ObjectTile> tileBuilding = std::make_shared<TileBuilding>(rci, scene, gridCoord);
-	scene.lock()->AddObject(tileBuilding);
-	tileBuilding->Init();
-	tileBuilding->Reset();
+	std::shared_ptr<TileBuilding> tileBuilding = Create(rci, scene, gridCoord, type);
 	for (auto tag : tagList)
 	{
 		tileBuilding->AddTag(tag);
@@ -170,40 +158,52 @@ void TileBuilding::UpdateAdjacent()
 	}
 }
 
-bool TileBuilding::MoveIn(std::weak_ptr<ObjectUnit> citizen)
+bool TileBuilding::CanUseR(std::weak_ptr<ObjectUnit> citizen)
 {
 	if (citizen.expired())
+		return false;
+	if (adjacent.empty())
 		return false;
 	if (rci.residenceSlot.size() == rci.residence)
 		return false;
 
-	rci.residenceSlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
-	citizen.lock()->SetHome(std::dynamic_pointer_cast<TileBuilding, GameObject>(This()));
-	GM_RCI.UseRegidence(1);
 	return true;
 }
 
-void TileBuilding::MoveOut(const std::string& key)
+void TileBuilding::UseR(std::weak_ptr<ObjectUnit> citizen)
 {
-	rci.residenceSlot.erase(key);
+	rci.residenceSlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
+	GM_RCI.UseRegidence(1);
 }
 
-bool TileBuilding::Join(std::weak_ptr<ObjectUnit> citizen)
+void TileBuilding::UnuseR(const std::string& key)
+{
+	if (rci.residenceSlot.erase(key) > 0)
+		GM_RCI.UseRegidence(-1);
+}
+
+bool TileBuilding::CanUseI(std::weak_ptr<ObjectUnit> citizen)
 {
 	if (citizen.expired())
+		return false;
+	if (adjacent.empty())
 		return false;
 	if (rci.industrySlot.size() == rci.industry)
 		return false;
 
-	rci.industrySlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
-	citizen.lock()->SetWorkPlace(std::dynamic_pointer_cast<TileBuilding, GameObject>(This()));
-	GM_RCI.UseIndustry(1);
 	return true;
 }
 
-void TileBuilding::Quit(const std::string& key)
+void TileBuilding::UseI(std::weak_ptr<ObjectUnit> citizen)
 {
-	rci.industrySlot.erase(key);
+	rci.industrySlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
+	GM_RCI.UseIndustry(1);
+}
+
+void TileBuilding::UnuseI(const std::string& key)
+{
+	if (rci.industrySlot.erase(key) > 0)
+		GM_RCI.UseIndustry(-1);
 }
 
 bool TileBuilding::ConditionCheck(GAME_OBJECT_TAG tag)

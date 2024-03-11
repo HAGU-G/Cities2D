@@ -11,8 +11,10 @@ private:
 	friend TileBuilding;
 	friend DataManager;
 	
-	static size_t UnitCount;
+	static size_t citizenCount;
 
+	void NoHome();
+	void NoWorkPlace();
 public:
 	enum class STATUS
 	{
@@ -46,23 +48,19 @@ protected:
 
 	float findTimer = 0.f;
 	float findInterval = 10.f;
-	int	patience = 100;
+	int	patience = 10;
 
 	STATUS status = STATUS::NONE;
 	float lifeTimer = 0.f;
 	float lifeInterval = 1.f;
+	int money = 100;
+
 	float speed = 50.f;
 	bool isMoving = false;
 	std::deque<sf::Vector2i> walkPath;
 	std::weak_ptr<ObjectTile> nextTile;
 	std::weak_ptr<ObjectTile> startingPoint;
 	std::weak_ptr<ObjectTile> destination;
-
-
-	void SetHome(std::weak_ptr<TileBuilding> building);
-	void NoHome();
-	void SetWorkPlace(std::weak_ptr<TileBuilding> building);
-	void NoWorkPlace();
 
 public:
 	explicit ObjectUnit(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType);
@@ -73,6 +71,7 @@ public:
 	ObjectUnit& operator=(ObjectUnit&&) = delete;
 
 	void Init();
+	void PreUpdate(float timeDelta, float timeScale) override;
 	void Update(float timeDelta, float timeScale) override;
 	void PostUpdate(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
@@ -83,17 +82,24 @@ public:
 	void SetPosition(const sf::Vector2f& position) override;
 
 	inline std::weak_ptr<ObjectTile> GetNextTile() const { return nextTile; }
-	inline static size_t GetUnitCount() { return UnitCount; }
+	inline static size_t GetUnitCount() { return citizenCount; }
+
+	void BeCitizen();
+	void NoCitizen();
 
 	void UpdateHome(float timeDelta, float timeScale);
 	void UpdateWorkSpace(float timeDelta, float timeScale);
 	bool FindHome();
-	bool FindWorkSpace();
+	void SetHome(std::shared_ptr<TileBuilding> building);
 	void ResetHome();
+	bool FindWorkSpace();
+	void SetWorkPlace(std::weak_ptr<TileBuilding> building);
 	void ResetWorkPlace();
 	void CheckHome();
 	void CheckWorkPlace();
 
+	
+	//TODO 수정 필요
 	void GridUpdate();
 
 	void LifeCycle(float timeDelta, float timeScale);

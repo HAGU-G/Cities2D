@@ -247,7 +247,7 @@ void GameManager::DebugUpdate()
 	text.setPosition(0.f, infoY);
 
 	text.setString(
-		"[GridPos]\n" + std::to_string(sceneGame->GetMousePosGrid().x) + "\n" + std::to_string(sceneGame->GetMousePosGrid().y)
+		"[GridPos]\n" + std::to_string(sceneGame->GetMouseGridCoord().x) + "\n" + std::to_string(sceneGame->GetMouseGridCoord().y)
 	);
 	debugWindow.draw(text);
 	infoY += fontSize * 4;

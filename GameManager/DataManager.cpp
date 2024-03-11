@@ -121,6 +121,9 @@ bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 				case 2:
 					rci.industry = std::stoi(tempStr);
 					break;
+				case 3:
+					rci.cost = std::stoi(tempStr);
+					break;
 				default:
 					break;
 				}
@@ -135,7 +138,7 @@ bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 		}
 
 		//오브젝트 생성
-		if (!sceneGame->LoadObjectTile(type, grid, tagList, rect, rci))
+		if (!sceneGame->LoadObjectTile(rci, grid, tagList, rect, type))
 			return false;
 	}
 
@@ -184,8 +187,8 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 
 			case GAME_OBJECT_TYPE::ROAD:
 			{
-				str = to_string((int)GAME_OBJECT_TYPE::ROAD) + str;
-				str += "0/0/0/";
+				str = to_string((int)y.second.first) + str;
+				str += "0/0/0/0/";
 
 				break;
 			}
@@ -196,7 +199,7 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 				std::shared_ptr<TileBuilding> building = std::dynamic_pointer_cast<TileBuilding, ObjectTile>(tile);
 
 				const RCI& rci = building->GetRCI();
-				str += to_string(rci.residence) + slash + to_string(rci.commerce) + slash + to_string(rci.industry) + slash;
+				str += to_string(rci.residence) + slash + to_string(rci.commerce) + slash + to_string(rci.industry) + slash + to_string(rci.cost) + slash;
 				break;
 			}
 			default:
@@ -234,7 +237,14 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		unit->SetPosition({ std::stof(row[1]), std::stof(row[2]) });
 
 		//bool 형
-		unit->isCitizen = std::stoi(row[5]) & (1 << 3);
+		if (std::stoi(row[5]) & (1 << 3))
+		{
+			unit->BeCitizen();
+		}
+		else
+		{
+			unit->NoCitizen();
+		}
 		unit->isMoving = std::stoi(row[5]) & (1 << 0);
 
 		//집 직장 설정
@@ -255,10 +265,11 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						std::shared_ptr<TileBuilding> tempTile = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						std::shared_ptr<TileBuilding> tempTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 						if (tempTile != nullptr)
 						{
-							tempTile->MoveIn(unit);
+							tempTile->UseR(unit);
+							unit->SetHome(tempTile);
 						}
 					}
 					break;
@@ -270,10 +281,11 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						std::shared_ptr<TileBuilding> tempTile = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						std::shared_ptr<TileBuilding> tempTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 						if (tempTile != nullptr)
 						{
-							tempTile->Join(unit);
+							tempTile->UseI(unit);
+							unit->SetWorkPlace(tempTile);
 						}
 					}
 					break;
@@ -391,7 +403,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						unit->nextTile = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						unit->nextTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 					}
 					break;
 				case 2:
@@ -402,7 +414,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						unit->startingPoint = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						unit->startingPoint = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 					}
 				case 4:
 					if (tempStr != "N")
@@ -412,7 +424,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						unit->destination = TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						unit->destination = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 					}
 					break;
 				case 6:
@@ -615,4 +627,9 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 
 
 
+}
+
+bool DataManager::SaveMayor(const std::shared_ptr<SceneGame>& sceneGame)
+{
+	return false;
 }

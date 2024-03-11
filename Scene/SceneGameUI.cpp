@@ -166,19 +166,24 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 {
 	std::shared_ptr<SceneGame> sceneGame = this->sceneGame.lock();
 
+
 	if (IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld())
 		&& !buttonMenu->GetBound().contains(GetMousePosWorld()))
 	{
+		
 		switch (clickMode)
 		{
 		case -1:
-			sceneGame->DeleteObjectTile(sceneGame->GetMousePosGrid());
+			sceneGame->DeleteObjectTile(sceneGame->GetMouseGridCoord());
 			break;
 		case 0:
 			break;
 		case 1:
-			sceneGame->CreateObjectTile(type, sceneGame->GetMousePosGrid());
-
+			if (sceneGame->GetTileInfo(sceneGame->GetMouseGridCoord()).first == GAME_OBJECT_TYPE::NONE)
+			{
+				if (sceneGame->MoneyLoss(rci.cost))
+					sceneGame->CreateObjectTile(rci, sceneGame->GetMouseGridCoord(), type);
+			}
 			break;
 		}
 	}
@@ -284,6 +289,7 @@ void SceneGameUI::Road()
 		clickMode = 1;
 
 		rci = RCI();
+		rci.cost = 10;
 		type = GAME_OBJECT_TYPE::ROAD;
 	}
 }
@@ -299,13 +305,14 @@ void SceneGameUI::R()
 	if (!buttonR->IsSelete())
 	{
 		clickMode = 0;
-		rci = RCI();
 		type = GAME_OBJECT_TYPE::NONE;
 	}
 	else
 	{
 		clickMode = 1;
 
+		rci = RCI();
+		rci.cost = 10;
 		rci.residence = 10;
 		rci.commerce = 0;
 		rci.industry = 0;
@@ -319,22 +326,19 @@ void SceneGameUI::C()
 	buttonI->UnSelect();
 	buttonDestroy->UnSelect();
 
-	rci.residence = 0;
-	rci.commerce = 1;
-	rci.industry = 0;
-
 	if (!buttonC->IsSelete())
 	{
 		clickMode = 0;
-		rci = RCI();
 		type = GAME_OBJECT_TYPE::NONE;
 	}
 	else
 	{
 		clickMode = 1;
 
+		rci = RCI();
+		rci.cost = 20;
 		rci.residence = 0;
-		rci.commerce = 10;
+		rci.commerce =10;
 		rci.industry = 0;
 		type = GAME_OBJECT_TYPE::SHOP;
 	}
@@ -346,10 +350,6 @@ void SceneGameUI::I()
 	buttonC->UnSelect();
 	buttonDestroy->UnSelect();
 
-	rci.residence = 0;
-	rci.commerce = 0;
-	rci.industry = 30;
-
 	if (!buttonI->IsSelete())
 	{
 		clickMode = 0;
@@ -360,6 +360,8 @@ void SceneGameUI::I()
 	{
 		clickMode = 1;
 
+		rci = RCI();
+		rci.cost = 30;
 		rci.residence = 0;
 		rci.commerce = 0;
 		rci.industry = 10;

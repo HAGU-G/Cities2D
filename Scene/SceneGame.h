@@ -8,6 +8,8 @@ class ObjectTileMap;
 class SceneGame : public Scene
 {
 protected:
+	std::deque<sf::Vector2i> deleteTileDeque;
+
 	sf::Vector2i mousePosGrid;
 	float viewZoom = 0.0f;
 	sf::Vector2f viewZoomTarget;
@@ -25,7 +27,7 @@ protected:
 	float citizenTimer = 0.f;
 	float citizenInterval = 1.f;
 
-	int money = 500;
+	int money = 5000;
 	
 	void SetMousePosGrid();
 
@@ -43,11 +45,12 @@ public:
 	void Init() override;
 	void PreUpdate(float timeDelta, float timeScale) override;
 	void Update(float timeDelta, float timeScale) override;
+	void PostUpdate(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
 	void Reset() override;
 	void Release() override;
 
-	bool CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord);
+	bool CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type);
 	std::shared_ptr<ObjectUnit> AddUnit(const std::shared_ptr<ObjectUnit>& unit);
 	void MoneyProfit(unsigned int value);
 
@@ -55,7 +58,7 @@ public:
 	void DeleteObjectTile(const sf::Vector2i& gridCoord);
 
 
-	inline const sf::Vector2i& GetMousePosGrid() const { return mousePosGrid; }
+	inline const sf::Vector2i& GetMouseGridCoord() const { return mousePosGrid; }
 	inline sf::Vector2f GetSelectGridPos() const { return sf::Vector2f(mousePosGrid) * gridSize.x; }
 	inline const sf::Vector2f& GetGridSize() const { return gridSize; }
 	const GridInfo& GetGridInfo();
@@ -69,8 +72,8 @@ public:
 	void OrganizeGridInfo();
 	void SaveGame();
 	void LoadGame();
-	bool LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord,
-		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, const RCI& rci);
+	bool LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
+		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type);
 
 };
 

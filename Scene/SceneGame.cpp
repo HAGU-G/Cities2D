@@ -207,6 +207,61 @@ void SceneGame::Update(float timeDelta, float timeScale)
 	Scene::Update(timeDelta, timeScale);
 }
 
+void SceneGame::PostUpdate(float timeDelta, float timeScale)
+{
+	while (!deleteTileDeque.empty())
+	{
+		sf::Vector2i gridCoord = deleteTileDeque.front();
+		deleteTileDeque.pop_front();
+
+		if (gridInfo[gridCoord.x][gridCoord.y].second.expired())
+			continue;
+
+		auto& adjacent = gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetAdjacent();
+		DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetKey());
+		gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::NONE;
+		gridInfo[gridCoord.x][gridCoord.y].second.reset();
+
+		if (!adjacent.empty())
+		{
+			for (auto& pair : adjacent)
+			{
+				if (!pair.second.expired())
+					pair.second.lock()->RemoveAdjacent(ObjectTile::ADDIREC(~pair.first));
+			}
+			adjacent.clear();
+		}
+
+		groundTileMap->UpdateTile(gridCoord);
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, -1));
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, 1));
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(1, 0));
+		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(-1, 0));
+
+		if (unitOnGrid[gridCoord.x][gridCoord.y].size() > 0)
+		{
+			sf::Vector2i teleport = ObjectTile::FindShortPath(gridCoord, gridInfo);
+			if (teleport != gridCoord)
+			{
+				for (auto& ptr : unitOnGrid[gridCoord.x][gridCoord.y])
+				{
+					if (!ptr.expired())
+					{
+						std::shared_ptr<ObjectUnit> tempPtr = ptr.lock();
+						if (tempPtr->GetNextTile().expired())
+							tempPtr->SetPosition({ sf::Vector2f(teleport).x * gridSize.x + gridSize.x * 0.5f,
+								sf::Vector2f(teleport).y * gridSize.y + gridSize.y * 0.5f });
+						else
+							tempPtr->SetPosition(tempPtr->GetNextTile().lock()->GetGridCenterPos());
+					}
+				}
+			}
+		}
+	}
+
+	Scene::PostUpdate(timeDelta, timeScale);
+}
+
 void SceneGame::Draw(sf::RenderWindow& window)
 {
 	const sf::View& preView = window.getView();
@@ -228,6 +283,8 @@ void SceneGame::Reset()
 	Scene::Reset();
 
 	AddObject(std::make_shared<ObjectIndicater>(This(), GAME_OBJECT_TYPE::NONE))->Init();
+
+	money = 5000;
 }
 
 void SceneGame::Release()
@@ -250,9 +307,9 @@ void SceneGame::MoneyProfit(unsigned int value)
 	money += value;
 }
 
-bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord)
+bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
 {
-	if (gridInfo[gridCoord.x][gridCoord.y].second.expired())
+	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
 		gridInfo[gridCoord.x][gridCoord.y].first = type;
 		switch (type)
@@ -261,28 +318,15 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord);
 			break;
 		case GAME_OBJECT_TYPE::HOME:
-		{
-			RCI rci;
-			rci.residence = GameManager::RandomRange(1, 3);
-			rci.cost = 100;
-			MoneyLoss(rci.cost);
-			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
-			break;
-		}
 		case GAME_OBJECT_TYPE::WORK_PLACE:
-		{		
-			RCI rci;
-			rci.industry = GameManager::RandomRange(1, 10);
-			rci.cost = 100;
-			MoneyLoss(rci.cost);
-			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
+		{
+			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord, type);
 			break;
 		}
 		default:
 			return false;
 			break;
 		}
-
 
 		groundTileMap->UpdateTile(gridCoord);
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, -1));
@@ -336,48 +380,7 @@ bool SceneGame::MoneyLoss(unsigned int value)
 
 void SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
 {
-	if (gridInfo[gridCoord.x][gridCoord.y].second.expired())
-		return;
-	auto& adjacent = gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetAdjacent();
-	DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetKey());
-	gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::NONE;
-	gridInfo[gridCoord.x][gridCoord.y].second.reset();
-
-	if (!adjacent.empty())
-	{
-		for (auto& pair : adjacent)
-		{
-			if (!pair.second.expired())
-				pair.second.lock()->RemoveAdjacent(ObjectTile::ADDIREC(~pair.first));
-		}
-		adjacent.clear();
-	}
-
-	groundTileMap->UpdateTile(gridCoord);
-	groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, -1));
-	groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, 1));
-	groundTileMap->UpdateTile(gridCoord + sf::Vector2i(1, 0));
-	groundTileMap->UpdateTile(gridCoord + sf::Vector2i(-1, 0));
-
-	if (unitOnGrid[gridCoord.x][gridCoord.y].size() > 0)
-	{
-		sf::Vector2i teleport = ObjectTile::FindShortPath(gridCoord, gridInfo);
-		if (teleport != gridCoord)
-		{
-			for (auto& ptr : unitOnGrid[gridCoord.x][gridCoord.y])
-			{
-				if (!ptr.expired())
-				{
-					std::shared_ptr<ObjectUnit> tempPtr = ptr.lock();
-					if (tempPtr->GetNextTile().expired())
-						tempPtr->SetPosition({ sf::Vector2f(teleport).x * gridSize.x + gridSize.x * 0.5f,
-							sf::Vector2f(teleport).y * gridSize.y + gridSize.y * 0.5f });
-					else
-						tempPtr->SetPosition(tempPtr->GetNextTile().lock()->GetGridCenterPos());
-				}
-			}
-		}
-	}
+	deleteTileDeque.push_back(gridCoord);
 }
 
 const GridInfo& SceneGame::GetGridInfo()
@@ -404,8 +407,8 @@ void SceneGame::LoadGame()
 	DataManager::LoadUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 }
 
-bool SceneGame::LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord
-	, const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, const RCI& rci)
+bool SceneGame::LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
+	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type)
 {
 	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
@@ -416,13 +419,9 @@ bool SceneGame::LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCo
 			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord, tagList, rect);
 			break;
 		case GAME_OBJECT_TYPE::HOME:
-		{
-			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(This(), gridCoord, tagList, rect, rci);
-			break;
-		}
 		case GAME_OBJECT_TYPE::WORK_PLACE:
 		{
-			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(This(), gridCoord, tagList, rect, rci);
+			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord, tagList, rect, type);
 			break;
 		}
 		default:

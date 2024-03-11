@@ -55,7 +55,6 @@ void SceneGame::Init()
 	//선택된 타일 표시용 (임시)
 	Scene::Init();
 	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
-	viewZoomTarget = view.getSize();
 
 	background.setFillColor({ 20,120,20,255 });
 	background.setSize(view.getSize());
@@ -63,16 +62,29 @@ void SceneGame::Init()
 
 	groundTileMap = ObjectTileMap::Create(This());
 
+	zoomY = view.getSize().y;
 }
 
 void SceneGame::PreUpdate(float timeDelta, float timeScale)
 {
 	Scene::PreUpdate(timeDelta, timeScale);
 	SetMousePosGrid();
-	UpdateCityTime(timeDelta, timeScale);
+	if (gameOver)
+	{
+
+	}
+	else {
+		UpdateCityTime(timeDelta, timeScale);
+		if (money < 0)
+			GameOver();
+	}
+
+
+
+
 
 	citizenTimer += timeDelta * timeScale;
-	if (GM_RCI.Instance().LeftRegidence() > 0 && citizenTimer >= citizenInterval)
+	if (SFGM_RCI.Instance().LeftRegidence() > 0 && citizenTimer >= citizenInterval)
 	{
 		citizenTimer = 0.f;
 		SceneGame::AddUnit(ObjectUnit::Create(This()));
@@ -83,6 +95,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::IsKeyPress(sf::Keyboard::Q))
 	{
 		view.rotate(45.f * timeDelta);
+		money -= 3;
 	}
 	if (IOManager::IsKeyPress(sf::Keyboard::E))
 	{
@@ -108,13 +121,13 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 
 	if (IOManager::GetWheelDelta() > 0)
 	{
-		viewZoom += 0.1;
-		viewZoomTarget /= 1 + viewZoom;
+		view.zoom(1.f / 1.05f);
+		zoomY *= 1.f / 1.05f;
 	}
 	else if (IOManager::GetWheelDelta() < 0)
 	{
-		viewZoom += 0.1;
-		viewZoomTarget *= 1 + viewZoom;
+		view.zoom(1.05f);
+		zoomY *= 1.05f;
 	}
 	if (IOManager::IsKeyPress(sf::Mouse::Middle))
 	{
@@ -125,8 +138,9 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		}
 		else
 		{
-			tilt = startTilt - GameManager::GetMousePosWindow().y;
-			view.setSize(view.getSize().x, view.getSize().y + tilt);
+			tilt += (startTilt - GameManager::GetMousePosWindow().y) * 0.005;
+			tilt = std::max(1.f, tilt);
+			view.setSize(view.getSize().x, zoomY * tilt);
 			startTilt = GameManager::GetMousePosWindow().y;
 		}
 	}
@@ -137,78 +151,14 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::IsKeyDown(sf::Keyboard::Num0))
 	{
 		view = resetView;
+		tilt = 1.f;
 	}
 
-
-	/*if (IOManager::IsKeyDown(sf::Mouse::Left))
-	{
-		if (gridInfo[mousePosGrid.x][mousePosGrid.y].second.expired())
-			CreateObjectTile(GAME_OBJECT_TYPE::BUILDING, mousePosGrid);
-		else
-			DeleteObjectTile(mousePosGrid);
-	}
-	if (IOManager::IsKeyDown(sf::Mouse::Right))
-	{
-		if (gridInfo[mousePosGrid.x][mousePosGrid.y].second.expired())
-			CreateObjectTile(GAME_OBJECT_TYPE::GROUND, mousePosGrid);
-		else
-			DeleteObjectTile(mousePosGrid);
-	}
-	if (IOManager::IsKeyDown(sf::Keyboard::Num2))
-	{
-		if (gridInfo[mousePosGrid.x][mousePosGrid.y].second.expired())
-			CreateObjectTile(GAME_OBJECT_TYPE::ROAD, mousePosGrid);
-		else
-			DeleteObjectTile(mousePosGrid);
-	}
-	if (IOManager::IsKeyDown(sf::Keyboard::Num3))
-	{
-
-
-
-	}
-	if (IOManager::IsKeyDown(sf::Keyboard::F5))
-	{
-		OrganizeGridInfo();
-	}
-
-	if (IOManager::IsKeyDown(sf::Keyboard::F))
-	{
-		SaveGame();
-	}
-	if (IOManager::IsKeyDown(sf::Keyboard::G))
-	{
-		LoadGame();
-	}
-	if (IOManager::IsKeyDown(sf::Keyboard::R))
-	{
-		Reset();
-	}*/
 	background.setPosition(view.getCenter());
 }
 
 void SceneGame::Update(float timeDelta, float timeScale)
 {
-	if (view.getSize().x > viewZoomTarget.x)
-	{
-		view.zoom(1 / (1 + viewZoom * timeDelta * timeScale));
-
-		if (abs(viewZoomTarget.x - view.getSize().x) < 1 / (1 + viewZoom * timeDelta * timeScale))
-		{
-			view.setSize(viewZoomTarget);
-			viewZoom = 0.f;
-		}
-	}
-	else if (view.getSize().x < viewZoomTarget.x)
-	{
-		view.zoom(1 + viewZoom * timeDelta * timeScale);
-
-		if (abs(viewZoomTarget.x - view.getSize().x) < 1 + viewZoom * timeDelta * timeScale)
-		{
-			view.setSize(viewZoomTarget);
-			viewZoom = 0.f;
-		}
-	}
 	Scene::Update(timeDelta, timeScale);
 }
 
@@ -224,8 +174,7 @@ void SceneGame::PostUpdate(float timeDelta, float timeScale)
 
 		auto& adjacent = gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetAdjacent();
 		DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetKey());
-		gridInfo[gridCoord.x][gridCoord.y].first = GAME_OBJECT_TYPE::NONE;
-		gridInfo[gridCoord.x][gridCoord.y].second.reset();
+		gridInfo[gridCoord.x].erase(gridCoord.y);
 
 		if (!adjacent.empty())
 		{
@@ -253,7 +202,7 @@ void SceneGame::PostUpdate(float timeDelta, float timeScale)
 					if (!ptr.expired())
 					{
 						std::shared_ptr<ObjectUnit> tempPtr = ptr.lock();
-						if (tempPtr->GetNextTile().expired())
+						if (tempPtr->GetNextTile().expired()||tempPtr->GetNextTile().lock()->GetGridCoord() == gridCoord)
 							tempPtr->SetPosition({ sf::Vector2f(teleport).x * gridSize.x + gridSize.x * 0.5f,
 								sf::Vector2f(teleport).y * gridSize.y + gridSize.y * 0.5f });
 						else
@@ -279,6 +228,7 @@ void SceneGame::Draw(sf::RenderWindow& window)
 
 void SceneGame::Reset()
 {
+	gameOver = false;
 	gridInfo.clear();
 	unitOnGrid.clear();
 
@@ -335,8 +285,8 @@ void SceneGame::UpdateCityTime(float timeDelta, float TimeScale)
 		{
 			lastMonth = tex.tm_mon;
 			doPayTex = true;
-			money -= moneyLoss;
-			moneyLoss = 0;
+			money += moneyTex;
+			moneyTex = 0;
 		}
 		std::dynamic_pointer_cast<SceneGameUI, Scene>(SceneManager::Get("SceneGameUI"))->SetCityTimeString(cityTime);
 	}
@@ -347,9 +297,9 @@ void SceneGame::MoneyProfit(unsigned int value)
 	moneyProfit += value;
 }
 
-void SceneGame::MoneyLoss(unsigned int value)
+void SceneGame::MoneyTex(int value)
 {
-	moneyLoss += value;
+	moneyTex += value;
 }
 
 void SceneGame::MoneyReport()
@@ -363,20 +313,17 @@ bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OB
 	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
 		gridInfo[gridCoord.x][gridCoord.y].first = type;
-		switch (type)
+		if (type == GAME_OBJECT_TYPE::ROAD)
 		{
-		case GAME_OBJECT_TYPE::ROAD:
 			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord);
-			break;
-		case GAME_OBJECT_TYPE::HOME:
-		case GAME_OBJECT_TYPE::WORK_PLACE:
+		}
+		else if (type >= GAME_OBJECT_TYPE::BUILDING && type < GAME_OBJECT_TYPE::BUILDING_END)
 		{
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord, type);
-			break;
 		}
-		default:
+		else
+		{
 			return false;
-			break;
 		}
 
 		groundTileMap->UpdateTile(gridCoord);
@@ -464,22 +411,18 @@ bool SceneGame::LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
 	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
 		gridInfo[gridCoord.x][gridCoord.y].first = type;
-		switch (type)
+		if (type == GAME_OBJECT_TYPE::ROAD)
 		{
-		case GAME_OBJECT_TYPE::ROAD:
 			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord, tagList, rect);
-			break;
-		case GAME_OBJECT_TYPE::HOME:
-		case GAME_OBJECT_TYPE::WORK_PLACE:
+		}
+		else if (type >= GAME_OBJECT_TYPE::BUILDING && type < GAME_OBJECT_TYPE::BUILDING_END)
 		{
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord, tagList, rect, type);
-			break;
 		}
-		default:
+		else
+		{
 			return false;
-			break;
 		}
-
 
 		groundTileMap->UpdateTile(gridCoord);
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, -1));
@@ -490,6 +433,11 @@ bool SceneGame::LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
 	}
 
 	return false;
+}
+
+void SceneGame::GameOver()
+{
+	gameOver = true;
 }
 
 void SceneGame::SetMousePosGrid()

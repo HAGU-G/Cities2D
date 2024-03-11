@@ -11,11 +11,12 @@ protected:
 	std::deque<sf::Vector2i> deleteTileDeque;
 
 	sf::Vector2i mousePosGrid;
-	float viewZoom = 0.0f;
-	sf::Vector2f viewZoomTarget;
+
+	
 	bool isTilt = false;
 	float startTilt = 0.f;
-	float tilt = 0.f;
+	float tilt = 1.f;
+	float zoomY = 0.f;
 
 	sf::Vector2f gridSize = { 50.f, 50.f };
 	sf::RectangleShape background;
@@ -32,13 +33,14 @@ protected:
 	//도시의 정보
 	int money = 5000;
 	unsigned int moneyProfit = 0;
-	unsigned int moneyLoss = 0;
-	time_t cityTime;
-	int lastDay;
-	int lastMonth;
+	int moneyTex = 0;
+	time_t cityTime = 0;
+	int lastDay = 0;
+	int lastMonth = 0;
 	bool doPayTex = false;
 	float cityTimer = 0.f;
 	float cityInterval = 1.f;
+	bool gameOver = false;
 
 public:
 	UnitOnGrid unitOnGrid; //[x][y]
@@ -65,7 +67,7 @@ public:
 	void UpdateCityTime(float timeDelta, float TimeScale);
 	inline const time_t& GetCityTime() const { return cityTime; }
 	void MoneyProfit(unsigned int value);
-	void MoneyLoss(unsigned int value);
+	void MoneyTex(int value);
 	void MoneyReport();
 	bool MoneyUse(unsigned int value);
 
@@ -81,13 +83,19 @@ public:
 	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };
 	inline const std::weak_ptr<ObjectTileMap> GetTileMap() { return groundTileMap; }
 	inline int GetMoney() const { return money; }
+	inline int GetProfit() const { return moneyProfit; }
+	inline int GetTex() const { return moneyTex; }
 	inline bool DoPayTex() const { return doPayTex; }
+	inline float GetTilt() const { return tilt; }
 
 	void OrganizeGridInfo();
 	void SaveGame();
 	void LoadGame();
 	bool LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
 		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type);
+
+	void GameOver();
+	inline bool IsGameOver() const { return gameOver; }
 
 };
 

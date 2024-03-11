@@ -1,6 +1,6 @@
 #pragma once
 
-#define GM_RCI (RCIManager::Instance())
+#define SFGM_RCI (RCIManager::Instance())
 class ObjectUnit;
 
 struct RCI
@@ -21,14 +21,15 @@ struct RCI
 class RCIManager final
 {
 private:
-	int totalRegidence;
-	int totalCommerce;
-	int totalIndustry;
+	int totalRegidence = 0;
+	int totalCommerce = 0;
+	int totalIndustry = 0;
 
-	int usingRegidence;
-	int usingCommerce;
-	int usingIndustry;
+	int usingRegidence = 0;
+	int usingCommerce = 0;
+	int usingIndustry = 0;
 
+	int needCommerce = 0;
 
 	RCIManager() = default;
 public:
@@ -43,15 +44,20 @@ public:
 
 	void UseRegidence(int value);
 	void UseCommerce(int value);
+	void INeedCommerce(int value);
 	void UseIndustry(int value);
+
+	int GetUsingRegidence() const { return usingRegidence; }
+	int GetUsingCommerce() const { return usingCommerce; }
+	int GetUsingIndustry() const { return usingIndustry; }
 
 	int LeftRegidence() const { return totalRegidence - usingRegidence; }
 	int LeftCommerce() const { return totalCommerce - usingCommerce; }
 	int LeftIndustry() const { return totalIndustry - usingIndustry; }
 
-	int NeedRegidence() const { return std::max(1, std::max(LeftCommerce(), LeftIndustry()) - LeftRegidence()); }
-	int NeedCommerce() const { return std::max(0, LeftRegidence() - LeftIndustry()); }
-	int NeedIndustry() const { return std::max(0, LeftRegidence() - LeftCommerce()); }
+	int NeedRegidence() const { return std::max(1, std::max(LeftCommerce() - (needCommerce- usingCommerce), LeftIndustry()) - LeftRegidence()); }
+	int NeedCommerce() const { return std::max(0, needCommerce - usingCommerce - LeftCommerce()); }
+	int NeedIndustry() const { return std::max(0, usingRegidence - usingIndustry); }
 
 	static RCIManager& Instance()
 	{

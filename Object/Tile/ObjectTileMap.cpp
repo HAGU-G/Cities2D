@@ -43,6 +43,9 @@ void ObjectTileMap::UpdateTile(int x, int y)
 	case GAME_OBJECT_TYPE::WORK_PLACE:
 		zeroTex = { 100, 50 };
 		break;
+	case GAME_OBJECT_TYPE::SHOP:
+		zeroTex = { 100, 0 };
+		break;
 	default:
 		ResetTile(x, y);
 		return;

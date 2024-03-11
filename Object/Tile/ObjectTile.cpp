@@ -246,45 +246,48 @@ sf::Vector2i ObjectTile::FindShortPath(sf::Vector2i fromGridCoord, GridInfo& gri
 	{
 		count++;
 		sf::Vector2i preGridCoord = nodeList.front(); //노드 좌표
+		nodeList.pop();
 		//노드의 상하좌우 검사
 		//상
 		currentGridCoord = preGridCoord + sf::Vector2i(0, -1);
-		if (visitList[currentGridCoord.x][currentGridCoord.y])
-			continue;
-		visitList[currentGridCoord.x][currentGridCoord.y] = true;
-		currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
-		if (currentTile != nullptr)
-			return currentGridCoord;
-		nodeList.push(currentGridCoord);
+		if (!visitList[currentGridCoord.x][currentGridCoord.y])
+		{
+			visitList[currentGridCoord.x][currentGridCoord.y] = true;
+			currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
+			if (currentTile != nullptr)
+				return currentGridCoord;
+			nodeList.push(currentGridCoord);
+		}
 		//하
 		currentGridCoord = preGridCoord + sf::Vector2i(0, 1);
-		if (visitList[currentGridCoord.x][currentGridCoord.y])
-			continue;
-		visitList[currentGridCoord.x][currentGridCoord.y] = true;
-		currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
-		if (currentTile != nullptr)
-			return currentGridCoord;
-		nodeList.push(currentGridCoord);
+		if (!visitList[currentGridCoord.x][currentGridCoord.y])
+		{
+			visitList[currentGridCoord.x][currentGridCoord.y] = true;
+			currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
+			if (currentTile != nullptr)
+				return currentGridCoord;
+			nodeList.push(currentGridCoord);
+		}
 		//좌
 		currentGridCoord = preGridCoord + sf::Vector2i(-1, 0);
-		if (visitList[currentGridCoord.x][currentGridCoord.y])
-			continue;
-		visitList[currentGridCoord.x][currentGridCoord.y] = true;
-		currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
-		if (currentTile != nullptr)
-			return currentGridCoord;
-		nodeList.push(currentGridCoord);
+		if (!visitList[currentGridCoord.x][currentGridCoord.y])
+		{
+			visitList[currentGridCoord.x][currentGridCoord.y] = true;
+			currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
+			if (currentTile != nullptr)
+				return currentGridCoord;
+			nodeList.push(currentGridCoord);
+		}
 		//우
 		currentGridCoord = preGridCoord + sf::Vector2i(1, 0);
-		if (visitList[currentGridCoord.x][currentGridCoord.y])
-			continue;
-		visitList[currentGridCoord.x][currentGridCoord.y] = true;
-		currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
-		if (currentTile != nullptr)
-			return currentGridCoord;
-		nodeList.push(currentGridCoord);
-
-		nodeList.pop();
+		if (!visitList[currentGridCoord.x][currentGridCoord.y])
+		{
+			visitList[currentGridCoord.x][currentGridCoord.y] = true;
+			currentTile = gridInfo[currentGridCoord.x][currentGridCoord.y].second.lock();
+			if (currentTile != nullptr)
+				return currentGridCoord;
+			nodeList.push(currentGridCoord);
+		}
 	}
 
 	for (auto& x : gridInfo)

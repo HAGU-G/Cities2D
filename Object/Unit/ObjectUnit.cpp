@@ -10,14 +10,20 @@ void ObjectUnit::NoHome()
 {
 	home.reset();
 	hasHome = false;
-	GM_RCI.UseRegidence(-1);
+	SFGM_RCI.UseRegidence(-1);
 }
 
 void ObjectUnit::NoWorkPlace()
 {
 	workPlace.reset();
 	hasWorkPlace = false;
-	GM_RCI.UseIndustry(-1);
+	SFGM_RCI.UseIndustry(-1);
+}
+
+void ObjectUnit::NoShop()
+{
+	shop.reset();
+	SFGM_RCI.UseCommerce(-1);
 }
 
 ObjectUnit::ObjectUnit(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
@@ -37,6 +43,11 @@ void ObjectUnit::Init()
 
 void ObjectUnit::PreUpdate(float timeDelta, float timeScale)
 {
+	if (isCitizen)
+	{
+		GridUpdate();
+	}
+
 	UpdateHome(timeDelta, timeScale);
 	UpdateWorkSpace(timeDelta, timeScale);
 }
@@ -69,6 +80,7 @@ void ObjectUnit::Draw(sf::RenderWindow& window)
 
 void ObjectUnit::Reset()
 {
+
 	findInterval = GameManager::RandomRange(0.1f, 1.f);
 
 	tempRender.setRadius(GameManager::RandomRange(5.f, 7.f));
@@ -79,6 +91,7 @@ void ObjectUnit::Reset()
 
 	ResetHome();
 	ResetWorkPlace();
+	ShopUsed();
 
 	NoCitizen();
 	status = STATUS::NONE;
@@ -86,6 +99,15 @@ void ObjectUnit::Reset()
 	pathToWorkPlace.clear();
 	walkPath.clear();
 	isMoving = false;
+
+	money = 100;
+	findTimer = 0.f;
+	patience = 10;
+
+	lifeTimer = 0.f;
+	lifeInterval = 1.f;
+
+	speed = 50.f;
 
 	nextTile.reset();
 	startingPoint.reset();
@@ -99,6 +121,7 @@ void ObjectUnit::Release()
 	GameObject::Release();
 	ResetHome();
 	ResetWorkPlace();
+	ShopUsed();
 	NoCitizen();
 	sceneGame.reset();
 	nextTile.reset();
@@ -117,6 +140,7 @@ std::shared_ptr<ObjectUnit> ObjectUnit::Create(std::weak_ptr<Scene> scene)
 
 void ObjectUnit::SetPosition(const sf::Vector2f& position)
 {
+
 	GameObject::SetPosition(position);
 	tempRender.setPosition(position);
 
@@ -130,69 +154,29 @@ void ObjectUnit::SetPosition(const sf::Vector2f& position)
 		gridCoord.y = position.y / gridSize.y;
 	else
 		gridCoord.y = floor(position.y / gridSize.y);
-
-	gridCenterPos.x = gridCoord.x * gridSize.x + gridSize.x * 0.5f;
-	gridCenterPos.y = gridCoord.y * gridSize.y + gridSize.y * 0.5f;
-
-
 }
 
 void ObjectUnit::GridUpdate()
 {
 	std::shared_ptr<SceneGame> sceneGame = this->sceneGame.lock();
-	std::shared_ptr<ObjectTile> currentTile = sceneGame->GetTileInfo(gridCoord).second.lock();
-	const std::list<GAME_OBJECT_TAG>& tagList = currentTile->GetGameObjectTagList();
-	if (sceneGame->GetTileInfo(gridCoord).second.expired()
-		|| (std::find(tagList.begin(), tagList.end(), GAME_OBJECT_TAG::MOVEABLE) == tagList.end()
-			&& (currentTile != home.lock() && currentTile != workPlace.lock())
-			))
+	if (preGridCoord != gridCoord)
 	{
-		if (hasHome && hasWorkPlace)
-		{
-			pathToWorkPlace = ObjectTile::FindShortPath(home, workPlace);
-			if (home.lock() != workPlace.lock() && pathToWorkPlace.empty())
-			{
-				if (status == STATUS::TO_HOME)
-				{
-					ResetHome();
-				}
-				else if (status == STATUS::TO_WORK_PLACE)
-				{
-					ResetWorkPlace();
-				}
-				else
-				{
-					Reset();
-				}
-			}
-		}
-		else if (hasHome)
-		{
-			CheckHome();
-		}
-		else if (hasWorkPlace)
-		{
-			CheckWorkPlace();
-		}
-		else
-		{
-			Reset();
-		}
-	}
-	else if (preGridCoord != gridCoord)
-	{
-		const std::shared_ptr<ObjectUnit>& tempPtr = std::dynamic_pointer_cast<ObjectUnit, GameObject>(This());
+		const std::shared_ptr<ObjectUnit>& thisPtr = C_OBJECT_UNIT(This());
 
 		sceneGame->unitOnGrid[preGridCoord.x][preGridCoord.y]
 			.remove_if(
-				[tempPtr](std::weak_ptr<ObjectUnit> ptr)
+				[thisPtr](std::weak_ptr<ObjectUnit> ptr)
 				{
-					return tempPtr.get() == ptr.lock().get();
+					return thisPtr.get() == ptr.lock().get();
 				});
 
 		sceneGame->unitOnGrid[gridCoord.x][gridCoord.y]
-			.push_back(std::dynamic_pointer_cast<ObjectUnit, GameObject>(This()));
+			.push_back(thisPtr);
 		preGridCoord = gridCoord;
+	}
+	else if (sceneGame->GetTileInfo(gridCoord).first == GAME_OBJECT_TYPE::NONE)
+	{
+		Reset();
 	}
 }
 
@@ -214,8 +198,7 @@ void ObjectUnit::UpdateHome(float timeDelta, float timeScale)
 	{
 		if (home.expired()) //집이 없어졌을 때
 		{
-			hasHome = false;
-			GM_RCI.UseRegidence(-1);
+			NoHome();
 		}
 	}
 }
@@ -241,9 +224,16 @@ void ObjectUnit::UpdateWorkSpace(float timeDelta, float timeScale)
 	{
 		if (workPlace.expired()) //회사가 부숴졌을 때
 		{
-			hasWorkPlace = false;
-			GM_RCI.UseIndustry(-1);
+			NoWorkPlace();
 		}
+	}
+}
+
+void ObjectUnit::UpdateShop(float timeDelta, float timeScale)
+{
+	if (shop.expired()) //상점 파괴됨
+	{
+		NoShop();
 	}
 }
 
@@ -322,11 +312,16 @@ bool ObjectUnit::FindHome()
 
 bool ObjectUnit::FindWorkSpace()
 {
+	money -= 10;
+	if (money < 0)
+	{
+		patience--;
+	}
 	pathToWorkPlace = ObjectTile::FindShortPath(home, GAME_OBJECT_TAG::I);
 
 	if (pathToWorkPlace.empty())
 	{
-		patience--;
+
 		return false;
 	}
 	else
@@ -336,12 +331,12 @@ bool ObjectUnit::FindWorkSpace()
 		{
 			workPlace->UseI(C_OBJECT_UNIT(This()));
 			SetWorkPlace(workPlace);
-			patience++;
+
 			return true;
 		}
 	}
 
-	patience--;
+
 	return false;
 
 }
@@ -398,12 +393,45 @@ void ObjectUnit::CheckWorkPlace()
 	}
 }
 
+void ObjectUnit::ShopUsed()
+{
+	needShopTimer = 0.f;
+
+	if (needShop)
+	{
+		needShop = false;
+		SFGM_RCI.INeedCommerce(-1);
+		patience++;
+	}
+}
+
 void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 {
+	needShopTimer += timeDelta * timeScale;
+	if (needShopTimer >= needShopInterval)
+	{
+		needShopTimer = 0.f;
+		if (!needShop)
+		{
+			needShop = true;
+			SFGM_RCI.INeedCommerce(1);
+		}
+		else
+		{
+			patience--;
+		}
+	}
 	if (sceneGame.lock()->DoPayTex())
 	{
-		sceneGame.lock()->MoneyProfit(money * 0.01);
-		money -= money * 0.01;
+		sceneGame.lock()->MoneyTex(money * 0.10);
+		money -= money * 0.10;
+		if (!home.expired())
+			money += home.lock()->GetRCI().tex / 2;
+		if (money < 0)
+		{
+			home.lock()->UnuseR(GetKey());
+			hasHome = false;
+		}
 	}
 
 	sf::Vector2f gridSize = sceneGame.lock()->GetGridSize();
@@ -485,6 +513,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		}
 		break;
 	case STATUS::WORK_PLACE:
+		needShopTimer += timeDelta * timeScale;
 		if (!hasWorkPlace)
 		{
 			if (hasHome)
@@ -505,17 +534,38 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 			else
 			{
 				lifeTimer = 0.f;
+				money += 18;
+				sceneGame.lock()->MoneyProfit(2);
 				if (home.lock() == workPlace.lock())
 				{
 					status = STATUS::HOME;
+				}
+				else if (needShop)
+				{
+					walkPath = ObjectTile::FindShortPath(workPlace, GAME_OBJECT_TAG::C);
+					if (walkPath.empty())
+					{
+						walkPath = pathToWorkPlace;
+						startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+						destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+						status = STATUS::TO_HOME;
+					}
+					else
+					{
+						startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+						destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+						shop = C_TILE_BUILDING(destination.lock());
+						shop.lock()->UseC(C_OBJECT_UNIT(This()));
+						ShopUsed();
+						status = STATUS::TO_SHOP;
+					}
+
 				}
 				else
 				{
 					walkPath = pathToWorkPlace;
 					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
 					destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
-					money += 9;
-					sceneGame.lock()->MoneyProfit(1);
 					status = STATUS::TO_HOME;
 				}
 			}
@@ -547,6 +597,106 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		else
 		{
 			status = STATUS::HOMELESS;
+		}
+		break;
+	case STATUS::SHOP:
+		needShopTimer -= timeDelta * timeScale;
+		if (shop.expired())
+		{
+			if (hasHome)
+			{
+				walkPath = pathToWorkPlace;
+				startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+				destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+				status = STATUS::TO_HOME;
+			}
+			else if (hasWorkPlace)
+			{
+				walkPath = pathToWorkPlace;
+				startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+				destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+				status = STATUS::TO_WORK_PLACE;
+			}
+			else
+			{
+				status = STATUS::HOMELESS;
+			}
+		}
+		else
+		{
+			if (lifeTimer < lifeInterval)
+			{
+				lifeTimer += timeDelta * timeScale;
+			}
+			else
+			{
+				lifeTimer = 0.f;
+				shop.lock()->UnuseC(GetKey());
+				shop.reset();
+				ShopUsed();
+				money -= 10;
+				sceneGame.lock()->MoneyProfit(1);
+				if (home.lock() == workPlace.lock())
+				{
+					status = STATUS::HOME;
+				}
+				else if (hasHome)
+				{
+					walkPath = ObjectTile::FindShortPath(home, sceneGame.lock()->GetTileInfo(gridCoord).second);
+					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+					destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+					money -= 2;
+					status = STATUS::TO_HOME;
+				}
+				else if (hasWorkPlace)
+				{
+					walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, workPlace);
+					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+					destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+					money -= 6;
+					status = STATUS::TO_WORK_PLACE;
+				}
+				else
+				{
+					status = STATUS::HOMELESS;
+				}
+			}
+		}
+		break;
+	case STATUS::TO_SHOP:
+		if (shop.expired())
+		{
+			if (hasHome)
+			{
+				walkPath = ObjectTile::FindShortPath(home, sceneGame.lock()->GetTileInfo(gridCoord).second);
+				startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+				destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+				money -= 10;
+				sceneGame.lock()->MoneyProfit(1);
+				status = STATUS::TO_HOME;
+			}
+			else if (hasWorkPlace)
+			{
+				walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, workPlace);
+				startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+				destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+				status = STATUS::TO_WORK_PLACE;
+			}
+			else
+			{
+				status = STATUS::HOMELESS;
+			}
+		}
+		Moving(timeDelta, timeScale);
+		if (!isMoving)
+		{
+			if (position == destination.lock()->GetGridCenterPos())
+			{
+				money -= 1;
+				startingPoint.reset();
+				destination.reset();
+				status = STATUS::SHOP;
+			}
 		}
 		break;
 	default:

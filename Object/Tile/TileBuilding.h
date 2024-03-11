@@ -40,6 +40,9 @@ public:
 	void UseI(std::weak_ptr<ObjectUnit> citizen);
 	void UnuseI(const std::string& key);
 
+	void UseC(std::weak_ptr<ObjectUnit> citizen);
+	void UnuseC(const std::string& key);
+
 	bool ConditionCheck(GAME_OBJECT_TAG tag) override;
 };
 

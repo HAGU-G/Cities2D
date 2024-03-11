@@ -51,6 +51,11 @@ void RCIManager::UseCommerce(int value)
 	UpdateRCI();
 }
 
+void RCIManager::INeedCommerce(int value)
+{
+	needCommerce += value;
+}
+
 void RCIManager::UseIndustry(int value)
 {
 	usingIndustry += value;

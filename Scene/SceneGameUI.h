@@ -27,17 +27,19 @@ protected:
 	std::shared_ptr<ObjectButton> buttonPlay;
 	std::shared_ptr<ObjectButton> button4x;
 	std::shared_ptr<ObjectButton> buttonPause;
+	sf::RectangleShape pauseOutline;
 	std::shared_ptr<ObjectButton> buttonRoad;
 	std::shared_ptr<ObjectButton> buttonR;
 	std::shared_ptr<ObjectButton> buttonC;
 	std::shared_ptr<ObjectButton> buttonI;
 	std::shared_ptr<ObjectButton> buttonDestroy;
 	std::shared_ptr<ButtonNameTag> buttonRCI;
+	std::shared_ptr<ButtonNameTag> buttonCityTime;
 	std::shared_ptr<ButtonNameTag> buttonGrid;
 	std::shared_ptr<ButtonNameTag> buttonCitizen;
 	std::shared_ptr<ButtonNameTag> buttonMoney;
-	std::shared_ptr<ButtonNameTag> buttonCityTime;
-
+	sf::Text textProfit;
+	sf::Text textTex;
 
 	RCI rci;
 	GAME_OBJECT_TYPE type = GAME_OBJECT_TYPE::NONE;

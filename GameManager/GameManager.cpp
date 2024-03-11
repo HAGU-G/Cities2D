@@ -122,7 +122,7 @@ void GameManager::MainLoop()
 		//       ·»´õ¸µ
 		// 
 		/////////////////////////////
-		window.clear();
+		window.clear({ 149,195,105 });
 		SceneManager::Draw(window);
 		window.display();
 

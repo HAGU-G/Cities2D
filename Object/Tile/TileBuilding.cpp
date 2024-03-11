@@ -7,7 +7,7 @@
 TileBuilding::TileBuilding(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
 	:ObjectTile(scene, gridCoord, type), rci(rci)
 {
-	GM_RCI.UpdateRCI(rci.residence, rci.commerce, rci.industry);
+	SFGM_RCI.UpdateRCI(rci.residence, rci.commerce, rci.industry);
 }
 
 TileBuilding::~TileBuilding()
@@ -26,10 +26,11 @@ void TileBuilding::Update(float timeDelta, float timeScale)
 {
 	ObjectTile::Update(timeDelta, timeScale);
 	buildingSprite.setRotation(scene.lock()->GetView().getRotation());
+	buildingSprite.setScale(1.f,sceneGame.lock()->GetTilt());
 
 	if (sceneGame.lock()->DoPayTex())
 	{
-		sceneGame.lock()->MoneyLoss(rci.tex);
+		sceneGame.lock()->MoneyTex(rci.tex);
 	}
 }
 
@@ -48,7 +49,11 @@ void TileBuilding::Reset()
 		if (!pair.second.expired())
 			pair.second.lock()->NoHome();
 	}
-	rci.commerceSlot.clear();
+	for (auto& pair : rci.commerceSlot)
+	{
+		if (!pair.second.expired())
+			pair.second.lock()->NoShop();
+	}
 	for (auto& pair : rci.industrySlot)
 	{
 		if (!pair.second.expired())
@@ -69,22 +74,22 @@ void TileBuilding::Reset()
 
 	if (rciMax == rci.commerce)
 	{
-		textureRect = { 0, 0, 50, 50 };
+		textureRect = { 0, 300, 50, 150 };
 		buildingSprite.setTextureRect(textureRect);
 	}
 	else if (rciMax == rci.industry)
 	{
-		textureRect = { 0, 50, 50, 100 };
+		textureRect = { 0, 150, 50, 150 };
 		buildingSprite.setTextureRect(textureRect);
 	}
 	else
 	{
-		textureRect = { 0, 0, 50, 50 };
+		textureRect = { 0, 0, 50, 150 };
 		buildingSprite.setTextureRect(textureRect);
-	}
+	} 
 
 	buildingSprite.setOrigin(buildingSprite.getLocalBounds().width * 0.5f,
-		buildingSprite.getLocalBounds().height - sceneGame.lock()->GetGridSize().y * 0.5f);
+		buildingSprite.getLocalBounds().height - sceneGame.lock()->GetGridSize().y);
 
 	ObjectTile::Reset();
 }
@@ -96,14 +101,18 @@ void TileBuilding::Release()
 		if (!pair.second.expired())
 			pair.second.lock()->NoHome();
 	}
-	rci.commerceSlot.clear();
+	for (auto& pair : rci.commerceSlot)
+	{
+		if (!pair.second.expired())
+			pair.second.lock()->NoShop();
+	}
 	for (auto& pair : rci.industrySlot)
 	{
 		if (!pair.second.expired())
 			pair.second.lock()->NoWorkPlace();
 	}
 
-	GM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
+	SFGM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
 	rci = RCI();
 }
 
@@ -178,13 +187,13 @@ bool TileBuilding::CanUseR(std::weak_ptr<ObjectUnit> citizen)
 void TileBuilding::UseR(std::weak_ptr<ObjectUnit> citizen)
 {
 	rci.residenceSlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
-	GM_RCI.UseRegidence(1);
+	SFGM_RCI.UseRegidence(1);
 }
 
 void TileBuilding::UnuseR(const std::string& key)
 {
 	if (rci.residenceSlot.erase(key) > 0)
-		GM_RCI.UseRegidence(-1);
+		SFGM_RCI.UseRegidence(-1);
 }
 
 bool TileBuilding::CanUseI(std::weak_ptr<ObjectUnit> citizen)
@@ -202,13 +211,25 @@ bool TileBuilding::CanUseI(std::weak_ptr<ObjectUnit> citizen)
 void TileBuilding::UseI(std::weak_ptr<ObjectUnit> citizen)
 {
 	rci.industrySlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
-	GM_RCI.UseIndustry(1);
+	SFGM_RCI.UseIndustry(1);
 }
 
 void TileBuilding::UnuseI(const std::string& key)
 {
 	if (rci.industrySlot.erase(key) > 0)
-		GM_RCI.UseIndustry(-1);
+		SFGM_RCI.UseIndustry(-1);
+}
+
+void TileBuilding::UseC(std::weak_ptr<ObjectUnit> citizen)
+{
+	rci.commerceSlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
+	SFGM_RCI.UseCommerce(1);
+}
+
+void TileBuilding::UnuseC(const std::string& key)
+{
+	if (rci.commerceSlot.erase(key) > 0)
+		SFGM_RCI.UseCommerce(-1);
 }
 
 bool TileBuilding::ConditionCheck(GAME_OBJECT_TAG tag)

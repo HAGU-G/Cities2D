@@ -15,6 +15,7 @@ private:
 
 	void NoHome();
 	void NoWorkPlace();
+	void NoShop();
 public:
 	enum class STATUS
 	{
@@ -22,10 +23,12 @@ public:
 
 		HOME,
 		WORK_PLACE,
+		SHOP,
 
 		WALK,
 		TO_HOME = WALK,
 		TO_WORK_PLACE,
+		TO_SHOP,
 		HOMELESS,
 		WALK_END
 	};
@@ -40,6 +43,7 @@ protected:
 
 	std::weak_ptr<TileBuilding> home;
 	std::weak_ptr<TileBuilding> workPlace;
+	std::weak_ptr<TileBuilding> shop;
 	std::deque<sf::Vector2i> pathToWorkPlace;
 
 	bool isCitizen = false;
@@ -53,6 +57,9 @@ protected:
 	STATUS status = STATUS::NONE;
 	float lifeTimer = 0.f;
 	float lifeInterval = 1.f;
+	float needShopTimer = 0.f;
+	float needShopInterval = 20.f;
+	bool needShop = false;
 	int money = 100;
 
 	float speed = 50.f;
@@ -89,6 +96,7 @@ public:
 
 	void UpdateHome(float timeDelta, float timeScale);
 	void UpdateWorkSpace(float timeDelta, float timeScale);
+	void UpdateShop(float timeDelta, float timeScale);
 	bool FindHome();
 	void SetHome(std::shared_ptr<TileBuilding> building);
 	void ResetHome();
@@ -97,9 +105,8 @@ public:
 	void ResetWorkPlace();
 	void CheckHome();
 	void CheckWorkPlace();
+	void ShopUsed();
 
-	
-	//TODO 수정 필요
 	void GridUpdate();
 
 	void LifeCycle(float timeDelta, float timeScale);

@@ -115,6 +115,13 @@ void SceneGameUI::Init()
 	buttonPause = ObjectButton::Create(This(), { 5.f, firstFloarY }, "pause", std::bind(&SceneGameUI::Pause, this));
 	buttonPause->SetOrigin(ORIGIN::LM);
 	buttonPause->OnlyDown();
+	pauseOutline.setSize({ view.getSize().x - 10.f, view.getSize().y - 10.f });
+	tool::SetOrigin(pauseOutline, ORIGIN::MC);
+	pauseOutline.setOutlineColor(sf::Color::Red);
+	pauseOutline.setFillColor(sf::Color::Transparent);
+	pauseOutline.setOutlineThickness(10.f);
+	pauseOutline.setPosition(view.getCenter());
+
 	buttonPlay = ObjectButton::Create(This(), { 74.f, firstFloarY }, "play", std::bind(&SceneGameUI::Play, this));
 	buttonPlay->SetOrigin(ORIGIN::LM);
 	buttonPlay->OnlyDown();
@@ -132,10 +139,26 @@ void SceneGameUI::Init()
 	buttonCitizen = ButtonNameTag::Create(This(), { view.getSize().x - 345.f, firstFloarY }, "citizen", "0");
 	buttonCitizen->SetOrigin(ORIGIN::RM);
 	buttonCitizen->SetWidth(300);
+
 	buttonMoney = ButtonNameTag::Create(This(), { view.getSize().x - 5.f, firstFloarY }, "money", "0");
 	buttonMoney->SetOrigin(ORIGIN::RM);
 	buttonMoney->SetWidth(300);
-
+	textProfit.setFillColor(sf::Color::Green);
+	textProfit.setCharacterSize(18);
+	textProfit.setFont(SFGM_FONT.Get("resource/font/ROKAF Sans Medium.ttf"));
+	textProfit.setPosition(buttonMoney->GetPosition() + sf::Vector2f(-32.f, 0.f - textProfit.getCharacterSize()));
+	textProfit.setStyle(sf::Text::Italic);
+	textProfit.setOutlineColor(sf::Color::Black);
+	textProfit.setOutlineThickness(0.5f);
+	tool::SetOrigin(textProfit, ORIGIN::RB);
+	textTex.setFillColor(sf::Color::Green);
+	textTex.setCharacterSize(18);
+	textTex.setFont(SFGM_FONT.Get("resource/font/ROKAF Sans Medium.ttf"));
+	textTex.setPosition(buttonMoney->GetPosition() + sf::Vector2f(-32.f, textTex.getCharacterSize() / 3));
+	textTex.setStyle(sf::Text::Italic);
+	textTex.setOutlineColor(sf::Color::Black);
+	textTex.setOutlineThickness(0.5f);
+	tool::SetOrigin(textTex, ORIGIN::RT);
 
 
 	buttonPlay->Select();
@@ -143,7 +166,9 @@ void SceneGameUI::Init()
 
 	tempText.setFillColor(sf::Color::White);
 	tempText.setCharacterSize(40);
-	tempText.setFont(SFGM_FONT.Get(""));
+	tempText.setFont(SFGM_FONT.Get("resource/font/ROKAF Sans Medium.ttf"));
+
+
 
 
 }
@@ -162,7 +187,12 @@ void SceneGameUI::Draw(sf::RenderWindow& window)
 	window.draw(rBar);
 	window.draw(cBar);
 	window.draw(iBar);
-
+	window.draw(textProfit);
+	window.draw(textTex);
+	if (sceneGame.lock()->GetTimeScale() == 0.f)
+	{
+		window.draw(pauseOutline);
+	}
 	window.setView(preView);
 
 }
@@ -170,14 +200,17 @@ void SceneGameUI::Reset()
 {
 	Scene::Reset();
 	SetCityTimeString(sceneGame.lock()->GetCityTime());
-	
+	textTex.setString(to_string(0));
+	textProfit.setString(to_string(0));
+
 }
 void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 {
 	std::shared_ptr<SceneGame> sceneGame = this->sceneGame.lock();
 
 
-	if (IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld())
+
+	if (!sceneGame->IsGameOver() && IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld())
 		&& !buttonMenu->GetBound().contains(GetMousePosWorld()))
 	{
 
@@ -198,7 +231,7 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 		}
 	}
 
-	if (IOManager::IsKeyDown(sf::Mouse::Right))
+	if (!sceneGame->IsGameOver() && IOManager::IsKeyDown(sf::Mouse::Right))
 	{
 		switch (clickMode)
 		{
@@ -218,16 +251,33 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 void SceneGameUI::Update(float timeDelta, float timeScale)
 {
 	Scene::Update(timeDelta, timeScale);
+
+	if (sceneGame.lock()->IsGameOver())
+		return;
+
 	buttonCitizen->SetString(to_string(ObjectUnit::GetUnitCount()));
 	buttonGrid->SetString(to_string(ObjectTile::GetTileCount()));
 
-	float max = std::max(GM_RCI.NeedRegidence() + GM_RCI.NeedCommerce() + GM_RCI.NeedIndustry(), 10);
-	rBar.setScale(GM_RCI.NeedRegidence() / max, 1.f);
-	cBar.setScale(GM_RCI.NeedCommerce() / max, 1.f);
-	iBar.setScale(GM_RCI.NeedIndustry() / max, 1.f);
+	float max = std::max(SFGM_RCI.NeedRegidence() + SFGM_RCI.NeedCommerce() + SFGM_RCI.NeedIndustry(), 100);
+	rBar.setScale(std::max(0.f, SFGM_RCI.NeedRegidence() / max), 1.f);
+	cBar.setScale(std::max(0.f, SFGM_RCI.NeedCommerce() / max), 1.f);
+	iBar.setScale(std::max(0.f, SFGM_RCI.NeedIndustry() / max), 1.f);
 
 	buttonMoney->SetString(tool::ThousandsSeparator(sceneGame.lock()->GetMoney()));
-
+	textProfit.setString("+" + tool::ThousandsSeparator(sceneGame.lock()->GetProfit()));
+	tool::SetOrigin(textProfit, ORIGIN::RB);
+	int tex = sceneGame.lock()->GetTex();
+	tool::SetOrigin(textTex, ORIGIN::RT);
+	if (tex < 0)
+	{
+		textTex.setFillColor(sf::Color::Red);
+		textTex.setString(tool::ThousandsSeparator(tex));
+	}
+	else
+	{
+		textTex.setFillColor(sf::Color::Green);
+		textTex.setString("+" + tool::ThousandsSeparator(tex));
+	}
 }
 
 void SceneGameUI::Menu()
@@ -271,8 +321,8 @@ void SceneGameUI::SetCityTimeString(const time_t& cityTime)
 		hourZero = L"0";
 
 	buttonCityTime->SetString(
-		std::to_wstring(cT.tm_year+1900) + L"년 "
-		+ std::to_wstring(cT.tm_mon+1) + L"월 "
+		std::to_wstring(cT.tm_year + 1900) + L"년 "
+		+ std::to_wstring(cT.tm_mon + 1) + L"월 "
 		+ std::to_wstring(cT.tm_mday) + L"일 "
 		+ hourZero + std::to_wstring(cT.tm_hour) + L"시");
 }
@@ -295,7 +345,7 @@ void SceneGameUI::Fast()
 {
 	buttonPause->UnSelect();
 	buttonPlay->UnSelect();
-	sceneGame.lock()->SetTimeScale(4.f);
+	sceneGame.lock()->SetTimeScale(16.f);
 }
 
 void SceneGameUI::Road()
@@ -339,7 +389,7 @@ void SceneGameUI::R()
 
 		rci = RCI();
 		rci.cost = 10;
-		rci.tex = 10;
+		rci.tex = -10;
 		rci.residence = 10;
 		rci.commerce = 0;
 		rci.industry = 0;
@@ -364,7 +414,7 @@ void SceneGameUI::C()
 
 		rci = RCI();
 		rci.cost = 20;
-		rci.tex = 20;
+		rci.tex = -20;
 		rci.residence = 0;
 		rci.commerce = 10;
 		rci.industry = 0;
@@ -390,7 +440,7 @@ void SceneGameUI::I()
 
 		rci = RCI();
 		rci.cost = 30;
-		rci.tex = 30;
+		rci.tex = -30;
 		rci.residence = 0;
 		rci.commerce = 0;
 		rci.industry = 10;

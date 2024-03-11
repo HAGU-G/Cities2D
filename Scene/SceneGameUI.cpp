@@ -121,14 +121,14 @@ void SceneGameUI::Init()
 	button4x = ObjectButton::Create(This(), { 141.f, firstFloarY }, "fast", std::bind(&SceneGameUI::Fast, this));
 	button4x->SetOrigin(ORIGIN::LM);
 	button4x->OnlyDown();
-	buttonGrid = ButtonNameTag::Create(This(), { view.getSize().x - 685.f, firstFloarY }, "grid", "grid");
+	buttonGrid = ButtonNameTag::Create(This(), { view.getSize().x - 685.f, firstFloarY }, "grid", "0");
 	buttonGrid->SetOrigin(ORIGIN::RM);
 	buttonGrid->SetWidth(300);
 	buttonGrid->SetFuntion(std::bind(&ObjectTileMap::TurnDrawLine, sceneGame.lock()->GetTileMap().lock().get()));
-	buttonCitizen = ButtonNameTag::Create(This(), { view.getSize().x - 345.f, firstFloarY }, "citizen", L"½Ã¹Î");
+	buttonCitizen = ButtonNameTag::Create(This(), { view.getSize().x - 345.f, firstFloarY }, "citizen", "0");
 	buttonCitizen->SetOrigin(ORIGIN::RM);
 	buttonCitizen->SetWidth(300);
-	buttonMoney = ButtonNameTag::Create(This(), { view.getSize().x - 5.f, firstFloarY }, "money", "money");
+	buttonMoney = ButtonNameTag::Create(This(), { view.getSize().x - 5.f, firstFloarY }, "money", "0");
 	buttonMoney->SetOrigin(ORIGIN::RM);
 	buttonMoney->SetWidth(300);
 
@@ -210,6 +210,8 @@ void SceneGameUI::Update(float timeDelta, float timeScale)
 	rBar.setScale(GM_RCI.NeedRegidence() / max, 1.f);
 	cBar.setScale(GM_RCI.NeedCommerce() / max, 1.f);
 	iBar.setScale(GM_RCI.NeedIndustry() / max, 1.f);
+
+	buttonMoney->SetString(tool::ThousandsSeparator(sceneGame.lock()->GetMoney()));
 
 }
 

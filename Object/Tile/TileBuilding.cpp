@@ -26,7 +26,6 @@ void TileBuilding::Update(float timeDelta, float timeScale)
 {
 	ObjectTile::Update(timeDelta, timeScale);
 	buildingSprite.setRotation(scene.lock()->GetView().getRotation());
-	//buildingSprite.setScale({ 1.f,scene.lock()->GetView().getSize().y / scene.lock()->GetResetView().getSize().y });
 }
 
 void TileBuilding::Draw(sf::RenderWindow& window)

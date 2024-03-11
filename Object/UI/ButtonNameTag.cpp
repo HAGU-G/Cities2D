@@ -52,11 +52,13 @@ void ButtonNameTag::SetPosition(const sf::Vector2f& position)
 void ButtonNameTag::SetString(const std::string& str)
 {
 	text.setString(str);
+	SetPosition(position);
 }
 
 void ButtonNameTag::SetString(const std::wstring& wstr)
 {
 	text.setString(wstr);
+	SetPosition(position);
 }
 
 std::shared_ptr<ButtonNameTag> ButtonNameTag::Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::string& text)

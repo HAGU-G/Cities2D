@@ -5,6 +5,8 @@ class ObjectUnit;
 
 struct RCI
 {
+	int cost = 0;
+
 	int residence = 0; //주거
 	int commerce = 0; //상업
 	int industry = 0; //산업
@@ -12,6 +14,7 @@ struct RCI
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> residenceSlot;
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> commerceSlot;
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> industrySlot;
+
 };
 
 class RCIManager final
@@ -45,7 +48,7 @@ public:
 	int LeftCommerce() const { return totalCommerce - usingCommerce; }
 	int LeftIndustry() const { return totalIndustry - usingIndustry; }
 
-	int NeedRegidence() const { return std::max(1,std::max(LeftCommerce(),LeftIndustry())-LeftRegidence()); }
+	int NeedRegidence() const { return std::max(1, std::max(LeftCommerce(), LeftIndustry()) - LeftRegidence()); }
 	int NeedCommerce() const { return std::max(0, LeftRegidence() - LeftIndustry()); }
 	int NeedIndustry() const { return std::max(0, LeftRegidence() - LeftCommerce()); }
 

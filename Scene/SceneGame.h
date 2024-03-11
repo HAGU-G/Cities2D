@@ -24,6 +24,8 @@ protected:
 
 	float citizenTimer = 0.f;
 	float citizenInterval = 1.f;
+
+	int money = 500;
 	
 	void SetMousePosGrid();
 
@@ -46,10 +48,12 @@ public:
 	void Release() override;
 
 	bool CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord);
-	void OrganizeGridInfo();
 	std::shared_ptr<ObjectUnit> AddUnit(const std::shared_ptr<ObjectUnit>& unit);
+	void MoneyProfit(unsigned int value);
 
+	bool MoneyLoss(unsigned int value);
 	void DeleteObjectTile(const sf::Vector2i& gridCoord);
+
 
 	inline const sf::Vector2i& GetMousePosGrid() const { return mousePosGrid; }
 	inline sf::Vector2f GetSelectGridPos() const { return sf::Vector2f(mousePosGrid) * gridSize.x; }
@@ -60,7 +64,9 @@ public:
 	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord){	return gridInfo[gridCoord.x][gridCoord.y]; }
 	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };
 	inline const std::weak_ptr<ObjectTileMap> GetTileMap() { return groundTileMap; }
+	inline int GetMoney() const { return money; }
 
+	void OrganizeGridInfo();
 	void SaveGame();
 	void LoadGame();
 	bool LoadObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord,

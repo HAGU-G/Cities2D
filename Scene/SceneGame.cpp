@@ -244,6 +244,12 @@ std::shared_ptr<ObjectUnit> SceneGame::AddUnit(const std::shared_ptr<ObjectUnit>
 	return unit;
 }
 
+void SceneGame::MoneyProfit(unsigned int value)
+{
+
+	money += value;
+}
+
 bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& gridCoord)
 {
 	if (gridInfo[gridCoord.x][gridCoord.y].second.expired())
@@ -256,13 +262,19 @@ bool SceneGame::CreateObjectTile(GAME_OBJECT_TYPE type, const sf::Vector2i& grid
 			break;
 		case GAME_OBJECT_TYPE::HOME:
 		{
-			RCI rci = { GameManager::RandomRange(1, 3),0,0 };
+			RCI rci;
+			rci.residence = GameManager::RandomRange(1, 3);
+			rci.cost = 100;
+			MoneyLoss(rci.cost);
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
 			break;
 		}
 		case GAME_OBJECT_TYPE::WORK_PLACE:
 		{		
-			RCI rci = { 0,0,GameManager::RandomRange(1,3) };
+			RCI rci;
+			rci.industry = GameManager::RandomRange(1, 10);
+			rci.cost = 100;
+			MoneyLoss(rci.cost);
 			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord);
 			break;
 		}
@@ -311,6 +323,15 @@ void SceneGame::OrganizeGridInfo()
 			}
 		}
 	}
+}
+
+bool SceneGame::MoneyLoss(unsigned int value)
+{
+	if (money < value)
+		return false;
+
+	money -= value;
+	return true;
 }
 
 void SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)

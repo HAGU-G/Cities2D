@@ -17,19 +17,20 @@ enum class ORIGIN
 };
 
 namespace tool {
+	//distance
 	float Magnitude(const sf::Vector2f& vec);
 	sf::Vector2f GetNormalize(const sf::Vector2f& vec);
 	void Normalize(sf::Vector2f& vec);
 	float Distance(const sf::Vector2f& p1, const sf::Vector2f& p2);
 
-
-
+	//Origin
 	sf::Vector2f SetOrigin(sf::Transformable& transformable, ORIGIN origin, const sf::FloatRect& rect);
 	sf::Vector2f SetOrigin(sf::Sprite& sprite, ORIGIN origin);
 	sf::Vector2f SetOrigin(sf::Text& text, ORIGIN origin);
 	sf::Vector2f SetOrigin(sf::Shape& shape, ORIGIN origin);
 
-
+	//conversion
+	std::string ThousandsSeparator(int num);
 
 
 

@@ -61,6 +61,27 @@ namespace tool
 		return SetOrigin(shape, origin, shape.getLocalBounds());
 	}
 
+	std::string ThousandsSeparator(int num)
+	{
+		if (num < 1000)
+			return to_string(num);
+		std::string numStr = to_string(num);
+		std::string newStr;
+		int count = 0;
+		while(!numStr.empty())
+		{
+			newStr = numStr.back() + newStr;
+			numStr.pop_back();
+			count++;
+			if (count == 3 && !numStr.empty())
+			{
+				newStr = "," + newStr;
+				count = 0;
+			}
+		}
+		return newStr;
+	}
+
 
 
 

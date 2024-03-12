@@ -264,19 +264,19 @@ void SceneGameUI::Update(float timeDelta, float timeScale)
 	iBar.setScale(std::max(0.f, SFGM_RCI.NeedIndustry() / max), 1.f);
 
 	buttonMoney->SetString(tool::ThousandsSeparator(sceneGame.lock()->GetMoney()));
-	textProfit.setString("+" + tool::ThousandsSeparator(sceneGame.lock()->GetProfit()));
+	textProfit.setString("Daily +" + tool::ThousandsSeparator(sceneGame.lock()->GetProfit()));
 	tool::SetOrigin(textProfit, ORIGIN::RB);
 	int tex = sceneGame.lock()->GetTex();
 	tool::SetOrigin(textTex, ORIGIN::RT);
 	if (tex < 0)
 	{
 		textTex.setFillColor(sf::Color::Red);
-		textTex.setString(tool::ThousandsSeparator(tex));
+		textTex.setString("Monthly" + tool::ThousandsSeparator(tex));
 	}
 	else
 	{
 		textTex.setFillColor(sf::Color::Green);
-		textTex.setString("+" + tool::ThousandsSeparator(tex));
+		textTex.setString("Monthly +" + tool::ThousandsSeparator(tex));
 	}
 }
 

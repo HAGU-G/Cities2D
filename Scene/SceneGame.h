@@ -5,6 +5,21 @@
 
 class ObjectTileMap;
 
+struct CITY
+{
+	std::string mayorName = "Unkwoun";
+	int money = 5000;
+	unsigned int moneyProfit = 0;
+	int moneyTex = 0;
+	time_t cityTime = 0;
+	int lastDay = 0;
+	int lastMonth = 0;
+	bool doPayTex = false;
+	float cityTimer = 0.f;
+	float cityInterval = 1.f;
+
+};
+
 class SceneGame : public Scene
 {
 protected:
@@ -12,7 +27,7 @@ protected:
 
 	sf::Vector2i mousePosGrid;
 
-	
+
 	bool isTilt = false;
 	float startTilt = 0.f;
 	float tilt = 1.f;
@@ -31,15 +46,7 @@ protected:
 	void SetMousePosGrid();
 
 	//도시의 정보
-	int money = 5000;
-	unsigned int moneyProfit = 0;
-	int moneyTex = 0;
-	time_t cityTime = 0;
-	int lastDay = 0;
-	int lastMonth = 0;
-	bool doPayTex = false;
-	float cityTimer = 0.f;
-	float cityInterval = 1.f;
+	CITY city;
 	bool gameOver = false;
 
 public:
@@ -65,7 +72,7 @@ public:
 	std::shared_ptr<ObjectUnit> AddUnit(const std::shared_ptr<ObjectUnit>& unit);
 
 	void UpdateCityTime(float timeDelta, float TimeScale);
-	inline const time_t& GetCityTime() const { return cityTime; }
+	inline const time_t& GetCityTime() const { return city.cityTime; }
 	void MoneyProfit(unsigned int value);
 	void MoneyTex(int value);
 	void MoneyReport();
@@ -82,15 +89,17 @@ public:
 	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord) { return gridInfo[gridCoord.x][gridCoord.y]; }
 	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };
 	inline const std::weak_ptr<ObjectTileMap> GetTileMap() { return groundTileMap; }
-	inline int GetMoney() const { return money; }
-	inline int GetProfit() const { return moneyProfit; }
-	inline int GetTex() const { return moneyTex; }
-	inline bool DoPayTex() const { return doPayTex; }
+	inline int GetMoney() const { return city.money; }
+	inline int GetProfit() const { return city.moneyProfit; }
+	inline int GetTex() const { return city.moneyTex; }
+	inline bool DoPayTex() const { return city.doPayTex; }
 	inline float GetTilt() const { return tilt; }
+	inline const CITY& GetCityInfo() const { return city; }
 
 	void OrganizeGridInfo();
 	void SaveGame();
 	void LoadGame();
+	void LoadMayor(CITY city);
 	bool LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
 		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type);
 

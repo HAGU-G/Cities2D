@@ -75,7 +75,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	}
 	else {
 		UpdateCityTime(timeDelta, timeScale);
-		if (money < 0)
+		if (city.money < 0)
 			GameOver();
 	}
 
@@ -95,7 +95,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::IsKeyPress(sf::Keyboard::Q))
 	{
 		view.rotate(45.f * timeDelta);
-		money -= 3;
+		city.money -= 3;
 	}
 	if (IOManager::IsKeyPress(sf::Keyboard::E))
 	{
@@ -214,7 +214,7 @@ void SceneGame::PostUpdate(float timeDelta, float timeScale)
 	}
 
 	Scene::PostUpdate(timeDelta, timeScale);
-	doPayTex = false;
+	city.doPayTex = false;
 }
 
 void SceneGame::Draw(sf::RenderWindow& window)
@@ -241,14 +241,15 @@ void SceneGame::Reset()
 	AddObject(std::make_shared<ObjectIndicater>(This(), GAME_OBJECT_TYPE::NONE))->Init();
 
 
-	money = 5000;
+	city = CITY();
+
 	time_t cT_t = time(NULL);
 	tm cT;
 	localtime_s(&cT, &cT_t);
 	cT.tm_hour = 6;
-	cityTime = mktime(&cT);
-	lastMonth = cT.tm_mon;
-	lastDay = cT.tm_mday;
+	city.cityTime = mktime(&cT);
+	city.lastMonth = cT.tm_mon;
+	city.lastDay = cT.tm_mday;
 
 }
 
@@ -268,44 +269,44 @@ std::shared_ptr<ObjectUnit> SceneGame::AddUnit(const std::shared_ptr<ObjectUnit>
 
 void SceneGame::UpdateCityTime(float timeDelta, float TimeScale)
 {
-	cityTimer += timeDelta * TimeScale;
-	if (cityTimer > cityInterval)
+	city.cityTimer += timeDelta * TimeScale;
+	if (city.cityTimer > city.cityInterval)
 	{
-		cityTimer = 0.f;
-		cityTime += 3600;
+		city.cityTimer = 0.f;
+		city.cityTime += 3600;
 
 		tm tex;
-		localtime_s(&tex, &cityTime);
-		if (lastDay != tex.tm_mday)
+		localtime_s(&tex, &city.cityTime);
+		if (city.lastDay != tex.tm_mday)
 		{
-			lastDay = tex.tm_mday;
+			city.lastDay = tex.tm_mday;
 			MoneyReport();
 		}
-		if (lastMonth != tex.tm_mon)
+		if (city.lastMonth != tex.tm_mon)
 		{
-			lastMonth = tex.tm_mon;
-			doPayTex = true;
-			money += moneyTex;
-			moneyTex = 0;
+			city.lastMonth = tex.tm_mon;
+			city.doPayTex = true;
+			city.money += city.moneyTex;
+			city.moneyTex = 0;
 		}
-		std::dynamic_pointer_cast<SceneGameUI, Scene>(SceneManager::Get("SceneGameUI"))->SetCityTimeString(cityTime);
+		std::dynamic_pointer_cast<SceneGameUI, Scene>(SceneManager::Get("SceneGameUI"))->SetCityTimeString(city.cityTime);
 	}
 }
 
 void SceneGame::MoneyProfit(unsigned int value)
 {
-	moneyProfit += value;
+	city.moneyProfit += value;
 }
 
 void SceneGame::MoneyTex(int value)
 {
-	moneyTex += value;
+	city.moneyTex += value;
 }
 
 void SceneGame::MoneyReport()
 {
-	money += moneyProfit;
-	moneyProfit = 0;
+	city.money += city.moneyProfit;
+	city.moneyProfit = 0;
 }
 
 bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
@@ -369,10 +370,10 @@ void SceneGame::OrganizeGridInfo()
 
 bool SceneGame::MoneyUse(unsigned int value)
 {
-	if (money < value)
+	if (city.money < value)
 		return false;
 
-	money -= value;
+	city.money -= value;
 	return true;
 }
 
@@ -395,14 +396,21 @@ GridInfo& SceneGame::GetGridInfoRaw()
 
 void SceneGame::SaveGame()
 {
+	DataManager::SaveMayor(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::SaveTile(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::SaveUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 }
 
 void SceneGame::LoadGame()
 {
+	DataManager::LoadMayor(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::LoadTile(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::LoadUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
+}
+
+void SceneGame::LoadMayor(CITY city)
+{
+	this->city = city;
 }
 
 bool SceneGame::LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,

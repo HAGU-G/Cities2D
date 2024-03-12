@@ -6,9 +6,42 @@
 #include "_Include_Tile.h"
 #include "ObjectUnit.h"
 
+bool DataManager::LoadMayor(const std::shared_ptr<SceneGame>& sceneGame)
+{
+	const CsvFile& csv = SFGM_CSVFILE.Load("data/save/" + sceneGame->GetCityInfo().mayorName + "Mayor.csv");
+	if (csv.IsUnknown())
+		return false;
+
+	const rapidcsv::Document& doc = csv.GetDocument();
+	CITY city = sceneGame->GetCityInfo();
+
+
+	for (int i = 0; i < doc.GetRowCount(); i++)
+	{
+		auto row = doc.GetRow<std::string>(i);
+		city.mayorName = row[0];
+
+		city.money = std::stoi(row[1]);
+		city.moneyProfit = std::stoi(row[2]);
+		city.moneyTex = std::stoi(row[3]);
+
+		city.cityTime = std::stoll(row[4]);
+		city.cityTimer = std::stof(row[5]);
+		city.cityInterval = std::stof(row[6]);
+		city.lastDay = std::stoi(row[7]);
+		city.lastMonth = std::stoi(row[8]);
+
+		city.doPayTex = std::stoi(row[9]);
+	}
+
+	sceneGame->LoadMayor(city);
+	SFGM_CSVFILE.UnLoad();
+	return true;
+}
+
 bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 {
-	const CsvFile& csv = SFGM_CSVFILE.Load("data/save/Tiles.csv");
+	const CsvFile& csv = SFGM_CSVFILE.Load("data/save/" + sceneGame->GetCityInfo().mayorName + "Tiles.csv");
 	if (csv.IsUnknown())
 		return false;
 	const rapidcsv::Document& doc = csv.GetDocument();
@@ -152,7 +185,7 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 	if (gridInfo.empty())
 		return false;
 
-	std::ofstream outFile("data/save/Tiles.csv");
+	std::ofstream outFile("data/save/" + sceneGame->GetCityInfo().mayorName + "Tiles.csv");
 	if (!outFile.is_open())
 		return false;
 
@@ -182,28 +215,18 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 			str += to_string(rect.left) + slash + to_string(rect.top) + slash
 				+ to_string(rect.width) + slash + to_string(rect.height) + slash + comma;
 
-			switch (y.second.first)
-			{
-
-			case GAME_OBJECT_TYPE::ROAD:
+			if (y.second.first == GAME_OBJECT_TYPE::ROAD)
 			{
 				str = to_string((int)y.second.first) + str;
 				str += "0/0/0/0/";
-
-				break;
 			}
-			case GAME_OBJECT_TYPE::HOME:
-			case GAME_OBJECT_TYPE::WORK_PLACE:
+			else if (y.second.first >= GAME_OBJECT_TYPE::BUILDING && y.second.first < GAME_OBJECT_TYPE::BUILDING_END)
 			{
 				str = std::to_string((int)y.second.first) + str;
 				std::shared_ptr<TileBuilding> building = std::dynamic_pointer_cast<TileBuilding, ObjectTile>(tile);
 
 				const RCI& rci = building->GetRCI();
 				str += to_string(rci.residence) + slash + to_string(rci.commerce) + slash + to_string(rci.industry) + slash + to_string(rci.cost) + slash;
-				break;
-			}
-			default:
-				break;
 			}
 
 			outFile << str << std::endl;
@@ -219,7 +242,7 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 
 bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 {
-	const CsvFile& csv = SFGM_CSVFILE.Load("data/save/Units.csv");
+	const CsvFile& csv = SFGM_CSVFILE.Load("data/save/" + sceneGame->GetCityInfo().mayorName + "Units.csv");
 	if (csv.IsUnknown())
 		return false;
 	const rapidcsv::Document& doc = csv.GetDocument();
@@ -286,6 +309,21 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 						{
 							tempTile->UseI(unit);
 							unit->SetWorkPlace(tempTile);
+						}
+					}
+					break;
+				case 4:
+					if (tempStr != "N")
+						tempVi.x = std::stoi(tempStr);
+					break;
+				case 5:
+					if (tempStr != "N")
+					{
+						tempVi.y = std::stoi(tempStr);
+						std::shared_ptr<TileBuilding> tempTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						if (tempTile != nullptr)
+						{
+							unit->shop = tempTile;
 						}
 					}
 					break;
@@ -480,7 +518,7 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 	if (unitList.empty())
 		return false;
 
-	std::ofstream outFile("data/save/Units.csv");
+	std::ofstream outFile("data/save/" + sceneGame->GetCityInfo().mayorName + "Units.csv");
 	if (!outFile.is_open())
 		return false;
 
@@ -512,6 +550,14 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		if (!unit->workPlace.expired())
 		{
 			str += to_string(unit->workPlace.lock()->GetGridCoord().x) + slash + to_string(unit->workPlace.lock()->GetGridCoord().y) + slash;
+		}
+		else
+		{
+			str += "N/N/";
+		}
+		if (!unit->shop.expired())
+		{
+			str += to_string(unit->shop.lock()->GetGridCoord().x) + slash + to_string(unit->shop.lock()->GetGridCoord().y) + slash;
 		}
 		else
 		{
@@ -631,5 +677,36 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 
 bool DataManager::SaveMayor(const std::shared_ptr<SceneGame>& sceneGame)
 {
-	return false;
+	CITY city = sceneGame->GetCityInfo();
+	std::ofstream outFile("data/save/" + city.mayorName + "Mayor.csv");
+	if (!outFile.is_open())
+		return false;
+
+	outFile << "NAME,MONEY,PROFIT,TEX,TIME,LAST_DAY,LAST_MONTH,DOPAYTEX,TIMER" << std::endl;
+
+	std::string str;
+	std::string comma = ",";
+
+	//이름
+	str += city.mayorName + comma;
+
+	//돈
+	str += to_string(city.money) + comma;
+	str += to_string(city.moneyProfit) + comma;
+	str += to_string(city.moneyTex) + comma;
+
+	//시간
+	str += to_string(city.cityTime) + comma;
+	str += to_string(city.cityTimer) + comma;
+	str += to_string(city.cityInterval) + comma;
+	str += to_string(city.lastDay) + comma;
+	str += to_string(city.lastMonth) + comma;
+
+	//세금
+	str += to_string(city.doPayTex);
+
+
+	outFile << str << std::endl;
+	outFile.close();
+	return true;
 }

@@ -687,10 +687,10 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				status = STATUS::HOMELESS;
 			}
 		}
-		Moving(timeDelta, timeScale);
-		if (!isMoving)
+		else
 		{
-			if (position == destination.lock()->GetGridCenterPos())
+			Moving(timeDelta, timeScale);
+			if (!isMoving && position == destination.lock()->GetGridCenterPos())
 			{
 				money -= 1;
 				startingPoint.reset();

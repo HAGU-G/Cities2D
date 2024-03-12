@@ -6,6 +6,24 @@
 #include "_Include_Tile.h"
 #include "ObjectUnit.h"
 
+bool DataManager::LoadConfig()
+{
+	const CsvFile& csv = SFGM_CSVFILE.Load("data/Config.csv");
+	if (csv.IsUnknown())
+		return false;
+
+	const rapidcsv::Document& doc = csv.GetDocument();
+	for (int i = 0; i < doc.GetRowCount(); i++)
+	{
+		auto row = doc.GetRow<std::string>(i);
+		GameManager::lastGameName = row[i];
+	}
+
+	SFGM_CSVFILE.UnLoad();
+	return true;
+
+}
+
 bool DataManager::LoadMayor(const std::shared_ptr<SceneGame>& sceneGame)
 {
 	const CsvFile& csv = SFGM_CSVFILE.Load("data/save/" + sceneGame->GetCityInfo().mayorName + "Mayor.csv");
@@ -695,6 +713,24 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 
 
 
+}
+
+bool DataManager::SaveConfig()
+{
+	std::wofstream outFile(L"data/Config.csv");
+	if (!outFile.is_open())
+		return false;
+
+	std::wstringstream wStr;
+	std::wstring comma = L",";
+
+	wStr << L"LAST_GAME" << std::endl;
+
+	wStr << GameManager::lastGameName.c_str();
+
+	outFile << wStr.rdbuf() << std::endl;
+	outFile.close();
+	return true;
 }
 
 bool DataManager::SaveMayor(const std::shared_ptr<SceneGame>& sceneGame)

@@ -25,6 +25,8 @@ sf::Vector2i  GameManager::mousePosWindow;
 std::random_device* GameManager::rd = nullptr; // randomDevice
 std::mt19937* GameManager::rg = nullptr; //randomGenerator
 
+std::string GameManager::lastGameName = "";
+
 
 void GameManager::Init()
 {

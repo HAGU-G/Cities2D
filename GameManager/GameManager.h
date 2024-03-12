@@ -27,7 +27,10 @@ private:
 	static std::random_device* rd; // randomDevice
 	static std::mt19937* rg; //randomGenerator
 
+
 public:
+	static std::string lastGameName;
+
 	static void Init();
 	static void MainLoop();
 	static void Release();

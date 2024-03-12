@@ -4,6 +4,7 @@
 #include <ButtonNineSlice.h>
 #include <SceneGame.h>
 #include <SceneGameUI.h>
+#include "DataManager.h"
 
 SceneMenu::SceneMenu(const std::string& name)
 	:Scene(name)
@@ -59,7 +60,7 @@ void SceneMenu::Init()
 
 
 	lastGame = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 0.f),
-		"continue", L"이어하기", std::bind(&SceneMenu::Continue,this));
+		"continue", L"이어하기", std::bind(&SceneMenu::Continue, this));
 	playGame = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 0.f),
 		"continue", L"게임 계속", std::bind(&SceneMenu::GameContinue, this));
 	playGame->SetActive(false);
@@ -76,30 +77,63 @@ void SceneMenu::Init()
 	resetGame = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(2.5f, 0.f),
 		"loading", L"초기화", std::bind(&SceneMenu::GameReset, this));
 	resetGame->SetActive(false);
-	std::shared_ptr<ButtonNineSlice> load = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(2.5f, 85.f),
+
+	//불러오기
+	loadView.setSize(450.f,250.f);
+	loadView.setCenter(view.getCenter().x + 2.5f+225.f, view.getCenter().y + 85.f + 125.f);
+	loadView.setViewport({ (view.getCenter().x + 2.5f) / resetView.getSize().x,(view.getCenter().y + 85.f) / resetView.getSize().y
+		,450.f / resetView.getSize().x, 250.f / resetView.getSize().y });
+
+	load = std::make_shared<ButtonNineSlice>(This(), sf::Vector2f(view.getCenter().x+ 2.5f, view.getCenter().y + 85.f),
 		"load", L"불러오기", std::bind(&SceneMenu::Load, this));
+	load->Init();
+	load->Reset();
 
+}
 
-	load->SetSize({ 450.f,250.f });
+void SceneMenu::PreUpdate(float timeDelta, float timeScale)
+{
+	Scene::PreUpdate(timeDelta, timeScale);
+	load->PreUpdate(timeDelta, timeScale);
+}
 
+void SceneMenu::Update(float timeDelta, float timeScale)
+{
+	Scene::Update(timeDelta, timeScale);
+	load->Update(timeDelta, timeScale);
+}
+
+void SceneMenu::PostUpdate(float timeDelta, float timeScale)
+{
+	Scene::PostUpdate(timeDelta, timeScale);
+	load->PostUpdate(timeDelta, timeScale);
 }
 
 void SceneMenu::Draw(sf::RenderWindow& window)
 {
+	const sf::View& preView = window.getView();
 	if (doDrawBackground)
 	{
-		const sf::View& preView = window.getView();
 		window.setView(view);
 		window.draw(background);
-		window.setView(preView);
 	}
 	Scene::Draw(window);
+	window.setView(loadView);
+	load->Draw(window);
+	window.setView(preView);
+}
+
+void SceneMenu::Reset()
+{
+	Scene::Reset();
+	DataManager::LoadConfig();
 }
 
 void SceneMenu::Continue()
 {
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"));
 	sceneGame->Reset();
+	sceneGame->SetMayorName(GameManager::lastGameName);
 	sceneGame->LoadGame();
 	New();
 }
@@ -132,6 +166,7 @@ void SceneMenu::Save()
 {
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"));
 	sceneGame->SaveGame();
+	DataManager::SaveConfig();
 }
 
 void SceneMenu::Load()
@@ -139,6 +174,7 @@ void SceneMenu::Load()
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"));
 	sceneGame->Reset();
 	sceneGame->LoadGame();
+	DataManager::SaveConfig();
 }
 
 void SceneMenu::GameReset()

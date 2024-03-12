@@ -16,6 +16,10 @@ protected:
 	std::shared_ptr<ButtonNineSlice> saveGame;
 	std::shared_ptr<ButtonNineSlice> resetGame;
 
+	std::shared_ptr<ButtonNineSlice> load;
+
+	sf::View loadView;
+
 public:
 	explicit SceneMenu(const std::string& name);
 	~SceneMenu() override = default;
@@ -26,7 +30,11 @@ public:
 
 	void AddResource() override;
 	void Init() override;
+	void PreUpdate(float timeDelta, float timeScale) override;
+	void Update(float timeDelta, float timeScale) override;
+	void PostUpdate(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
+	void Reset() override;
 
 	void Continue();
 	void GameContinue();

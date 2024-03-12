@@ -6,10 +6,13 @@ class DataManager final
 {
 private:
 public:
+	static bool SaveConfig();
 	static bool SaveMayor(const std::shared_ptr<SceneGame>& sceneGame);
 	static bool SaveTile(const std::shared_ptr<SceneGame>& sceneGame);
 	static bool SaveUnit(const std::shared_ptr<SceneGame>& sceneGame);
 
+	
+	static bool LoadConfig();
 	static bool LoadMayor(const std::shared_ptr<SceneGame>& sceneGame);
 	static bool LoadTile(const std::shared_ptr<SceneGame>& sceneGame);
 	static bool LoadUnit(const std::shared_ptr<SceneGame>& sceneGame);

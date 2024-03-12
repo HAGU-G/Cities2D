@@ -407,10 +407,12 @@ void SceneGame::SaveGame()
 	DataManager::SaveMayor(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::SaveTile(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::SaveUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
+	GameManager::lastGameName = city.mayorName;
 }
 
 void SceneGame::LoadGame()
 {
+	city.mayorName = GameManager::lastGameName;
 	DataManager::LoadMayor(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::LoadTile(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::LoadUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));

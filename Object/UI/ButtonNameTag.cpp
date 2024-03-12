@@ -45,7 +45,10 @@ void ButtonNameTag::Update(float timeDelta, float timeScale)
 		}
 	}
 
-
+	sf::Image image = icon.getTexture()->copyToImage();
+	color = image.getPixel(image.getSize().x, image.getSize().y / 2);
+	background.setFillColor(color);
+	backgroundCircle.setFillColor(color);
 }
 
 void ButtonNameTag::Draw(sf::RenderWindow& window)

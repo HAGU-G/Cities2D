@@ -323,6 +323,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 						std::shared_ptr<TileBuilding> tempTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 						if (tempTile != nullptr)
 						{
+							tempTile->UseC(unit);
 							unit->shop = tempTile;
 						}
 					}
@@ -441,6 +442,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
+						//TODO nextTileÀ» ¹Þ¾Æ¿ÀÁö ¸øÇÔ
 						unit->nextTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 					}
 					break;
@@ -506,7 +508,15 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 			}
 		}
 		unit->gameObjectTagList = tagList;
+
+		//shop µ·
+		unit->needShopTimer = std::stof(row[16]);
+		unit->needShopInterval = std::stof(row[17]);
+		unit->needShop = std::stoi(row[18]);
+		unit->money = std::stoi(row[19]);
+
 	}
+
 
 	SFGM_CSVFILE.UnLoad();
 	return false;
@@ -522,7 +532,7 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 	if (!outFile.is_open())
 		return false;
 
-	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/HAS_HOME/HAS_WORK_PLACE/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS" << std::endl;
+	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/HAS_HOME/HAS_WORK_PLACE/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY" << std::endl;
 
 	std::string str;
 	std::string comma = ",";
@@ -664,6 +674,13 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		default:
 			break;
 		}
+		str += comma;
+
+		//shop µ·
+		str += to_string(unit->needShopTimer) + comma;
+		str += to_string(unit->needShopInterval) + comma;
+		str += to_string(unit->needShop) + comma;
+		str += to_string(unit->money);
 
 		outFile << str << std::endl;
 

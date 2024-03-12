@@ -2,6 +2,19 @@
 #include "RCIManager.h"
 #include <SceneGameUI.h>
 
+void RCIManager::Reset()
+{
+	totalRegidence = 0;
+	totalCommerce = 0;
+	totalIndustry = 0;
+
+	usingRegidence = 0;
+	usingCommerce = 0;
+	usingIndustry = 0;
+
+	needCommerce = 0;
+}
+
 void RCIManager::UpdateRCI() const
 {
 	std::string str = "R: " + std::to_string(totalRegidence) + " " + std::to_string(usingRegidence) + " " + std::to_string(totalRegidence - usingRegidence)

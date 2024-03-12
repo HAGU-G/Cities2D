@@ -35,6 +35,8 @@ private:
 public:
 	~RCIManager() = default;
 
+	void Reset();
+
 	void UpdateRCI() const;
 	void UpdateRCI(int r, int c, int i);
 

@@ -8,22 +8,46 @@ size_t ObjectUnit::citizenCount = 0;
 
 void ObjectUnit::NoHome()
 {
+	SFGM_RCI.UseRegidence(-1);
+
 	home.reset();
 	hasHome = false;
-	SFGM_RCI.UseRegidence(-1);
 }
 
 void ObjectUnit::NoWorkPlace()
 {
+	SFGM_RCI.UseIndustry(-1);
+
 	workPlace.reset();
 	hasWorkPlace = false;
-	SFGM_RCI.UseIndustry(-1);
 }
 
 void ObjectUnit::NoShop()
 {
 	shop.reset();
-	SFGM_RCI.UseCommerce(-1);
+
+	if (status == STATUS::TO_SHOP || status == STATUS::SHOP)
+	{
+		SFGM_RCI.UseCommerce(-1);
+		if (hasHome)
+		{
+			walkPath = pathToWorkPlace;
+			startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+			destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+			status = STATUS::TO_HOME;
+		}
+		else if (hasWorkPlace)
+		{
+			walkPath = pathToWorkPlace;
+			startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
+			destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+			status = STATUS::TO_WORK_PLACE;
+		}
+		else
+		{
+			status = STATUS::HOMELESS;
+		}
+	}
 }
 
 ObjectUnit::ObjectUnit(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
@@ -92,6 +116,7 @@ void ObjectUnit::Reset()
 	ResetHome();
 	ResetWorkPlace();
 	ShopUsed();
+	NoShop();
 
 	NoCitizen();
 	status = STATUS::NONE;
@@ -118,15 +143,17 @@ void ObjectUnit::Reset()
 
 void ObjectUnit::Release()
 {
-	GameObject::Release();
 	ResetHome();
 	ResetWorkPlace();
 	ShopUsed();
+	NoShop();
+
 	NoCitizen();
 	sceneGame.reset();
 	nextTile.reset();
 	startingPoint.reset();
 	destination.reset();
+	GameObject::Release();
 }
 
 std::shared_ptr<ObjectUnit> ObjectUnit::Create(std::weak_ptr<Scene> scene)
@@ -603,24 +630,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		needShopTimer -= timeDelta * timeScale;
 		if (shop.expired())
 		{
-			if (hasHome)
-			{
-				walkPath = pathToWorkPlace;
-				startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-				destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
-				status = STATUS::TO_HOME;
-			}
-			else if (hasWorkPlace)
-			{
-				walkPath = pathToWorkPlace;
-				startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-				destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
-				status = STATUS::TO_WORK_PLACE;
-			}
-			else
-			{
-				status = STATUS::HOMELESS;
-			}
+			NoShop();
 		}
 		else
 		{
@@ -640,7 +650,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				{
 					status = STATUS::HOME;
 				}
-				else if (hasHome)
+				else if (!home.expired())
 				{
 					walkPath = ObjectTile::FindShortPath(home, sceneGame.lock()->GetTileInfo(gridCoord).second);
 					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
@@ -648,7 +658,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 					money -= 2;
 					status = STATUS::TO_HOME;
 				}
-				else if (hasWorkPlace)
+				else if (!workPlace.expired())
 				{
 					walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, workPlace);
 					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
@@ -666,26 +676,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 	case STATUS::TO_SHOP:
 		if (shop.expired())
 		{
-			if (hasHome)
-			{
-				walkPath = ObjectTile::FindShortPath(home, sceneGame.lock()->GetTileInfo(gridCoord).second);
-				startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-				destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
-				money -= 10;
-				sceneGame.lock()->MoneyProfit(1);
-				status = STATUS::TO_HOME;
-			}
-			else if (hasWorkPlace)
-			{
-				walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, workPlace);
-				startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-				destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
-				status = STATUS::TO_WORK_PLACE;
-			}
-			else
-			{
-				status = STATUS::HOMELESS;
-			}
+			NoShop();
 		}
 		else
 		{

@@ -251,6 +251,8 @@ void SceneGame::Reset()
 	city.lastMonth = cT.tm_mon;
 	city.lastDay = cT.tm_mday;
 
+	SFGM_RCI.Reset();
+
 }
 
 void SceneGame::Release()

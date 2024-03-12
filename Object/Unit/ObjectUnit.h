@@ -110,7 +110,7 @@ public:
 	void GridUpdate();
 
 	void LifeCycle(float timeDelta, float timeScale);
-	void Moving(float timeDelta, float timeScale);
-	void MovingReverse(float timeDelta, float timeScale);
+	void Moving(float timeDelta, float timeScale);//수정 필요
+	void MovingReverse(float timeDelta, float timeScale);//수정 필요
 };
 

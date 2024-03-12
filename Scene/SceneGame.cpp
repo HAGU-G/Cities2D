@@ -370,6 +370,11 @@ void SceneGame::OrganizeGridInfo()
 	}
 }
 
+void SceneGame::SetMayorName(const std::string& str)
+{
+	city.mayorName = str;
+}
+
 bool SceneGame::MoneyUse(unsigned int value)
 {
 	if (city.money < value)

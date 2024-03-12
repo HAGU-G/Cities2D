@@ -7,7 +7,7 @@ class ObjectTileMap;
 
 struct CITY
 {
-	std::string mayorName = "Unkwoun";
+	std::string mayorName = "";
 	int money = 5000;
 	unsigned int moneyProfit = 0;
 	int moneyTex = 0;
@@ -86,9 +86,11 @@ public:
 	const GridInfo& GetGridInfo();
 	GridInfo& GetGridInfoRaw();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
-	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord) {
-		sf::Vector2i d  = gridCoord;
-	return gridInfo[gridCoord.x][gridCoord.y]; }
+
+
+	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord){	return gridInfo[gridCoord.x][gridCoord.y];	}
+
+
 	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };
 	inline const std::weak_ptr<ObjectTileMap> GetTileMap() { return groundTileMap; }
 	inline int GetMoney() const { return city.money; }
@@ -99,6 +101,7 @@ public:
 	inline const CITY& GetCityInfo() const { return city; }
 
 	void OrganizeGridInfo();
+	void SetMayorName(const std::string& str);
 	void SaveGame();
 	void LoadGame();
 	void LoadMayor(CITY city);

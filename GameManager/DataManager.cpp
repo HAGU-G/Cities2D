@@ -443,7 +443,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					{
 						tempVi.y = std::stoi(tempStr);
 						//TODO nextTile을 받아오지 못함
-						unit->nextTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						unit->nextTile = C_TILE_ROAD(sceneGame->GetTileInfo(tempVi).second.lock());
 					}
 					break;
 				case 2:
@@ -532,7 +532,7 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 	if (!outFile.is_open())
 		return false;
 
-	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/HAS_HOME/HAS_WORK_PLACE/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY" << std::endl;
+	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK/SHOP_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/HAS_HOME/HAS_WORK_PLACE/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY" << std::endl;
 
 	std::string str;
 	std::string comma = ",";
@@ -548,7 +548,7 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		//position
 		str += to_string(unit->GetPosition().x) + comma + to_string(unit->GetPosition().y) + comma;
 
-		//home, work grid
+		//home, work grid, shop
 		if (!unit->home.expired())
 		{
 			str += to_string(unit->home.lock()->GetGridCoord().x) + slash + to_string(unit->home.lock()->GetGridCoord().y) + slash;

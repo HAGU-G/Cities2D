@@ -57,6 +57,7 @@ using std::to_string;
 
 #define C_SCENE_GAME std::dynamic_pointer_cast<SceneGame, Scene>
 #define C_TILE_BUILDING std::dynamic_pointer_cast<TileBuilding, ObjectTile>
+#define C_TILE_ROAD std::dynamic_pointer_cast<TileRoad, ObjectTile>
 #define C_OBJECT_UNIT std::dynamic_pointer_cast<ObjectUnit, GameObject>
 
 

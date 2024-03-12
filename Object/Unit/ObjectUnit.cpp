@@ -29,18 +29,18 @@ void ObjectUnit::NoShop()
 	if (status == STATUS::TO_SHOP || status == STATUS::SHOP)
 	{
 		SFGM_RCI.UseCommerce(-1);
-		if (hasHome)
+		if (!home.expired())
 		{
 			walkPath = pathToWorkPlace;
 			startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-			destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+			destination = home;
 			status = STATUS::TO_HOME;
 		}
-		else if (hasWorkPlace)
+		else if (!workPlace.expired())
 		{
 			walkPath = pathToWorkPlace;
 			startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-			destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+			destination = workPlace;
 			status = STATUS::TO_WORK_PLACE;
 		}
 		else
@@ -505,7 +505,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				{
 					walkPath = pathToWorkPlace;
 					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-					destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+					destination = workPlace;
 					status = STATUS::TO_WORK_PLACE;
 				}
 			}
@@ -574,7 +574,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 					{
 						walkPath = pathToWorkPlace;
 						startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-						destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+						destination = home;
 						status = STATUS::TO_HOME;
 					}
 					else
@@ -592,7 +592,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				{
 					walkPath = pathToWorkPlace;
 					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-					destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+					destination = home;
 					status = STATUS::TO_HOME;
 				}
 			}
@@ -654,7 +654,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				{
 					walkPath = ObjectTile::FindShortPath(home, sceneGame.lock()->GetTileInfo(gridCoord).second);
 					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-					destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+					destination = home;
 					money -= 2;
 					status = STATUS::TO_HOME;
 				}
@@ -662,7 +662,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				{
 					walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, workPlace);
 					startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
-					destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+					destination = workPlace;
 					money -= 6;
 					status = STATUS::TO_WORK_PLACE;
 				}

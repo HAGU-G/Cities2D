@@ -295,13 +295,11 @@ void SceneGameUI::Menu()
 void SceneGameUI::SetMayorName()
 {
 	if(buttonRCI->IsInputMode())
-		sceneGame.lock()->SetMayorName(buttonRCI->GetString().);
+		sceneGame.lock()->SetMayorName(buttonRCI->GetString());
 	else
 	{
 		buttonRCI->SetString(sceneGame.lock()->GetCityInfo().mayorName);
 	}
-	sf::Texture dd;
-	dd.loadFromFile(sf::String(L"df"));
 }
 
 void SceneGameUI::UnSeleteAll()

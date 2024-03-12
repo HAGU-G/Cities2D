@@ -182,15 +182,17 @@ bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 
 bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 {
-	const GridInfo& gridInfo = sceneGame->GetGridInfo();
-	if (gridInfo.empty())
-		return false;
+
 
 	std::ofstream outFile("data/save/" + sceneGame->GetCityInfo().mayorName + "Tiles.csv");
 	if (!outFile.is_open())
 		return false;
 
 	outFile << "OBJECT_TYPE,GRID,TAGS,TEXTURE_RECT,RCI" << std::endl;
+
+	const GridInfo& gridInfo = sceneGame->GetGridInfo();
+	if (gridInfo.empty())
+		return true;
 
 	std::string str;
 	std::string comma = ",";
@@ -257,7 +259,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		sf::Vector2f tempVf;
 
 		//Å¸ÀÔ
-		std::shared_ptr<ObjectUnit> unit = sceneGame->AddUnit(ObjectUnit::Create(sceneGame));
+		std::shared_ptr<ObjectUnit> unit = sceneGame->AddUnit(ObjectUnit::Create(sceneGame, GAME_OBJECT_TYPE(std::stoi(row[0]))) );
 		unit->SetPosition({ std::stof(row[1]), std::stof(row[2]) });
 
 		//bool Çü
@@ -525,15 +527,17 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 
 bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 {
-	const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& unitList = sceneGame->GetUnitList();
-	if (unitList.empty())
-		return false;
+
 
 	std::ofstream outFile("data/save/" + sceneGame->GetCityInfo().mayorName + "Units.csv");
 	if (!outFile.is_open())
 		return false;
 
 	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK/SHOP_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/HAS_HOME/HAS_WORK_PLACE/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY" << std::endl;
+	
+	const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& unitList = sceneGame->GetUnitList();
+	if (unitList.empty())
+		return true;
 
 	std::string str;
 	std::string comma = ",";

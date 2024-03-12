@@ -32,7 +32,7 @@ public:
 	inline void SetIsTextField(bool value) { isTextField = value; }
 	void SetInputMode(bool value, size_t textSize = 6);
 
-	inline const std::string& GetString() { return text.getString(); }
+	inline std::string GetString() { return text.getString(); }
 	inline bool IsInputMode() const { return isInputMode; }
 
 	void OnDown() override;

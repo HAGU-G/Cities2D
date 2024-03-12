@@ -87,7 +87,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	if (SFGM_RCI.Instance().LeftRegidence() > 0 && citizenTimer >= citizenInterval)
 	{
 		citizenTimer = 0.f;
-		SceneGame::AddUnit(ObjectUnit::Create(This()));
+		SceneGame::AddUnit(ObjectUnit::Create(This(), GAME_OBJECT_TYPE::CITIZEN));
 	}
 
 	//TESTCODE 이 밑으로 전부 테스트 코드
@@ -242,6 +242,7 @@ void SceneGame::Reset()
 
 
 	city = CITY();
+
 
 	time_t cT_t = time(NULL);
 	tm cT;

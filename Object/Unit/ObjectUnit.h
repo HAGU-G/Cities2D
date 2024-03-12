@@ -85,7 +85,7 @@ public:
 	void Reset() override;
 	void Release() override;
 
-	static std::shared_ptr<ObjectUnit> Create(std::weak_ptr<Scene> scene);
+	static std::shared_ptr<ObjectUnit> Create(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE type);
 	void SetPosition(const sf::Vector2f& position) override;
 
 	inline std::weak_ptr<ObjectTile> GetNextTile() const { return nextTile; }

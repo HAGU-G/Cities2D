@@ -156,9 +156,9 @@ void ObjectUnit::Release()
 	GameObject::Release();
 }
 
-std::shared_ptr<ObjectUnit> ObjectUnit::Create(std::weak_ptr<Scene> scene)
+std::shared_ptr<ObjectUnit> ObjectUnit::Create(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE type)
 {
-	std::shared_ptr<ObjectUnit> objectUnit = std::make_shared<ObjectUnit>(scene, GAME_OBJECT_TYPE::CITIZEN);
+	std::shared_ptr<ObjectUnit> objectUnit = std::make_shared<ObjectUnit>(scene, type);
 	scene.lock()->AddObject(objectUnit);
 	objectUnit->Init();
 	objectUnit->Reset();

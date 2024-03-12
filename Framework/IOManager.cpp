@@ -76,7 +76,7 @@ void IOManager::EventUpdate(const sf::Event& event)
 				}
 				break;
 			}
-			else if(inputText.size() < textSize)
+			else if(inputText.size() < textSize && event.text.unicode <= 0x007E)
 			{
 				switch (event.text.unicode)
 				{

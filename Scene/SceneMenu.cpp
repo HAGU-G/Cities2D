@@ -1,9 +1,11 @@
 #include "pch.h"
+#include <filesystem>
+
 #include "SceneMenu.h"
-#include <ObjectButton.h>
-#include <ButtonNineSlice.h>
-#include <SceneGame.h>
-#include <SceneGameUI.h>
+#include "ObjectButton.h"
+#include "ButtonNineSlice.h"
+#include "SceneGame.h"
+#include "SceneGameUI.h"
 #include "DataManager.h"
 
 SceneMenu::SceneMenu(const std::string& name)
@@ -53,7 +55,7 @@ void SceneMenu::Init()
 	menuBgm.setLoop(true);
 	menuBgm.play();
 
-	background.setFillColor({ 0,0,0,220 });
+	background.setFillColor({ 0,0,0,200 });
 	background.setSize(view.getSize());
 	tool::SetOrigin(background, ORIGIN::MC);
 	background.setPosition(view.getCenter());
@@ -62,7 +64,7 @@ void SceneMenu::Init()
 	lastGame = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 0.f),
 		"continue", L"이어하기", std::bind(&SceneMenu::Continue, this));
 	playGame = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 0.f),
-		"continue", L"게임 계속", std::bind(&SceneMenu::GameContinue, this));
+		"continue", L"돌아가기", std::bind(&SceneMenu::GameContinue, this));
 	playGame->SetActive(false);
 	newGame = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 85.f),
 		"new", L"새 게임", std::bind(&SceneMenu::New, this));
@@ -70,7 +72,7 @@ void SceneMenu::Init()
 		"save", L"게임 저장", std::bind(&SceneMenu::Save, this));
 	saveGame->SetActive(false);
 	ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 170.f),
-		"option", L"옵션");
+		"option", L"옵션", std::bind(&SceneMenu::Option, this));
 	ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 255.f),
 		"exit", L"종료", std::bind(&GameManager::Exit));
 
@@ -79,54 +81,84 @@ void SceneMenu::Init()
 	resetGame->SetActive(false);
 
 	//불러오기
-	loadView.setSize(450.f,250.f);
-	loadView.setCenter(view.getCenter().x + 2.5f+225.f, view.getCenter().y + 85.f + 125.f);
-	loadView.setViewport({ (view.getCenter().x + 2.5f) / resetView.getSize().x,(view.getCenter().y + 85.f) / resetView.getSize().y
+	saveListView.setSize(450.f,250.f);
+	saveListView.setCenter(view.getCenter().x + 2.5f+225.f, view.getCenter().y + 85.f + 125.f);
+	saveListView.setViewport({ (view.getCenter().x + 2.5f) / resetView.getSize().x,(view.getCenter().y + 85.f) / resetView.getSize().y
 		,450.f / resetView.getSize().x, 250.f / resetView.getSize().y });
-
-	load = std::make_shared<ButtonNineSlice>(This(), sf::Vector2f(view.getCenter().x+ 2.5f, view.getCenter().y + 85.f),
-		"load", L"불러오기", std::bind(&SceneMenu::Load, this));
-	load->Init();
-	load->Reset();
 
 }
 
 void SceneMenu::PreUpdate(float timeDelta, float timeScale)
 {
 	Scene::PreUpdate(timeDelta, timeScale);
-	load->PreUpdate(timeDelta, timeScale);
+	for (auto& ptr : saveList)
+	{
+		ptr->PreUpdate(timeDelta, timeScale);
+	}
+
+	if (IOManager::GetWheelDelta() > 0)
+	{
+		saveListView.move(0.f , 20.f);
+	}
+	else if (IOManager::GetWheelDelta() < 0)
+	{
+		saveListView.move(0.f, -20.f);
+	}
 }
 
 void SceneMenu::Update(float timeDelta, float timeScale)
 {
 	Scene::Update(timeDelta, timeScale);
-	load->Update(timeDelta, timeScale);
+	for (auto& ptr : saveList)
+	{
+		ptr->Update(timeDelta, timeScale);
+	}
 }
 
 void SceneMenu::PostUpdate(float timeDelta, float timeScale)
 {
 	Scene::PostUpdate(timeDelta, timeScale);
-	load->PostUpdate(timeDelta, timeScale);
+	for (auto& ptr : saveList)
+	{
+		ptr->PostUpdate(timeDelta, timeScale);
+	}
 }
 
 void SceneMenu::Draw(sf::RenderWindow& window)
 {
 	const sf::View& preView = window.getView();
-	if (doDrawBackground)
+	if (isGamePlaying)
 	{
 		window.setView(view);
 		window.draw(background);
 	}
 	Scene::Draw(window);
-	window.setView(loadView);
-	load->Draw(window);
+
+	window.setView(saveListView);
+	for (auto& ptr : saveList)
+	{
+		ptr->Draw(window);
+	}
 	window.setView(preView);
 }
 
 void SceneMenu::Reset()
 {
 	Scene::Reset();
+	saveList.clear();
+
 	DataManager::LoadConfig();
+	LoadSaveList();
+}
+
+void SceneMenu::Release()
+{
+	for (auto& ptr : saveList)
+	{
+		ptr->Release();
+	}
+	saveList.clear();
+	Scene::Release();
 }
 
 void SceneMenu::Continue()
@@ -160,6 +192,7 @@ void SceneMenu::New()
 
 void SceneMenu::Option()
 {
+	LoadSaveList();
 }
 
 void SceneMenu::Save()
@@ -169,12 +202,77 @@ void SceneMenu::Save()
 	DataManager::SaveConfig();
 }
 
-void SceneMenu::Load()
+void SceneMenu::LoadSaveList()
+{
+
+	saveList.clear();
+	float buttonPosY = 85.f;
+	std::filesystem::directory_iterator dIt("./data/save/");
+	std::unordered_map<std::string,int> fileList;
+
+	for (auto& dEntry : dIt)
+	{
+		std::string fileName = dEntry.path().filename().string();
+		std::string temp = fileName;
+		size_t num = 0;
+		if ((num = temp.find("Mayor.csv")) != std::string::npos)
+		{
+			std::cout << temp.erase(num) << std::endl;
+			fileList[temp] += 1;
+		}
+		else if ((num = temp.find("Tiles.csv")) != std::string::npos)
+		{
+			std::cout << temp.erase(num) << std::endl;
+			fileList[temp] += 10;
+		}
+		else if((num = temp.find("Units.csv")) != std::string::npos)
+		{
+			std::cout << temp.erase(num) << std::endl;
+			fileList[temp] += 100;
+		}
+		else
+		{
+			continue;
+		}
+			
+		if (fileList[temp] == 111)
+		{
+			std::shared_ptr<ButtonNineSlice> load = std::make_shared<ButtonNineSlice>(This(), sf::Vector2f(view.getCenter().x + 2.5f, view.getCenter().y + buttonPosY),	"load", temp);
+			saveList.push_back(load);
+			buttonPosY += 85.f;
+		}
+	}
+
+	if (saveList.empty())
+	{
+		lastGame->SetActive(false);
+	}
+	else if (!isGamePlaying)
+	{
+		lastGame->SetString(GameManager::lastGameName);
+		lastGame->SetActive(true);
+	}
+
+	for (auto& ptr : saveList)
+	{
+		ptr->Init();
+		ptr->Reset();
+		ptr->SetFuntion(std::bind(&SceneMenu::Load, this, std::placeholders::_1));
+	}
+}
+
+void SceneMenu::Load(const std::string& str)
 {
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"));
 	sceneGame->Reset();
+	sceneGame->SetMayorName(str);
 	sceneGame->LoadGame();
 	DataManager::SaveConfig();
+
+	if (!isGamePlaying)
+	{
+		New();
+	}
 }
 
 void SceneMenu::GameReset()
@@ -185,5 +283,5 @@ void SceneMenu::GameReset()
 
 void SceneMenu::UseBackground()
 {
-	doDrawBackground = true;
+	isGamePlaying = true;
 }

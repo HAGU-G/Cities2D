@@ -8,9 +8,11 @@ protected:
 	sf::VertexArray nineSlicing;
 	sf::Text text;
 
+	std::function<void(const std::string&)> funcVoid_string;
+
 public:
 	explicit ButtonNineSlice(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::string& str = "", const std::function<void()>& func = nullptr);
-	explicit ButtonNineSlice(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::wstring& str = L"", const std::function<void()>& func = nullptr);
+	explicit ButtonNineSlice(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::wstring& str, const std::function<void()>& func = nullptr);
 	ButtonNineSlice(const ButtonNineSlice&) = delete;
 	ButtonNineSlice(ButtonNineSlice&&) = delete;
 	ButtonNineSlice& operator=(const ButtonNineSlice&) = delete;
@@ -24,6 +26,9 @@ public:
 	void SetState(int state) override;
 
 	void SetSize(sf::Vector2f size);
+
+	inline void SetFuntion(std::function<void(const std::string&)> func) { funcVoid_string = func; }
+	void OnDown() override;
 
 	void ContentsUpdate();
 

@@ -2,7 +2,7 @@
 #include "ObjectButton.h"
 
 ObjectButton::ObjectButton(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconName, const std::function<void()>& func)
-	:GameObject(scene, GAME_OBJECT_TYPE::BUTTON), func(func), iconName(iconName)
+	:GameObject(scene, GAME_OBJECT_TYPE::BUTTON), funcVoid_void(func), iconName(iconName)
 {
 	this->position = position;
 
@@ -56,8 +56,8 @@ void ObjectButton::Update(float timeDelta, float timeScale)
 				{
 					SetState(1);
 				}
-				if (func != nullptr)
-					func();
+				if (funcVoid_void != nullptr)
+					funcVoid_void();
 				OnDown();
 
 			}

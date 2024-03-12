@@ -7,7 +7,7 @@ class ObjectTileMap;
 
 struct CITY
 {
-	std::string mayorName = "";
+	std::string mayorName = "My City";
 	int money = 5000;
 	unsigned int moneyProfit = 0;
 	int moneyTex = 0;

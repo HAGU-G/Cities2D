@@ -15,7 +15,7 @@ protected:
 	
 	int state = 0; //0:NONE, 1:HOVER, 2:DOWN
 
-	std::function<void()> func;
+	std::function<void()> funcVoid_void;
 	sf::Sound mouseOn;
 	sf::Sound click;
 	bool doToggle = false;
@@ -38,7 +38,7 @@ public:
 	virtual void SetPosition(const sf::Vector2f& position) override;
 	virtual void SetState(int state);
 	void SetIcon(const std::string& path);
-	inline void SetFuntion(std::function<void()> func) { this->func = func; }
+	inline void SetFuntion(std::function<void()> func) { funcVoid_void = func; }
 	void SetDoToggle(bool value) { doToggle = value; }
 
 	inline void SetOnlyDown(bool value) { isOnlyDown = value; }

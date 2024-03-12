@@ -66,6 +66,13 @@ void ButtonNineSlice::SetOrigin(ORIGIN origin)
 	ContentsUpdate();
 }
 
+void ButtonNineSlice::OnDown()
+{
+	if (funcVoid_string != nullptr)
+		funcVoid_string(text.getString());
+	ObjectButton::OnDown();
+}
+
 void ButtonNineSlice::ContentsUpdate()
 {
 	renderStates.transform = sf::Transform().scale(scale, position).rotate(rotate, position).translate(position - origin);

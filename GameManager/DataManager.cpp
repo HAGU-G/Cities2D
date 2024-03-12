@@ -565,7 +565,7 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		if (pair.second.expired())
 			continue;
 
-		str = comma; //타입은 switch문에서 앞쪽에 넣어준다.
+		str = comma;
 		std::shared_ptr<ObjectUnit> unit = pair.second.lock();
 
 		//position
@@ -686,17 +686,9 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 			str += "N";
 		}
 
-		switch (unit->GetGameObjectType())
-		{
 
-		case GAME_OBJECT_TYPE::CITIZEN:
-		{
-			str = to_string((int)GAME_OBJECT_TYPE::ROAD) + str;
-			break;
-		}
-		default:
-			break;
-		}
+		str = to_string((int)unit->GetGameObjectType()) + str;
+
 		str += comma;
 
 		//shop 돈

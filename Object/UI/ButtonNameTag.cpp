@@ -38,8 +38,8 @@ void ButtonNameTag::Update(float timeDelta, float timeScale)
 		}
 		else
 		{
-			if (func != nullptr)
-				func();
+			if (funcVoid_void != nullptr)
+				funcVoid_void();
 			isInputMode = false;
 			UnSelect();
 		}
@@ -133,6 +133,8 @@ void ButtonNameTag::SetInputMode(bool value, size_t textSize)
 
 void ButtonNameTag::OnDown()
 {
+
 	ObjectButton::OnDown();
 	SetInputMode(!isInputMode);
+
 }

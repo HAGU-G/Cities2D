@@ -9,8 +9,9 @@ protected:
 	sf::RectangleShape background;
 	sf::CircleShape backgroundCircle;
 
-	bool isTextField = true;
+	bool isTextField = false;
 	bool isInputMode = false;
+
 
 public:
 	explicit ButtonNameTag(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::function<void()>& func = nullptr);

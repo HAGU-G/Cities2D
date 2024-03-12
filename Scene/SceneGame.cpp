@@ -412,11 +412,11 @@ void SceneGame::SaveGame()
 
 void SceneGame::LoadGame()
 {
-	city.mayorName = GameManager::lastGameName;
 	DataManager::LoadMayor(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::LoadTile(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::LoadUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	std::dynamic_pointer_cast<SceneGameUI, Scene>(SceneManager::Get("SceneGameUI"))->Reset();
+	GameManager::lastGameName = city.mayorName;
 }
 
 void SceneGame::LoadMayor(CITY city)

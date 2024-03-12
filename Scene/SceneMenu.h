@@ -8,7 +8,7 @@ protected:
 	sf::Sound menuBgm;
 	sf::RectangleShape background;
 
-	bool doDrawBackground = false;
+	bool isGamePlaying = false;
 
 	std::shared_ptr<ButtonNineSlice> lastGame;
 	std::shared_ptr<ButtonNineSlice> playGame;
@@ -16,9 +16,9 @@ protected:
 	std::shared_ptr<ButtonNineSlice> saveGame;
 	std::shared_ptr<ButtonNineSlice> resetGame;
 
-	std::shared_ptr<ButtonNineSlice> load;
+	std::list<std::shared_ptr<ButtonNineSlice>> saveList;
 
-	sf::View loadView;
+	sf::View saveListView;
 
 public:
 	explicit SceneMenu(const std::string& name);
@@ -35,6 +35,7 @@ public:
 	void PostUpdate(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
 	void Reset() override;
+	void Release() override;
 
 	void Continue();
 	void GameContinue();
@@ -42,7 +43,8 @@ public:
 	void Option();
 
 	void Save();
-	void Load();
+	void LoadSaveList();
+	void Load(const std::string& str);
 	void GameReset();
 
 	void UseBackground();

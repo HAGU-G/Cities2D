@@ -13,7 +13,7 @@ bool IOManager::isMouseInWindow = false;
 float IOManager::wheelDelta = 0;
 std::wstring IOManager::inputText;
 bool IOManager::doInputText = false;
-size_t IOManager::textSize = 6;
+size_t IOManager::textSize = 12;
 
 void IOManager::EventUpdate(const sf::Event& event)
 {

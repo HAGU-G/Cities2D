@@ -2,6 +2,7 @@
 
 //c++, STL
 #include <iostream>
+#include <string>
 #include <list>
 #include <deque>
 #include <unordered_map>

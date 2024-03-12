@@ -81,9 +81,12 @@ void SceneGameUI::Init()
 
 	//2´Ü
 	float secondFloarY = view.getSize().y - 105.f;
-	buttonRCI = ButtonNameTag::Create(This(), { 5.f, secondFloarY }, "rci");
+	buttonRCI = ButtonNameTag::Create(This(), { 5.f, secondFloarY }, "rci", "", std::bind(&SceneGameUI::SetMayorName, this));
 	buttonRCI->SetOrigin(ORIGIN::LM);
-	buttonRCI->SetWidth(330);
+	buttonRCI->SetWidth(500);
+	buttonRCI->SetDoToggle(true);
+	buttonRCI->SetIsTextField(true);
+
 	buttonRoad = ObjectButton::Create(This(), { view.getCenter().x - 71.5f, secondFloarY }, "road", std::bind(&SceneGameUI::Road, this));
 	buttonRoad->SetOrigin(ORIGIN::RM);
 	buttonR = ObjectButton::Create(This(), { view.getCenter().x - 2.5f, secondFloarY }, "r_", std::bind(&SceneGameUI::R, this));
@@ -114,7 +117,7 @@ void SceneGameUI::Init()
 	float firstFloarY = view.getSize().y - 35.f;
 	buttonPause = ObjectButton::Create(This(), { 5.f, firstFloarY }, "pause", std::bind(&SceneGameUI::Pause, this));
 	buttonPause->SetOrigin(ORIGIN::LM);
-	buttonPause->OnlyDown();
+	buttonPause->SetOnlyDown(true);
 	pauseOutline.setSize({ view.getSize().x - 10.f, view.getSize().y - 10.f });
 	tool::SetOrigin(pauseOutline, ORIGIN::MC);
 	pauseOutline.setOutlineColor(sf::Color::Red);
@@ -124,10 +127,10 @@ void SceneGameUI::Init()
 
 	buttonPlay = ObjectButton::Create(This(), { 74.f, firstFloarY }, "play", std::bind(&SceneGameUI::Play, this));
 	buttonPlay->SetOrigin(ORIGIN::LM);
-	buttonPlay->OnlyDown();
+	buttonPlay->SetOnlyDown(true);
 	button4x = ObjectButton::Create(This(), { 141.f, firstFloarY }, "fast", std::bind(&SceneGameUI::Fast, this));
 	button4x->SetOrigin(ORIGIN::LM);
-	button4x->OnlyDown();
+	button4x->SetOnlyDown(true);
 	buttonCityTime = ButtonNameTag::Create(This(), { 206.f, firstFloarY }, "grid", "0");
 	buttonCityTime->SetOrigin(ORIGIN::LM);
 	buttonCityTime->SetWidth(400);
@@ -202,7 +205,7 @@ void SceneGameUI::Reset()
 	SetCityTimeString(sceneGame.lock()->GetCityTime());
 	textTex.setString(to_string(0));
 	textProfit.setString(to_string(0));
-
+	SetMayorName();
 }
 void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 {
@@ -287,6 +290,18 @@ void SceneGameUI::Menu()
 	SceneManager::Wait("SceneGameUI");
 	SceneManager::Use("SceneMenu");
 	std::dynamic_pointer_cast<SceneMenu, Scene>(SceneManager::Get("SceneMenu"))->UseBackground();
+}
+
+void SceneGameUI::SetMayorName()
+{
+	if(buttonRCI->IsInputMode())
+		sceneGame.lock()->SetMayorName(buttonRCI->GetString().);
+	else
+	{
+		buttonRCI->SetString(sceneGame.lock()->GetCityInfo().mayorName);
+	}
+	sf::Texture dd;
+	dd.loadFromFile(sf::String(L"df"));
 }
 
 void SceneGameUI::UnSeleteAll()

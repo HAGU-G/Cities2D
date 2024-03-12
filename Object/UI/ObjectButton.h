@@ -39,10 +39,14 @@ public:
 	virtual void SetState(int state);
 	void SetIcon(const std::string& path);
 	inline void SetFuntion(std::function<void()> func) { this->func = func; }
+	void SetDoToggle(bool value) { doToggle = value; }
 
-	inline void OnlyDown() { isOnlyDown = !isOnlyDown; }
+	inline void SetOnlyDown(bool value) { isOnlyDown = value; }
 	void UnSelect();
 	void Select();
+	virtual void OnDown();
+
+
 
 	static std::shared_ptr<ObjectButton> Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::function<void()>& func = nullptr, bool toggle = true);
 

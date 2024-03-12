@@ -41,6 +41,7 @@ bool DataManager::LoadMayor(const std::shared_ptr<SceneGame>& sceneGame)
 
 bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 {
+
 	const CsvFile& csv = SFGM_CSVFILE.Load("data/save/" + sceneGame->GetCityInfo().mayorName + "Tiles.csv");
 	if (csv.IsUnknown())
 		return false;
@@ -721,7 +722,6 @@ bool DataManager::SaveMayor(const std::shared_ptr<SceneGame>& sceneGame)
 
 	//¼¼±Ý
 	str += to_string(city.doPayTex);
-
 
 	outFile << str << std::endl;
 	outFile.close();

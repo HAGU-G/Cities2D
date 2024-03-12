@@ -35,7 +35,7 @@ public:
 
 	void Save();
 	void Load();
-	void Reset();
+	void GameReset();
 
 	void UseBackground();
 };

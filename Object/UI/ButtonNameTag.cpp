@@ -2,8 +2,8 @@
 #include "ButtonNameTag.h"
 
 ButtonNameTag::ButtonNameTag(std::weak_ptr<Scene> scene, sf::Vector2f position,
-	const std::string& iconPath)
-	:ObjectButton(scene, position, iconPath)
+	const std::string& iconPath, const std::function<void()>& func)
+	:ObjectButton(scene, position, iconPath, func)
 {
 }
 
@@ -25,6 +25,27 @@ void ButtonNameTag::Init()
 	text.setFont(SFGM_FONT.Get("resource/font/ROKAF Sans Medium.ttf"));
 	text.setFillColor(sf::Color::Black);
 	SetPosition(position);
+}
+
+void ButtonNameTag::Update(float timeDelta, float timeScale)
+{
+	ObjectButton::Update(timeDelta, timeScale);
+	if (isInputMode)
+	{
+		if (IOManager::IsDoInputText())
+		{
+			SetString(IOManager::GetInputText());
+		}
+		else
+		{
+			if (func != nullptr)
+				func();
+			isInputMode = false;
+			UnSelect();
+		}
+	}
+
+
 }
 
 void ButtonNameTag::Draw(sf::RenderWindow& window)
@@ -61,9 +82,9 @@ void ButtonNameTag::SetString(const std::wstring& wstr)
 	SetPosition(position);
 }
 
-std::shared_ptr<ButtonNameTag> ButtonNameTag::Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::string& text)
+std::shared_ptr<ButtonNameTag> ButtonNameTag::Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::string& text, const std::function<void()>& func)
 {
-	std::shared_ptr<ButtonNameTag> buttonNameTag = std::make_shared<ButtonNameTag>(scene, position, iconPath);
+	std::shared_ptr<ButtonNameTag> buttonNameTag = std::make_shared<ButtonNameTag>(scene, position, iconPath, func);
 	scene.lock()->AddObject(buttonNameTag);
 	buttonNameTag->Init();
 	buttonNameTag->Reset();
@@ -71,9 +92,9 @@ std::shared_ptr<ButtonNameTag> ButtonNameTag::Create(std::weak_ptr<Scene> scene,
 	return buttonNameTag;
 }
 
-std::shared_ptr<ButtonNameTag> ButtonNameTag::Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::wstring& text)
+std::shared_ptr<ButtonNameTag> ButtonNameTag::Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::wstring& text, const std::function<void()>& func)
 {
-	std::shared_ptr<ButtonNameTag> buttonNameTag = std::make_shared<ButtonNameTag>(scene, position, iconPath);
+	std::shared_ptr<ButtonNameTag> buttonNameTag = std::make_shared<ButtonNameTag>(scene, position, iconPath, func);
 	scene.lock()->AddObject(buttonNameTag);
 	buttonNameTag->Init();
 	buttonNameTag->Reset();
@@ -99,4 +120,16 @@ void ButtonNameTag::SetWidth(float width)
 {
 	background.setSize({ width - icon.getGlobalBounds().width, background.getSize().y });
 	SetOrigin(origin);
+}
+
+void ButtonNameTag::SetInputMode(bool value, size_t textSize)
+{
+	isInputMode = value;
+	IOManager::SetDoInputText(isInputMode, textSize);
+}
+
+void ButtonNameTag::OnDown()
+{
+	ObjectButton::OnDown();
+	SetInputMode(!isInputMode);
 }

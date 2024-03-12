@@ -51,13 +51,15 @@ void ObjectButton::Update(float timeDelta, float timeScale)
 			{
 				if (doToggle)
 					isSelect = !isSelect;
+
 				if (!isOnlyDown)
 				{
 					SetState(1);
 				}
-
 				if (func != nullptr)
 					func();
+				OnDown();
+
 			}
 			else if(!isOnlyDown)
 			{
@@ -144,6 +146,10 @@ void ObjectButton::Select()
 {
 	isSelect = true;
 	SetState(2);
+}
+
+void ObjectButton::OnDown()
+{
 }
 
 std::shared_ptr<ObjectButton> ObjectButton::Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath,

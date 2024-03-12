@@ -3,6 +3,7 @@
 #include <ObjectButton.h>
 #include <ButtonNineSlice.h>
 #include <SceneGame.h>
+#include <SceneGameUI.h>
 
 SceneMenu::SceneMenu(const std::string& name)
 	:Scene(name)
@@ -73,7 +74,7 @@ void SceneMenu::Init()
 		"exit", L"종료", std::bind(&GameManager::Exit));
 
 	resetGame = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(2.5f, 0.f),
-		"loading", L"초기화", std::bind(&SceneMenu::Reset, this));
+		"loading", L"초기화", std::bind(&SceneMenu::GameReset, this));
 	resetGame->SetActive(false);
 	std::shared_ptr<ButtonNineSlice> load = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(2.5f, 85.f),
 		"load", L"불러오기", std::bind(&SceneMenu::Load, this));
@@ -140,10 +141,10 @@ void SceneMenu::Load()
 	sceneGame->LoadGame();
 }
 
-void SceneMenu::Reset()
+void SceneMenu::GameReset()
 {
-	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"));
-	sceneGame->Reset();
+	std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"))->Reset();
+	std::dynamic_pointer_cast<SceneGameUI, Scene>(SceneManager::Get("SceneGameUI"))->Reset();
 }
 
 void SceneMenu::UseBackground()

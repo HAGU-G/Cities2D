@@ -27,6 +27,10 @@ private:
 	static bool isMouseInWindow;
 	static float wheelDelta;
 
+	static std::wstring inputText;
+	static bool doInputText;
+	static size_t textSize;
+
 	//TODO 키설정 파일(txt?)에서 받아오자!
 
 public:
@@ -58,8 +62,11 @@ public:
 	static void StopComboRecord();
 	static void ClearCombo();
 
-
-
+	//텍스트 입력
+	static void SetDoInputText(bool value, size_t textSize = IOManager::textSize);
+	inline static bool IsDoInputText() { return doInputText; };
+	inline static void ClearInputText() { inputText.clear(); }
+	inline static const std::wstring& GetInputText() { return inputText; }
 
 
 

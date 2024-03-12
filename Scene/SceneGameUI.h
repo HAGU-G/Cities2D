@@ -74,6 +74,7 @@ public:
 	void I();
 	void Destroy();
 	void Menu();
+	void SetMayorName();
 
 	void UnSeleteAll();
 };

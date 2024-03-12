@@ -11,6 +11,9 @@ float IOManager::comboTimeLimit = 1.f;
 bool IOManager::doComboRecord = false;
 bool IOManager::isMouseInWindow = false;
 float IOManager::wheelDelta = 0;
+std::wstring IOManager::inputText;
+bool IOManager::doInputText = false;
+size_t IOManager::textSize = 6;
 
 void IOManager::EventUpdate(const sf::Event& event)
 {
@@ -54,7 +57,45 @@ void IOManager::EventUpdate(const sf::Event& event)
 		isMouseInWindow = true;
 		break;
 	case sf::Event::MouseWheelScrolled:
-			wheelDelta = event.mouseWheelScroll.delta;
+		wheelDelta = event.mouseWheelScroll.delta;
+		break;
+	case sf::Event::TextEntered:
+		if (doInputText)
+		{
+			if (event.text.unicode < 0x0020)
+			{
+				switch (event.text.unicode)
+				{
+				case 0x0008:
+					if(!inputText.empty())
+						inputText.pop_back();
+					break;
+				case 0x000D:
+					doInputText = false;
+					break;
+				}
+				break;
+			}
+			else if(inputText.size() < textSize)
+			{
+				switch (event.text.unicode)
+				{
+				case 0x005C: // "\"
+				case 0x002F: // "/"
+				case 0x003A: // ":"
+				case 0x002A: // "*"
+				case 0x003F: // "?"
+				case 0x0022: // (")
+				case 0x003C: // "<"
+				case 0x003E: // ">"
+				case 0x007C: // "|"
+					break;
+				default:
+					inputText += event.text.unicode;
+					break;
+				}
+			}
+		}
 		break;
 	}
 }
@@ -188,4 +229,10 @@ void IOManager::StopComboRecord()
 void IOManager::ClearCombo()
 {
 	combo.clear();
+}
+
+void IOManager::SetDoInputText(bool value, size_t textSize)
+{
+	doInputText = value;
+	IOManager::textSize = textSize;
 }

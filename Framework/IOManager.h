@@ -84,21 +84,28 @@ public:
 private:
 	static std::pair<std::pair<std::string, sf::Sound>, std::pair<std::string, sf::Sound>> bgm[2]; // 0=main
 
+	static std::list<std::shared_ptr<sf::Sound>> usingSfx;
+	static std::list<std::shared_ptr<sf::Sound>> waitingSfx;
+
 public:
+	static void SoundInit(int sfxCount = 64);
 	static void SoundRelease();
 
 	static void PlayBGMCh1(const std::string& path, bool loop = true);
 	static void PlayBGMCh2(const std::string& path, bool loop = true);
 	static void StopBGM();
 	static void StopBGM(unsigned int channel);
+	static void SetBGMCh1Volume(float volume);
+	static void SetBGMCh2Volume(float volume);
 
 	static void SetVolume(float volume);
 
 	static void BGMSyncPlay(const std::string& path1, const std::string& path2, bool loop = true);
 	static void BGMSyncPlay(const std::string& path1, const std::string& path2, unsigned int channel, bool loop);
 	static void BGMSyncSwitch(unsigned int channel);
-	static void SetBGMCh1Volume(float volume);
-	static void SetBGMCh2Volume(float volume);
+
+
+	static void PlaySfx(const std::string& path, bool listener = false);
 
 };
 

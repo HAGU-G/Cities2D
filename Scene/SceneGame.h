@@ -26,7 +26,7 @@ protected:
 	std::deque<sf::Vector2i> deleteTileDeque;
 
 	sf::Vector2i mousePosGrid;
-
+	
 
 	bool isTilt = false;
 	float startTilt = 0.f;

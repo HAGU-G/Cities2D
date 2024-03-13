@@ -252,6 +252,17 @@ void IOManager::SetDoInputText(bool value, size_t textSize)
 //////////////////////////////////////////////////////////////////////////////////////////////
 std::pair<std::pair<std::string, sf::Sound>, std::pair<std::string, sf::Sound>> IOManager::bgm[2];
 
+std::list<std::shared_ptr<sf::Sound>> IOManager::usingSfx;
+std::list<std::shared_ptr<sf::Sound>> IOManager::waitingSfx;
+
+void IOManager::SoundInit(int sfxCount)
+{
+	for (int i = 0; i < sfxCount; i++)
+	{
+		usingSfx.push_back(std::make_shared<sf::Sound>());
+	}
+}
+
 void IOManager::SoundRelease()
 {
 	bgm[0].first.second.stop();
@@ -325,6 +336,28 @@ void IOManager::BGMSyncSwitch(unsigned int channel)
 		bgm[0].second.second.setVolume(100.f);
 		bgm[0].first.second.setVolume(0.f);
 	}
+}
+
+void IOManager::PlaySfx(const std::string& path, bool listener)
+{
+	std::shared_ptr<sf::Sound> sfx;
+	if (waitingSfx.empty())
+	{
+		sfx = usingSfx.front();
+		usingSfx.pop_front();
+		sfx->stop();
+
+	}
+	else
+	{
+		sfx = waitingSfx.front();
+		waitingSfx.pop_front();
+	}
+
+	sfx->setBuffer(SFGM_SOUNDBUFFER.Get(path));
+	sfx->setRelativeToListener(listener);
+	usingSfx.push_back(sfx);
+	sfx->play();
 }
 
 void IOManager::SetBGMCh1Volume(float volume)

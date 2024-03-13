@@ -76,6 +76,14 @@ void GameManager::Init()
 	SceneManager::Draw(window);
 	window.display();
 
+
+	/////////////////////////////
+	// 
+	//       Manager
+	// 
+	/////////////////////////////
+	IOManager::SoundInit();
+
 	/////////////////////////////
 	// 
 	//       초기화 완료 작업

@@ -46,6 +46,7 @@ public:
 
 	bool ConditionCheck(GAME_OBJECT_TAG tag) override;
 
+	void Enter();
 	void PlaySound();
 };
 

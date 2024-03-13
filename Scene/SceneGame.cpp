@@ -113,7 +113,6 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::IsKeyPress(sf::Keyboard::Q))
 	{
 		view.rotate(45.f * timeDelta);
-		city.money -= 3;
 	}
 	if (IOManager::IsKeyPress(sf::Keyboard::E))
 	{
@@ -177,10 +176,11 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		tilt = 1.f;
 	}
 
-	sf::Listener::setPosition(view.getCenter().x, view.getCenter().y, zoomRatio * 100.f);
-	sf::Vector2f vecUp = { 1.f, 0.f };
-	vecUp = sf::Transform().rotate(view.getRotation()).translate(vecUp).transformPoint(vecUp);
-	sf::Listener::setUpVector(vecUp.x, vecUp.y, 0.f);
+	sf::Vector2f tempV = { 0.f, 1.f };
+	tempV = sf::Transform().rotate(view.getRotation()).translate(tempV).transformPoint(tempV);
+	sf::Listener::setUpVector(tempV.x, tempV.y, tilt - 1.f);
+	tempV *= zoomY * (tilt - 1.f) * 0.05f;
+	sf::Listener::setPosition(view.getCenter().x + tempV.x, view.getCenter().y + tempV.y, zoomRatio * 400.f);
 }
 
 void SceneGame::Update(float timeDelta, float timeScale)
@@ -197,7 +197,7 @@ void SceneGame::PostUpdate(float timeDelta, float timeScale)
 
 		if (gridInfo[gridCoord.x][gridCoord.y].second.expired())
 			continue;
-
+		IOManager::PlaySfx("resource/sfx/destroy.wav", true);
 		auto& adjacent = gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetAdjacent();
 		DeleteObject(gridInfo[gridCoord.x][gridCoord.y].second.lock()->GetKey());
 		gridInfo[gridCoord.x].erase(gridCoord.y);
@@ -362,6 +362,7 @@ bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OB
 			return false;
 		}
 
+		IOManager::PlaySfx("resource/sfx/build.wav", true);
 		groundTileMap->UpdateTile(gridCoord);
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, -1));
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, 1));

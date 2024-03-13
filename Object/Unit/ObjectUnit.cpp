@@ -501,6 +501,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		else
 		{
 		}
+		break;
 	case STATUS::HOME:
 		if (!hasHome)
 		{
@@ -525,6 +526,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				if (home.lock() == workPlace.lock())
 				{
 					status = STATUS::WORK_PLACE;
+					workPlace.lock()->Enter();
 				}
 				else
 				{
@@ -552,6 +554,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 					startingPoint.reset();
 					destination.reset();
 					status = STATUS::WORK_PLACE;
+					workPlace.lock()->Enter();
 				}
 			}
 		}
@@ -591,6 +594,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				if (home.lock() == workPlace.lock())
 				{
 					status = STATUS::HOME;
+					home.lock()->Enter();
 				}
 				else if (needShop)
 				{
@@ -639,6 +643,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 					startingPoint.reset();
 					destination.reset();
 					status = STATUS::HOME;
+					home.lock()->Enter();
 				}
 			}
 		}
@@ -712,6 +717,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				startingPoint.reset();
 				destination.reset();
 				status = STATUS::SHOP;
+				shop.lock()->Enter();
 			}
 		}
 		break;

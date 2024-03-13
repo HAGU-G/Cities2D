@@ -93,13 +93,18 @@ void SceneMenu::PreUpdate(float timeDelta, float timeScale)
 
 	if (IOManager::GetWheelDelta() > 0)
 	{
-		saveListView.move(0.f , 20.f);
-		IOManager::BGMSyncSwitch(1);
+		for (auto& ptr : saveList)
+		{
+			ptr->SetPosition(sf::Vector2f( 0.f, 20.f ) + ptr->GetPosition());
+		}
+		
 	}
 	else if (IOManager::GetWheelDelta() < 0)
 	{
-		saveListView.move(0.f, -20.f);
-		IOManager::BGMSyncSwitch(2);
+		for (auto& ptr : saveList)
+		{
+			ptr->SetPosition(sf::Vector2f(0.f, -20.f) + ptr->GetPosition());
+		}
 	}
 }
 

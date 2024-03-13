@@ -46,6 +46,8 @@ protected:
 	void SetMousePosGrid();
 	void SetBGMSync();
 	void ChangeBGM();
+	int soundRadius = 5;
+	sf::Vector2i preListenerGridCoord;
 
 	//도시의 정보
 	CITY city;
@@ -85,6 +87,7 @@ public:
 
 	void DeleteObjectTile(const sf::Vector2i& gridCoord);
 
+	sf::Vector2i PosToGridCoord(const sf::Vector2f& position);
 	inline const sf::Vector2i& GetMouseGridCoord() const { return mousePosGrid; }
 	inline sf::Vector2f GetSelectGridPos() const { return sf::Vector2f(mousePosGrid) * gridSize.x; }
 	inline const sf::Vector2f& GetGridSize() const { return gridSize; }
@@ -111,7 +114,7 @@ public:
 	void LoadGame();
 	void LoadMayor(CITY city);
 	bool LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
-		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type);
+		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration);
 
 	void GameOver();
 	inline bool IsGameOver() const { return gameOver; }

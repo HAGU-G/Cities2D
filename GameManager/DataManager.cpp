@@ -188,9 +188,10 @@ bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 			}
 			it++;
 		}
-
+		float soundTimer = std::stoi(row[5]);
+		float soundDuration = std::stoi(row[6]);
 		//오브젝트 생성
-		if (!sceneGame->LoadObjectTile(rci, grid, tagList, rect, type))
+		if (!sceneGame->LoadObjectTile(rci, grid, tagList, rect, type, soundTimer, soundDuration))
 			return false;
 	}
 
@@ -206,7 +207,7 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 	if (!outFile.is_open())
 		return false;
 
-	outFile << "OBJECT_TYPE,GRID,TAGS,TEXTURE_RECT,RCI" << std::endl;
+	outFile << "OBJECT_TYPE,GRID,TAGS,TEXTURE_RECT,RCI,SOUND_TIMER,SOUND_DURATION" << std::endl;
 
 	const GridInfo& gridInfo = sceneGame->GetGridInfo();
 	if (gridInfo.empty())
@@ -239,7 +240,7 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 			if (y.second.first == GAME_OBJECT_TYPE::ROAD)
 			{
 				str = to_string((int)y.second.first) + str;
-				str += "0/0/0/0/";
+				str += "0/0/0/0/,0,0";
 			}
 			else if (y.second.first >= GAME_OBJECT_TYPE::BUILDING && y.second.first < GAME_OBJECT_TYPE::BUILDING_END)
 			{
@@ -247,8 +248,11 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 				std::shared_ptr<TileBuilding> building = std::dynamic_pointer_cast<TileBuilding, ObjectTile>(tile);
 
 				const RCI& rci = building->GetRCI();
-				str += to_string(rci.residence) + slash + to_string(rci.commerce) + slash + to_string(rci.industry) + slash + to_string(rci.cost) + slash;
+				str += to_string(rci.residence) + slash + to_string(rci.commerce) + slash + to_string(rci.industry) + slash + to_string(rci.cost) + slash + comma;
+				str += to_string(building->soundTimer) + comma;
+				str += to_string(building->soundDuration);
 			}
+
 
 			outFile << str << std::endl;
 
@@ -270,7 +274,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 
 	for (int i = 0; i < doc.GetRowCount(); i++)
 	{
-		auto row = doc.GetRow<std::string>(i);
+ 		auto row = doc.GetRow<std::string>(i);
 		int divide = 0; // '/'로 구분
 		std::string tempStr;
 		sf::Vector2i tempVi;

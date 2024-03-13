@@ -45,7 +45,7 @@ void ObjectUnit::NoShop()
 		}
 		else
 		{
-			status = STATUS::HOMELESS;
+			BeHomeLess();
 		}
 	}
 }
@@ -64,11 +64,13 @@ void ObjectUnit::Init()
 {
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
 	spriteAnimator.SetTarget(&unitSprite);
-
 }
 
 void ObjectUnit::PreUpdate(float timeDelta, float timeScale)
 {
+	if (soundTimer <= soundDuration)
+		soundTimer += timeDelta;
+
 	if (isCitizen)
 	{
 		GridUpdate();
@@ -109,6 +111,7 @@ void ObjectUnit::Draw(sf::RenderWindow& window)
 
 void ObjectUnit::Reset()
 {
+	isReset = true;
 
 	ResetHome();
 	ResetWorkPlace();
@@ -149,10 +152,13 @@ void ObjectUnit::Reset()
 	auto uRow = unitData.GetRow<std::string>(0);
 	spriteNum = GameManager::RandomRange(0, std::stoi(uRow[4]) - 1);
 	SetTexture(spriteNum);
+
+	isReset = false;
 }
 
 void ObjectUnit::Release()
 {
+	isReset = true;
 	ResetHome();
 	ResetWorkPlace();
 	ShopUsed();
@@ -163,6 +169,7 @@ void ObjectUnit::Release()
 	nextTile.reset();
 	startingPoint.reset();
 	destination.reset();
+
 	GameObject::Release();
 }
 
@@ -180,22 +187,14 @@ void ObjectUnit::SetPosition(const sf::Vector2f& position)
 
 	GameObject::SetPosition(position);
 
-	sf::Vector2f gridSize = sceneGame.lock()->GetGridSize();
-	if (position.x >= 0)
-		gridCoord.x = position.x / gridSize.x;
-	else
-		gridCoord.x = floor(position.x / gridSize.x);
-
-	if (position.y >= 0)
-		gridCoord.y = position.y / gridSize.y;
-	else
-		gridCoord.y = floor(position.y / gridSize.y);
+	gridCoord = sceneGame.lock()->PosToGridCoord(position);
 
 	unitSprite.setPosition(position);
 }
 
 void ObjectUnit::SetTexture(int spriteNum)
 {
+	this->spriteNum = spriteNum;
 	const rapidcsv::Document& citizenData = SFGM_CSVFILE.Get("data/CitizenData.csv").GetDocument();
 	auto cRow = citizenData.GetRow<float>(0);
 	const rapidcsv::Document& unitData = SFGM_CSVFILE.Get("data/UnitData.csv").GetDocument();
@@ -305,6 +304,38 @@ void ObjectUnit::NoCitizen()
 		isCitizen = false;
 		citizenCount--;
 	}
+}
+
+void ObjectUnit::BeHomeLess()
+{
+	const rapidcsv::Document& unitData = SFGM_CSVFILE.Get("data/UnitData.csv").GetDocument();
+	auto uRow = unitData.GetRow<std::string>(0);
+	unitSprite.setTexture(SFGM_TEXTURE.Get(uRow[2] + uRow[3] + to_string(spriteNum) + "-Laying.png"));
+	unitSprite.setOrigin(std::stof(uRow[5]), std::stof(uRow[6]));
+
+	spriteAnimator.ClearEvent();
+	spriteAnimator.Play(uRow[2] + uRow[3] + to_string(spriteNum) + "-Laying.csv");
+	status = STATUS::HOMELESS;
+
+	if (!isReset && soundTimer >= soundDuration)
+	{
+		soundTimer = 0.f;
+		soundDuration = IOManager::PlaySfx("resource/sfx/homeless.wav", { position.x, position.y, 0.f }, 100, 4);
+	}
+}
+
+void ObjectUnit::NoHomeLess()
+{
+	const rapidcsv::Document& citizenData = SFGM_CSVFILE.Get("data/CitizenData.csv").GetDocument();
+	auto cRow = citizenData.GetRow<float>(0);
+	const rapidcsv::Document& unitData = SFGM_CSVFILE.Get("data/UnitData.csv").GetDocument();
+	auto uRow = unitData.GetRow<std::string>(0);
+	std::string spriteAct = (speed > (cRow[11] + cRow[10]) / 2) ? "-Run" : "-Walk";
+	unitSprite.setTexture(SFGM_TEXTURE.Get(uRow[2] + uRow[3] + to_string(spriteNum) + spriteAct + ".png"));
+	unitSprite.setOrigin(std::stof(uRow[5]), std::stof(uRow[6]));
+
+	spriteAnimator.ClearEvent();
+	spriteAnimator.Play(uRow[2] + uRow[3] + to_string(spriteNum) + spriteAct + ".csv");
 }
 
 bool ObjectUnit::FindHome()
@@ -419,12 +450,13 @@ void ObjectUnit::CheckHome()
 	if (walkPath.empty())
 	{
 		ResetHome();
-		status = STATUS::HOMELESS;
+		BeHomeLess();
 	}
 	else
 	{
 		startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
 		destination = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+		NoHomeLess();
 		status = STATUS::TO_HOME;
 	}
 }
@@ -435,12 +467,13 @@ void ObjectUnit::CheckWorkPlace()
 	if (walkPath.empty())
 	{
 		ResetWorkPlace();
-		status = STATUS::HOMELESS;
+		BeHomeLess();
 	}
 	else
 	{
 		startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
 		destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+		NoHomeLess();
 		status = STATUS::TO_WORK_PLACE;
 	}
 }
@@ -511,10 +544,10 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 			}
 			else
 			{
-				status = STATUS::HOMELESS;
+				BeHomeLess();
 			}
 		}
-		else if (hasWorkPlace)
+		else if (!workPlace.expired())
 		{
 			if (lifeTimer < lifeInterval)
 			{
@@ -539,7 +572,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		}
 		break;
 	case STATUS::TO_WORK_PLACE:
-		if (hasWorkPlace)
+		if (!workPlace.expired())
 		{
 			if (destination.expired())
 			{
@@ -564,7 +597,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		}
 		else
 		{
-			status = STATUS::HOMELESS;
+			BeHomeLess();
 		}
 		break;
 	case STATUS::WORK_PLACE:
@@ -577,7 +610,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 			}
 			else
 			{
-				status = STATUS::HOMELESS;
+				BeHomeLess();
 			}
 		}
 		else if (hasHome)
@@ -653,7 +686,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		}
 		else
 		{
-			status = STATUS::HOMELESS;
+			BeHomeLess();
 		}
 		break;
 	case STATUS::SHOP:
@@ -698,7 +731,7 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				}
 				else
 				{
-					status = STATUS::HOMELESS;
+					BeHomeLess();
 				}
 			}
 		}
@@ -749,6 +782,12 @@ void ObjectUnit::Moving(float timeDelta, float timeScale)
 	}
 	if (doCheck)
 	{
+		if (soundTimer >= soundDuration)
+		{
+			soundTimer = 0.f;
+			soundDuration = IOManager::PlaySfx("resource/sfx/leave.wav", { position.x, position.y, 0.f }, 30, 7);
+		}
+
 		startingPoint = sceneGame.lock()->GetTileInfo(gridCoord).second;
 		walkPath = ObjectTile::FindShortPath(destination, startingPoint);
 		if (walkPath.empty())

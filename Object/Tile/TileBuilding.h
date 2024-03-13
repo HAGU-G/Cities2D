@@ -2,12 +2,17 @@
 #include "ObjectTile.h"
 #include "RCIManager.h"
 
+class DataManager;
+
 class TileBuilding : public ObjectTile
 {
+	friend DataManager;
+
 protected:
 	RCI rci;
 	sf::Sprite buildingSprite;
-	sf::Sound environmentSound;
+	float soundTimer = 0.f;
+	float soundDuration = 0.f;
 
 public:
 	explicit TileBuilding(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type);
@@ -24,10 +29,10 @@ public:
 	void Release() override;
 
 	void SetPosition(const sf::Vector2f& position) override;
-	static std::shared_ptr<TileBuilding> Create(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type );
+	static std::shared_ptr<TileBuilding> Create(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type);
 	static std::shared_ptr<TileBuilding> Create(const RCI& rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord,
-		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type);
-	
+		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration);
+
 	void UpdateAdjacent() override;
 
 	inline const RCI& GetRCI() { return rci; }

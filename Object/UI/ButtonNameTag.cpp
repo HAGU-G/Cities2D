@@ -135,6 +135,7 @@ void ButtonNameTag::OnDown()
 {
 
 	ObjectButton::OnDown();
-	SetInputMode(!isInputMode);
+	if (isTextField)
+		SetInputMode(!isInputMode);
 
 }

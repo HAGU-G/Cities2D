@@ -25,8 +25,12 @@ void TileBuilding::Init()
 void TileBuilding::Update(float timeDelta, float timeScale)
 {
 	ObjectTile::Update(timeDelta, timeScale);
+
+	if(soundTimer <= soundDuration)
+	soundTimer += timeDelta;
+
 	buildingSprite.setRotation(scene.lock()->GetView().getRotation());
-	buildingSprite.setScale(1.f,sceneGame.lock()->GetTilt());
+	buildingSprite.setScale(1.f, sceneGame.lock()->GetTilt());
 
 	if (sceneGame.lock()->DoPayTex())
 	{
@@ -47,33 +51,39 @@ void TileBuilding::Reset()
 	for (auto& pair : rci.residenceSlot)
 	{
 		if (!pair.second.expired())
+		{
+			pair.second.lock()->isReset = true;
 			pair.second.lock()->NoHome();
+		}
 	}
 	for (auto& pair : rci.commerceSlot)
 	{
 		if (!pair.second.expired())
+		{
+			pair.second.lock()->isReset = true;
 			pair.second.lock()->NoShop();
+		}
 	}
 	for (auto& pair : rci.industrySlot)
 	{
 		if (!pair.second.expired())
+		{
+			pair.second.lock()->isReset = true;
 			pair.second.lock()->NoWorkPlace();
+		}
 	}
 
 	if (rci.residence > 0)
 	{
 		AddTag(GAME_OBJECT_TAG::R);
-		environmentSound.setBuffer(SFGM_SOUNDBUFFER.Get("resource/sfx/sparrow.wav"));
 	}
 	if (rci.commerce > 0)
 	{
 		AddTag(GAME_OBJECT_TAG::C);
-		environmentSound.setBuffer(SFGM_SOUNDBUFFER.Get("resource/sfx/Konbini.wav"));
 	}
 	if (rci.industry > 0)
 	{
 		AddTag(GAME_OBJECT_TAG::I);
-		environmentSound.setBuffer(SFGM_SOUNDBUFFER.Get("resource/sfx/type_in.wav"));
 	}
 
 
@@ -101,22 +111,30 @@ void TileBuilding::Reset()
 
 void TileBuilding::Release()
 {
-	for (auto& pair :rci.residenceSlot)
+	for (auto& pair : rci.residenceSlot)
 	{
 		if (!pair.second.expired())
+		{
+			pair.second.lock()->isReset = true;
 			pair.second.lock()->NoHome();
+		}
 	}
 	for (auto& pair : rci.commerceSlot)
 	{
 		if (!pair.second.expired())
+		{
+			pair.second.lock()->isReset = true;
 			pair.second.lock()->NoShop();
+		}
 	}
 	for (auto& pair : rci.industrySlot)
 	{
 		if (!pair.second.expired())
+		{
+			pair.second.lock()->isReset = true;
 			pair.second.lock()->NoWorkPlace();
+		}
 	}
-
 	SFGM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
 	rci = RCI();
 }
@@ -131,7 +149,7 @@ std::shared_ptr<TileBuilding> TileBuilding::Create(RCI rci, std::weak_ptr<Scene>
 }
 
 std::shared_ptr<TileBuilding> TileBuilding::Create(const RCI& rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord,
-	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type)
+	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration)
 {
 	std::shared_ptr<TileBuilding> tileBuilding = Create(rci, scene, gridCoord, type);
 	for (auto tag : tagList)
@@ -139,6 +157,9 @@ std::shared_ptr<TileBuilding> TileBuilding::Create(const RCI& rci, std::weak_ptr
 		tileBuilding->AddTag(tag);
 	}
 	tileBuilding->SetTextureRect(rect);
+	tileBuilding->soundTimer = soundTimer;
+	tileBuilding->soundDuration = soundDuration;
+
 
 	return tileBuilding;
 }
@@ -148,9 +169,6 @@ void TileBuilding::SetPosition(const sf::Vector2f& position)
 {
 	ObjectTile::SetPosition(position);
 	buildingSprite.setPosition(position + sceneGame.lock()->GetGridSize() * 0.5f);
-	environmentSound.setPosition(gridCenterPos.x, gridCenterPos.y,0.f);
-	environmentSound.setMinDistance(50.f);
-	environmentSound.setAttenuation(3.f);
 }
 
 void TileBuilding::UpdateAdjacent()
@@ -269,8 +287,24 @@ void TileBuilding::Enter()
 
 void TileBuilding::PlaySound()
 {
-	if (environmentSound.getStatus() != sf::Sound::Playing)
+
+	if (soundTimer >= soundDuration
+		&& std::find(gameObjectTagList.begin(), gameObjectTagList.end(), GAME_OBJECT_TAG::MUTE) == gameObjectTagList.end())
 	{
-		environmentSound.play();
+		soundTimer = 0.f;
+		
+		switch (GetGameObjectType())
+		{
+		case GAME_OBJECT_TYPE::HOME:
+			soundDuration = IOManager::PlaySfx("resource/sfx/sparrows.wav", { gridCenterPos.x, gridCenterPos.y, 0.f }, 100, 4);
+			break;
+		case GAME_OBJECT_TYPE::SHOP:
+			soundDuration = IOManager::PlaySfx("resource/sfx/Konbini.wav", { gridCenterPos.x, gridCenterPos.y, 0.f }, 100, 4);
+			break;
+		case GAME_OBJECT_TYPE::WORK_PLACE:
+			soundDuration = IOManager::PlaySfx("resource/sfx/type_in.wav", { gridCenterPos.x, gridCenterPos.y, 0.f }, 100, 4);
+			break;
+		}
+
 	}
 }

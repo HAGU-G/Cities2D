@@ -39,6 +39,9 @@ protected:
 	sf::Sprite unitSprite;
 	Animator spriteAnimator;
 	int spriteNum = 0;
+	float soundTimer = 0.f;
+	float soundDuration = 1.f;
+	bool isReset = false;
 
 	sf::Vector2i preGridCoord;
 	sf::Vector2i gridCoord;
@@ -98,6 +101,8 @@ public:
 
 	void BeCitizen();
 	void NoCitizen();
+	void BeHomeLess();
+	void NoHomeLess();
 
 	void UpdateHome(float timeDelta, float timeScale);
 	void UpdateWorkSpace(float timeDelta, float timeScale);

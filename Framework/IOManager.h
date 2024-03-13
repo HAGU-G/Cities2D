@@ -89,6 +89,7 @@ private:
 
 public:
 	static void SoundInit(int sfxCount = 64);
+	static void SoundUpdate(float timeDelta, float timeScale);
 	static void SoundRelease();
 
 	static void PlayBGMCh1(const std::string& path, bool loop = true);
@@ -97,6 +98,7 @@ public:
 	static void StopBGM(unsigned int channel);
 	static void SetBGMCh1Volume(float volume);
 	static void SetBGMCh2Volume(float volume);
+	static void SetBGMVolume(); //юс╫ц
 
 	static void SetVolume(float volume);
 
@@ -105,7 +107,8 @@ public:
 	static void BGMSyncSwitch(unsigned int channel);
 
 
-	static void PlaySfx(const std::string& path, bool listener = false);
+	static std::shared_ptr<sf::Sound> PlaySfx(const std::string& path, bool listener = true, bool play = true);
+	static float PlaySfx(const std::string& path, sf::Vector3f pos, float minD, float Atte);
 
 };
 

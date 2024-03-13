@@ -123,6 +123,7 @@ void GameManager::MainLoop()
 		//       업데이트
 		// 
 		/////////////////////////////
+		IOManager::SoundUpdate(globalTimeDelta, globalTimeScale);
 		SceneManager::PreUpdate(globalTimeDelta);
 		SceneManager::Update(globalTimeDelta);
 		SceneManager::PostUpdate(globalTimeDelta);
@@ -148,8 +149,8 @@ void GameManager::MainLoop()
 void GameManager::Release()
 {
 	while (debugWindow.isOpen()) {}
-	IOManager::SoundRelease();
 	SceneManager::Release();
+	IOManager::SoundRelease();
 }
 
 void GameManager::SetWindowSize(unsigned int x)

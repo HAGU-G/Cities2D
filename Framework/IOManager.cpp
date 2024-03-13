@@ -259,7 +259,24 @@ void IOManager::SoundInit(int sfxCount)
 {
 	for (int i = 0; i < sfxCount; i++)
 	{
-		usingSfx.push_back(std::make_shared<sf::Sound>());
+		waitingSfx.push_back(std::make_shared<sf::Sound>());
+	}
+}
+
+void IOManager::SoundUpdate(float timeDelta, float timeScale)
+{
+	auto it = usingSfx.begin();
+	while (it != usingSfx.end())
+	{
+		if ((*it)->getStatus() == sf::Sound::Stopped)
+		{
+			waitingSfx.push_back((*it));
+			it = usingSfx.erase(it);
+		}
+		else
+		{
+			it++;
+		}
 	}
 }
 
@@ -270,6 +287,13 @@ void IOManager::SoundRelease()
 	bgm[1].first.second.stop();
 	bgm[1].second.second.stop();
 
+	for (auto& ptr : usingSfx)
+	{
+		ptr->stop();
+	}
+	usingSfx.clear();
+	waitingSfx.clear();
+
 }
 
 void IOManager::PlayBGMCh1(const std::string& path, bool loop)
@@ -277,7 +301,7 @@ void IOManager::PlayBGMCh1(const std::string& path, bool loop)
 	if (bgm->first.first != path)
 	{
 		bgm->first.second.stop();
-		bgm->first.second.setBuffer(SFGM_SOUNDBUFFER.Load(path));
+		bgm->first.second.setBuffer(SFGM_SOUNDBUFFER.Get(path));
 		bgm->first.first = path;
 		bgm->first.second.play();
 	}
@@ -289,7 +313,7 @@ void IOManager::PlayBGMCh2(const std::string& path, bool loop)
 	if (bgm->second.first != path)
 	{
 		bgm->second.second.stop();
-		bgm->second.second.setBuffer(SFGM_SOUNDBUFFER.Load(path));
+		bgm->second.second.setBuffer(SFGM_SOUNDBUFFER.Get(path));
 		bgm->second.first = path;
 		bgm->second.second.play();
 	}
@@ -302,13 +326,13 @@ void IOManager::BGMSyncPlay(const std::string& path1, const std::string& path2, 
 	if (bgm->first.first != path1)
 	{
 		bgm[0].first.second.stop();
-		bgm[0].first.second.setBuffer(SFGM_SOUNDBUFFER.Load(path1));
+		bgm[0].first.second.setBuffer(SFGM_SOUNDBUFFER.Get(path1));
 		bgm[0].first.first = path1;
 	}
 	if (bgm->second.first != path2)
 	{
 		bgm[0].second.second.stop();
-		bgm[0].second.second.setBuffer(SFGM_SOUNDBUFFER.Load(path2));
+		bgm[0].second.second.setBuffer(SFGM_SOUNDBUFFER.Get(path2));
 		bgm[0].second.first = path2;
 	}
 	bgm[0].first.second.setLoop(loop);
@@ -336,9 +360,10 @@ void IOManager::BGMSyncSwitch(unsigned int channel)
 		bgm[0].second.second.setVolume(100.f);
 		bgm[0].first.second.setVolume(0.f);
 	}
+	SetBGMVolume();
 }
 
-void IOManager::PlaySfx(const std::string& path, bool listener)
+std::shared_ptr<sf::Sound> IOManager::PlaySfx(const std::string& path, bool listener, bool play)
 {
 	std::shared_ptr<sf::Sound> sfx;
 	if (waitingSfx.empty())
@@ -346,7 +371,6 @@ void IOManager::PlaySfx(const std::string& path, bool listener)
 		sfx = usingSfx.front();
 		usingSfx.pop_front();
 		sfx->stop();
-
 	}
 	else
 	{
@@ -355,21 +379,46 @@ void IOManager::PlaySfx(const std::string& path, bool listener)
 	}
 
 	sfx->setBuffer(SFGM_SOUNDBUFFER.Get(path));
+	sfx->setPosition(0.f, 0.f, 0.f);
+	sfx->setMinDistance(1);
+	sfx->setAttenuation(1);
 	sfx->setRelativeToListener(listener);
 	usingSfx.push_back(sfx);
+	if(play)
+		sfx->play();
+	return sfx;
+}
+
+float IOManager::PlaySfx(const std::string& path, sf::Vector3f pos, float minD, float atte)
+{
+	std::shared_ptr<sf::Sound> sfx = PlaySfx(path, false, false);
+	sfx->setPosition(pos);
+	sfx->setMinDistance(minD);
+	sfx->setAttenuation(atte);
 	sfx->play();
+	return sfx->getBuffer()->getDuration().asSeconds();
 }
 
 void IOManager::SetBGMCh1Volume(float volume)
 {
 	bgm[0].first.second.setVolume(volume);
 	bgm[1].first.second.setVolume(volume);
+	SetBGMVolume();
 }
 
 void IOManager::SetBGMCh2Volume(float volume)
 {
 	bgm[0].second.second.setVolume(volume);
 	bgm[1].second.second.setVolume(volume);
+	SetBGMVolume();
+}
+
+void IOManager::SetBGMVolume()
+{
+	bgm[0].first.second.setVolume(bgm[0].first.second.getVolume() * 0.7f);
+	bgm[0].second.second.setVolume(bgm[0].second.second.getVolume() * 0.7f);
+	bgm[1].first.second.setVolume(bgm[1].first.second.getVolume() * 0.7f);
+	bgm[1].second.second.setVolume(bgm[1].second.second.getVolume() * 0.7f);
 }
 
 void IOManager::StopBGM(unsigned int channel)

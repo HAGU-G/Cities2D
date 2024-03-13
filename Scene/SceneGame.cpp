@@ -22,12 +22,16 @@ void SceneGame::AddResource()
 	SFGM_TEXTURE.Add("resource/tile/Tile.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat0-Run.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat0-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat0-Laying.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat1-Run.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat1-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat1-Laying.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat2-Run.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat2-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat2-Laying.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat3-Run.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat3-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat3-Laying.png");
 
 	//Music
 	SFGM_SOUNDBUFFER.Add("resource/music/LittleClose.wav");
@@ -44,6 +48,8 @@ void SceneGame::AddResource()
 	SFGM_SOUNDBUFFER.Add("resource/sfx/Konbini.wav");
 	SFGM_SOUNDBUFFER.Add("resource/sfx/sparrows.wav");
 	SFGM_SOUNDBUFFER.Add("resource/sfx/type_in.wav");
+	SFGM_SOUNDBUFFER.Add("resource/sfx/leave.wav");
+	SFGM_SOUNDBUFFER.Add("resource/sfx/homeless.wav");
 
 	//csv
 	SFGM_CSVFILE.Add("data/TileData.csv");
@@ -51,22 +57,30 @@ void SceneGame::AddResource()
 	SFGM_CSVFILE.Add("data/CitizenData.csv");
 	SFGM_CSVFILE.Add("resource/unit/Cat0-Run.csv");
 	SFGM_CSVFILE.Add("resource/unit/Cat0-Walk.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat0-Laying.csv");
 	SFGM_CSVFILE.Add("resource/unit/Cat1-Run.csv");
 	SFGM_CSVFILE.Add("resource/unit/Cat1-Walk.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat1-Laying.csv");
 	SFGM_CSVFILE.Add("resource/unit/Cat2-Run.csv");
 	SFGM_CSVFILE.Add("resource/unit/Cat2-Walk.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat2-Laying.csv");
 	SFGM_CSVFILE.Add("resource/unit/Cat3-Run.csv");
 	SFGM_CSVFILE.Add("resource/unit/Cat3-Walk.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat3-Laying.csv");
 
 	//animation
 	SFGM_ANICLIP.Add("resource/unit/Cat0-Run.csv");
 	SFGM_ANICLIP.Add("resource/unit/Cat0-Walk.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat0-Laying.csv");
 	SFGM_ANICLIP.Add("resource/unit/Cat1-Run.csv");
 	SFGM_ANICLIP.Add("resource/unit/Cat1-Walk.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat1-Laying.csv");
 	SFGM_ANICLIP.Add("resource/unit/Cat2-Run.csv");
 	SFGM_ANICLIP.Add("resource/unit/Cat2-Walk.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat2-Laying.csv");
 	SFGM_ANICLIP.Add("resource/unit/Cat3-Run.csv");
 	SFGM_ANICLIP.Add("resource/unit/Cat3-Walk.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat3-Laying.csv");
 
 }
 
@@ -85,56 +99,19 @@ void SceneGame::Init()
 
 void SceneGame::PreUpdate(float timeDelta, float timeScale)
 {
-	Scene::PreUpdate(timeDelta, timeScale);
-	SetMousePosGrid();
-	if (gameOver)
-	{
-
-	}
-	else {
-		UpdateCityTime(timeDelta, timeScale);
-		if (city.money < 0)
-			GameOver();
-	}
-
-
-
-
-
-	citizenTimer += timeDelta * timeScale;
-	if (SFGM_RCI.Instance().LeftRegidence() > 0 && citizenTimer >= citizenInterval)
-	{
-		citizenTimer = 0.f;
-		SceneGame::AddUnit(ObjectUnit::Create(This(), GAME_OBJECT_TYPE::CITIZEN));
-	}
-
-	//TESTCODE 이 밑으로 전부 테스트 코드
-
 	if (IOManager::IsKeyPress(sf::Keyboard::Q))
-	{
 		view.rotate(45.f * timeDelta);
-	}
 	if (IOManager::IsKeyPress(sf::Keyboard::E))
-	{
 		view.rotate(-45.f * timeDelta);
-	}
-	if (IOManager::IsKeyPress(sf::Keyboard::W))
-	{
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, -200.f * timeDelta));
-	}
-	if (IOManager::IsKeyPress(sf::Keyboard::S))
-	{
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, 200.f * timeDelta));
-	}
-	if (IOManager::IsKeyPress(sf::Keyboard::A))
-	{
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(-200.f * timeDelta, 0.f));
-	}
-	if (IOManager::IsKeyPress(sf::Keyboard::D))
-	{
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(200.f * timeDelta, 0.f));
-	}
 
+	if (IOManager::IsKeyPress(sf::Keyboard::W))
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, -200.f * timeDelta));
+	if (IOManager::IsKeyPress(sf::Keyboard::S))
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, 200.f * timeDelta));
+	if (IOManager::IsKeyPress(sf::Keyboard::A))
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(-200.f * timeDelta, 0.f));
+	if (IOManager::IsKeyPress(sf::Keyboard::D))
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(200.f * timeDelta, 0.f));
 
 	if (IOManager::GetWheelDelta() > 0)
 	{
@@ -176,11 +153,80 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		tilt = 1.f;
 	}
 
+	//Listener 위치 설정
 	sf::Vector2f tempV = { 0.f, 1.f };
 	tempV = sf::Transform().rotate(view.getRotation()).translate(tempV).transformPoint(tempV);
 	sf::Listener::setUpVector(tempV.x, tempV.y, tilt - 1.f);
 	tempV *= zoomY * (tilt - 1.f) * 0.05f;
 	sf::Listener::setPosition(view.getCenter().x + tempV.x, view.getCenter().y + tempV.y, zoomRatio * 400.f);
+
+	sf::Vector2i unMute = PosToGridCoord({ sf::Listener::getPosition().x, sf::Listener::getPosition().y });
+	if (unMute != preListenerGridCoord)
+	{
+		unMute.x -= soundRadius + 1;
+		unMute.y -= soundRadius + 1;
+		for (int x = 0; x < (soundRadius + 1) * 2; x++)
+		{
+			for (int y = 0; y < (soundRadius + 1) * 2; y++)
+			{
+				if (x == 0 || x == (soundRadius + 1) * 2 - 1 || y == 0 || y == (soundRadius + 1) * 2 - 1)
+				{
+					if (!gridInfo[unMute.x + x][unMute.y + y].second.expired())
+						gridInfo[unMute.x + x][unMute.y + y].second.lock()->AddTag(GAME_OBJECT_TAG::MUTE);
+					else
+						gridInfo[unMute.x + x].erase(unMute.y + y);
+
+					for (auto& ptr : unitOnGrid[unMute.x + x][unMute.y + y])
+					{
+						if (!ptr.expired())
+						{
+							ptr.lock()->AddTag(GAME_OBJECT_TAG::MUTE);
+						}
+					}
+				}
+				else
+				{
+					if (!gridInfo[unMute.x + x][unMute.y + y].second.expired())
+						gridInfo[unMute.x + x][unMute.y + y].second.lock()->RemoveTag(GAME_OBJECT_TAG::MUTE);
+					else
+						gridInfo[unMute.x + x].erase(unMute.y + y);
+
+					for (auto& ptr : unitOnGrid[unMute.x + x][unMute.y + y])
+					{
+						if (!ptr.expired())
+						{
+							ptr.lock()->RemoveTag(GAME_OBJECT_TAG::MUTE);
+						}
+					}
+				}
+			}
+		}
+	}
+	preListenerGridCoord = PosToGridCoord({ sf::Listener::getPosition().x, sf::Listener::getPosition().y });
+
+
+	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), view);
+	SetMousePosGrid();
+
+	if (gameOver)
+	{
+		//gameOver일때 보여줄 화면
+	}
+	else
+	{
+		UpdateCityTime(timeDelta, timeScale);
+		if (city.money < 0)
+			GameOver();
+	}
+
+	citizenTimer += timeDelta * timeScale;
+	if (SFGM_RCI.Instance().LeftRegidence() > 0 && citizenTimer >= citizenInterval)
+	{
+		citizenTimer = 0.f;
+		SceneGame::AddUnit(ObjectUnit::Create(This(), GAME_OBJECT_TYPE::CITIZEN));
+	}
+
+	Scene::PreUpdate(timeDelta, timeScale);
 }
 
 void SceneGame::Update(float timeDelta, float timeScale)
@@ -293,6 +339,7 @@ void SceneGame::Release()
 void SceneGame::Enter()
 {
 	IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav", 1, true);
+	SetBGMSync();
 }
 
 std::shared_ptr<ObjectUnit> SceneGame::AddUnit(const std::shared_ptr<ObjectUnit>& unit)
@@ -423,6 +470,22 @@ void SceneGame::DeleteObjectTile(const sf::Vector2i& gridCoord)
 	deleteTileDeque.push_back(gridCoord);
 }
 
+sf::Vector2i SceneGame::PosToGridCoord(const sf::Vector2f& position)
+{
+	sf::Vector2i gridCoord;
+	if (position.x >= 0)
+		gridCoord.x = position.x / gridSize.x;
+	else
+		gridCoord.x = floor(position.x / gridSize.x);
+
+	if (position.y >= 0)
+		gridCoord.y = position.y / gridSize.y;
+	else
+		gridCoord.y = floor(position.y / gridSize.y);
+
+	return gridCoord;
+}
+
 const GridInfo& SceneGame::GetGridInfo()
 {
 	OrganizeGridInfo();
@@ -458,7 +521,7 @@ void SceneGame::LoadMayor(CITY city)
 }
 
 bool SceneGame::LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
-	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type)
+	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer,float soundDuration)
 {
 	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
@@ -469,7 +532,7 @@ bool SceneGame::LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
 		}
 		else if (type >= GAME_OBJECT_TYPE::BUILDING && type < GAME_OBJECT_TYPE::BUILDING_END)
 		{
-			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord, tagList, rect, type);
+			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord, tagList, rect, type, soundTimer, soundDuration);
 		}
 		else
 		{
@@ -490,37 +553,30 @@ bool SceneGame::LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
 void SceneGame::GameOver()
 {
 	gameOver = true;
+	timeScale = 0.f;
 }
 
 void SceneGame::SetMousePosGrid()
 {
-	if (mousePosWorld.x >= 0)
-		mousePosGrid.x = mousePosWorld.x / gridSize.x;
-	else
-		mousePosGrid.x = floor(mousePosWorld.x / gridSize.x);
-
-	if (mousePosWorld.y >= 0)
-		mousePosGrid.y = mousePosWorld.y / gridSize.y;
-	else
-		mousePosGrid.y = floor(mousePosWorld.y / gridSize.y);
+	mousePosGrid = PosToGridCoord(mousePosWorld);
 }
 
 void SceneGame::SetBGMSync()
 {
-	if (zoomRatio < 0.1f)
+	if (zoomRatio < 0.35f)
 	{
 		IOManager::SetBGMCh1Volume(0.f);
 		IOManager::SetBGMCh2Volume(0.f);
 	}
-	else if (zoomRatio <= 1.1f)
+	else if (zoomRatio <= 1.35f)
 	{
-		IOManager::SetBGMCh1Volume(100.f * (zoomRatio - 0.1f));
+		IOManager::SetBGMCh1Volume(100.f * (zoomRatio - 0.35f));
 		IOManager::SetBGMCh2Volume(0.f);
 	}
-	else if (zoomRatio <= 2.1f)
+	else if (zoomRatio <= 2.35f)
 	{
-		IOManager::SetBGMCh1Volume(100.f * (2.1f - zoomRatio));
-		IOManager::SetBGMCh2Volume(100.f * (zoomRatio - 1.1f));
+		IOManager::SetBGMCh1Volume(100.f * (2.35f - zoomRatio));
+		IOManager::SetBGMCh2Volume(100.f * (zoomRatio - 1.35f));
 	}
 	else
 	{
@@ -541,4 +597,5 @@ void SceneGame::ChangeBGM()
 		isMiddleCity = false;
 		IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav", 1, true);
 	}
+	SetBGMSync();
 }

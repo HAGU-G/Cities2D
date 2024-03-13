@@ -1,0 +1,12 @@
+ID,FPS,LOOPTYPE (0:Sigle 1:loop 2:PingPong)
+resource/unit/Cat1-Walk.csv,10,1
+
+TEXTURE ID, LEFT, TOP, WIDTH, HEIGHT
+resource/unit/Cat1-Walk.png,0,0,50,50
+resource/unit/Cat1-Walk.png,50,0,50,50
+resource/unit/Cat1-Walk.png,100,0,50,50
+resource/unit/Cat1-Walk.png,150,0,50,50
+resource/unit/Cat1-Walk.png,200,0,50,50
+resource/unit/Cat1-Walk.png,250,0,50,50
+resource/unit/Cat1-Walk.png,300,0,50,50
+resource/unit/Cat1-Walk.png,350,0,50,50

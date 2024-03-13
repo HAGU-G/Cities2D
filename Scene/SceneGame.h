@@ -32,9 +32,9 @@ protected:
 	float startTilt = 0.f;
 	float tilt = 1.f;
 	float zoomY = 0.f;
+	float zoomRatio = 1.f;
 
 	sf::Vector2f gridSize = { 50.f, 50.f };
-	sf::RectangleShape background;
 
 	GridInfo gridInfo; //[x][y]
 	std::shared_ptr<ObjectTileMap> groundTileMap;
@@ -44,10 +44,13 @@ protected:
 	float citizenInterval = 1.f;
 
 	void SetMousePosGrid();
+	void SetBGMSync();
+	void ChangeBGM();
 
 	//도시의 정보
 	CITY city;
 	bool gameOver = false;
+	bool isMiddleCity = false;
 
 public:
 	UnitOnGrid unitOnGrid; //[x][y]
@@ -67,6 +70,8 @@ public:
 	void Draw(sf::RenderWindow& window) override;
 	void Reset() override;
 	void Release() override;
+
+	void Enter() override;
 
 	bool CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type);
 	std::shared_ptr<ObjectUnit> AddUnit(const std::shared_ptr<ObjectUnit>& unit);

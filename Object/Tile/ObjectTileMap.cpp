@@ -32,24 +32,23 @@ void ObjectTileMap::UpdateTile(int x, int y)
 
 	sf::Vector2f zeroTex;
 
-	switch (sceneGame.lock()->GetTileInfo(x, y).first)
+
+	const rapidcsv::Document& tileData = SFGM_CSVFILE.Get("data/TileData.csv").GetDocument();
+	for (int i = 0; i < tileData.GetRowCount(); i++)
 	{
-	case GAME_OBJECT_TYPE::ROAD:
-		zeroTex = { 0, 50 };
-		break;
-	case GAME_OBJECT_TYPE::HOME:
-		zeroTex = { 50, 50 };
-		break;
-	case GAME_OBJECT_TYPE::WORK_PLACE:
-		zeroTex = { 100, 50 };
-		break;
-	case GAME_OBJECT_TYPE::SHOP:
-		zeroTex = { 100, 0 };
-		break;
-	default:
-		ResetTile(x, y);
-		return;
-		break;
+		auto row = tileData.GetRow<std::string>(i);
+		if (std::stoi(row[1]) == (int)sceneGame.lock()->GetTileInfo(x, y).first - (int)GAME_OBJECT_TYPE::TILE)
+		{
+			renderStates.texture = &SFGM_TEXTURE.Load(row[2]);
+			zeroTex = { std::stof(row[3]), std::stof(row[4]) };
+			break;
+		}
+
+		if (i == tileData.GetRowCount() - 1)
+		{
+			ResetTile(x, y);
+			return;
+		}
 	}
 
 	//타일에 무언가 있을 때
@@ -265,8 +264,6 @@ void ObjectTileMap::ResetTile(int x, int y)
 void ObjectTileMap::Init()
 {
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
-
-	renderStates.texture = &SFGM_TEXTURE.Load("resource/tile/Tile.png");
 
 	tileMap.setPrimitiveType(sf::Triangles);
 

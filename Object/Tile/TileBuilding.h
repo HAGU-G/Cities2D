@@ -7,6 +7,7 @@ class TileBuilding : public ObjectTile
 protected:
 	RCI rci;
 	sf::Sprite buildingSprite;
+	sf::Sound environmentSound;
 
 public:
 	explicit TileBuilding(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type);
@@ -44,5 +45,7 @@ public:
 	void UnuseC(const std::string& key);
 
 	bool ConditionCheck(GAME_OBJECT_TAG tag) override;
+
+	void PlaySound();
 };
 

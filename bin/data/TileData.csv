@@ -1,0 +1,5 @@
+TILE_OBJECT_TYPE,TYPE_ID,TILE_RESOURCE_PATH,TILE_TEXTURE_COORD_X,TILE_TEXTURE_COORD_Y,BUILDING_RESOURCE_PATH,BUILDING_TEXTURE_RECT_LEFT,TOP,WIDTH,HEIGHT
+ROAD,0,resource/tile/Tile.png,0,50,NONE,0,0,0,0
+HOME,1,resource/tile/Tile.png,50,50,resource/tile/Buildings.png,0,0,50,150
+SHOP,2,resource/tile/Tile.png,100,0,resource/tile/Buildings.png,0,300,50,150
+WORK_PLACE,3,resource/tile/Tile.png,100,50,resource/tile/Buildings.png,0,150,50,150

@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "SceneManager.h"
+#include "Animator.h"
 
 std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::usingSceneList;
 std::unordered_map<std::string, std::shared_ptr<Scene>> SceneManager::unuseSceneList;
@@ -88,6 +89,7 @@ void SceneManager::Use()
 		if (scene != waitingSceneList.end())
 		{
 			usingSceneList.insert(std::make_pair(scene->first, scene->second));
+			scene->second->Enter();
 			waitingSceneList.erase(name);
 		}
 		else
@@ -114,6 +116,7 @@ void SceneManager::Wait()
 		if (usingScene != usingSceneList.end())
 		{
 			waitingSceneList.insert(std::make_pair(usingScene->first, usingScene->second));
+			usingScene->second->Exit();
 			usingSceneList.erase(name);
 		}
 		else
@@ -128,6 +131,7 @@ void SceneManager::Wait()
 				SFGM_FONT.Load();
 				SFGM_SOUNDBUFFER.Load();
 				SFGM_CSVFILE.Load();
+				SFGM_ANICLIP.Load();
 
 				unuseScene->second->Init();
 				unuseScene->second->Reset();
@@ -150,6 +154,7 @@ void SceneManager::Unuse()
 		if (usingScene != usingSceneList.end())
 		{
 			unuseSceneList.insert(std::make_pair(usingScene->first, usingScene->second));
+			usingScene->second->Exit();
 			usingScene->second->RemoveResource();
 			usingScene->second->Release();
 			usingSceneList.erase(name);
@@ -182,6 +187,7 @@ void SceneManager::Unuse()
 		SFGM_FONT.UnLoad();
 		SFGM_SOUNDBUFFER.UnLoad();
 		SFGM_CSVFILE.UnLoad();
+		SFGM_ANICLIP.UnLoad();
 	}
 }
 
@@ -245,7 +251,6 @@ void SceneManager::Release()
 	waitingSceneList.clear();
 	unuseSceneList.clear();
 }
-
 void SceneManager::Use(const std::string& name, bool doForce)
 {
 	toUse.push_back(name);

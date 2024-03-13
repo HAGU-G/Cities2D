@@ -1,5 +1,6 @@
 #pragma once
 #include "GameObject.h"
+#include "Animator.h"
 
 class TileBuilding;
 class SceneGame;
@@ -35,7 +36,9 @@ public:
 protected:
 	std::weak_ptr<SceneGame> sceneGame;
 
-	sf::CircleShape tempRender;
+	sf::Sprite unitSprite;
+	Animator spriteAnimator;
+	int spriteNum = 0;
 
 	sf::Vector2i preGridCoord;
 	sf::Vector2i gridCoord;
@@ -53,6 +56,7 @@ protected:
 	float findTimer = 0.f;
 	float findInterval = 10.f;
 	int	patience = 10;
+	int	maxPatience = 10;
 
 	STATUS status = STATUS::NONE;
 	float lifeTimer = 0.f;
@@ -87,6 +91,7 @@ public:
 
 	static std::shared_ptr<ObjectUnit> Create(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE type);
 	void SetPosition(const sf::Vector2f& position) override;
+	void SetTexture(int spriteNum);
 
 	inline std::weak_ptr<ObjectTile> GetNextTile() const { return nextTile; }
 	inline static size_t GetUnitCount() { return citizenCount; }

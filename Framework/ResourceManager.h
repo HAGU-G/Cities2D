@@ -6,6 +6,7 @@
 #define SFGM_FONT (ResourceManager<sf::Font>::Instance())
 #define SFGM_SOUNDBUFFER (ResourceManager<sf::SoundBuffer>::Instance())
 #define SFGM_CSVFILE (ResourceManager<CsvFile>::Instance())
+#define SFGM_ANICLIP (ResourceManager<AnimationClip>::Instance())
 
 #include "Scene.h"
 #include "CsvFile.h"
@@ -146,7 +147,7 @@ public:
 		std::shared_ptr<T> tempObject = std::make_unique<T>();
 		if (tempObject->loadFromFile(resourcePath))
 		{
-			return *resourceObjectList.insert(std::make_pair(resourcePath, tempObject)).first->second;
+			return *(resourceObjectList.insert(std::make_pair(resourcePath, tempObject)).first->second);
 		}
 		std::cout << "\"" + resourcePath + "\"를 찾을 수 없습니다." << std::endl;
 		return unknownResource;
@@ -197,8 +198,19 @@ public:
 		return std::make_pair(UnLoadALL(), Load());
 	}
 
-	//추가된 리소스 오브젝트 Get
+	//추가된 리소스 오브젝트 Get (const)
 	const T& Get(const std::string& path)
+	{
+		auto it = resourceObjectList.find(path);
+		if (it == resourceObjectList.end())
+		{
+			std::cout << "\"" + path + "\"를 찾을 수 없습니다." << std::endl;
+			return unknownResource;
+		}
+		return *(it->second);
+	}
+	//추가된 리소스 오브젝트 Get
+	T& GetRaw(const std::string& path)
 	{
 		auto it = resourceObjectList.find(path);
 		if (it == resourceObjectList.end())

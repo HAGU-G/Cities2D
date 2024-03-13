@@ -124,6 +124,14 @@ void Scene::Release()
 	resourcePathList.clear(); //파일 경로들이 담긴 컨테이너
 }
 
+void Scene::Enter()
+{
+}
+
+void Scene::Exit()
+{
+}
+
 float Scene::GetTimeScale() const
 {
 	if (useGlobalTimeScale)

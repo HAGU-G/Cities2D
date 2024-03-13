@@ -98,7 +98,7 @@ void GameManager::MainLoop()
 		//       이벤트 루프
 		// 
 		/////////////////////////////
-		IOManager::Update(globalTimeDelta, globalTimeScale);
+		IOManager::KeyUpdate(globalTimeDelta, globalTimeScale);
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
@@ -107,7 +107,7 @@ void GameManager::MainLoop()
 				debugWindow.close();
 				window.close();
 			}
-			IOManager::EventUpdate(event);
+			IOManager::KeyEventUpdate(event);
 		}
 
 		/////////////////////////////
@@ -140,6 +140,7 @@ void GameManager::MainLoop()
 void GameManager::Release()
 {
 	while (debugWindow.isOpen()) {}
+	IOManager::SoundRelease();
 	SceneManager::Release();
 }
 

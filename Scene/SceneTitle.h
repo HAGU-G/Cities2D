@@ -8,6 +8,8 @@ private:
 	void LoadingGame();
 
 protected:
+	std::thread t1;
+
 	sf::Sprite background00;
 	sf::Sprite background01;
 	sf::Sprite background02;

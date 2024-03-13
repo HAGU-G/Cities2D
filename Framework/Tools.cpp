@@ -1,5 +1,6 @@
 #include "pch.h"
 #include "Tools.h"
+
 namespace tool
 {
 	float RandomBetween(float a, float b)
@@ -68,7 +69,7 @@ namespace tool
 		std::string numStr = to_string(num);
 		std::string newStr;
 		int count = 0;
-		while(!numStr.empty())
+		while (!numStr.empty())
 		{
 			newStr = numStr.back() + newStr;
 			numStr.pop_back();
@@ -80,6 +81,35 @@ namespace tool
 			}
 		}
 		return newStr;
+	}
+
+
+	float RadianToDegree(float radian)
+	{
+		return radian / M_PI * 180.f;
+	}
+	float Angle(const sf::Vector2f& vec)
+	{
+		return atan2f(vec.y, vec.x);
+	}
+
+	float Angle360(const sf::Vector2f& vec)
+	{
+		float angle1 = acosf(vec.x / tool::Magnitude(vec));
+		if (vec.y < 0)
+			angle1 = 2.f * M_PI - angle1;
+		return RadianToDegree(angle1);
+	}
+	float Angle360(const sf::Vector2f& vec1, const sf::Vector2f& vec2)
+	{
+		return RadianToDegree(acosf((vec1.x * vec2.x + vec1.y * vec2.y) / (Magnitude(vec1) * Magnitude(vec2))));
+	}
+
+	float Angle360(const sf::Vector2f& vec1, float degree)
+	{
+		sf::Vector2f vec2 = { 1.f, 0.f };
+		vec2 = sf::Transform().rotate(degree).translate(vec2).transformPoint(vec2);
+		return Angle360(vec1, vec2);
 	}
 
 

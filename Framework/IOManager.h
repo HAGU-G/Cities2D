@@ -4,6 +4,12 @@
 
 class IOManager final
 {
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+//    
+//     Key
+// 
+//////////////////////////////////////////////////////////////////////////////////////////////
 public:
 	enum class KEY_STATE
 	{
@@ -31,13 +37,11 @@ private:
 	static bool doInputText;
 	static size_t textSize;
 
-	//TODO 키설정 파일(txt?)에서 받아오자!
-
 public:
 	//메시지 루프 전에 호출
-	static void Update(float timedetla, float timeScale);
+	static void KeyUpdate(float timedetla, float timeScale);
 	//메시지 루프 안에서 호출
-	static void EventUpdate(const sf::Event& event);
+	static void KeyEventUpdate(const sf::Event& event);
 
 	//키보드
 	static bool IsKeyPress(const sf::Keyboard::Key key);
@@ -70,6 +74,31 @@ public:
 
 
 
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+//    
+//     Sound
+// 
+//////////////////////////////////////////////////////////////////////////////////////////////
+
+private:
+	static std::pair<std::pair<std::string, sf::Sound>, std::pair<std::string, sf::Sound>> bgm[2]; // 0=main
+
+public:
+	static void SoundRelease();
+
+	static void PlayBGMCh1(const std::string& path, bool loop = true);
+	static void PlayBGMCh2(const std::string& path, bool loop = true);
+	static void StopBGM();
+	static void StopBGM(unsigned int channel);
+
+	static void SetVolume(float volume);
+
+	static void BGMSyncPlay(const std::string& path1, const std::string& path2, bool loop = true);
+	static void BGMSyncPlay(const std::string& path1, const std::string& path2, unsigned int channel, bool loop);
+	static void BGMSyncSwitch(unsigned int channel);
+	static void SetBGMCh1Volume(float volume);
+	static void SetBGMCh2Volume(float volume);
 
 };
 

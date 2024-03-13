@@ -116,9 +116,9 @@ void SceneTitle::PostInit()
 
 
 
-
-	std::thread t1(&SceneTitle::LoadingGame, this);
-	t1.detach();
+	LoadingGame();
+	//t1 = std::thread(&SceneTitle::LoadingGame, this);
+	//t1.detach();
 }
 
 void SceneTitle::Draw(sf::RenderWindow& window)

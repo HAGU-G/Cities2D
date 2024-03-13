@@ -61,32 +61,36 @@ void TileBuilding::Reset()
 	}
 
 	if (rci.residence > 0)
+	{
 		AddTag(GAME_OBJECT_TAG::R);
+	}
 	if (rci.commerce > 0)
+	{
 		AddTag(GAME_OBJECT_TAG::C);
+		environmentSound.setBuffer(SFGM_SOUNDBUFFER.Get("resource/sfx/Konbini.wav"));
+	}
 	if (rci.industry > 0)
+	{
 		AddTag(GAME_OBJECT_TAG::I);
+		environmentSound.setBuffer(SFGM_SOUNDBUFFER.Get("resource/sfx/type_in.wav"));
+	}
 
-	buildingSprite.setTexture(SFGM_TEXTURE.Get("resource/tile/Buildings.png"));
 
 	std::initializer_list<int> elements = { rci.residence, rci.commerce, rci.industry };
 	int rciMax = std::max(elements);
 
-	if (rciMax == rci.commerce)
+	const rapidcsv::Document& tileData = SFGM_CSVFILE.Get("data/TileData.csv").GetDocument();
+	for (int i = 0; i < tileData.GetRowCount(); i++)
 	{
-		textureRect = { 0, 300, 50, 150 };
-		buildingSprite.setTextureRect(textureRect);
+		auto row = tileData.GetRow<std::string>(i);
+		if (std::stoi(row[1]) == (int)GetGameObjectType() - (int)GAME_OBJECT_TYPE::TILE)
+		{
+			buildingSprite.setTexture(SFGM_TEXTURE.Get(row[5]));
+			textureRect = { std::stoi(row[6]), std::stoi(row[7]), std::stoi(row[8]), std::stoi(row[9]) };
+			buildingSprite.setTextureRect(textureRect);
+			break;
+		}
 	}
-	else if (rciMax == rci.industry)
-	{
-		textureRect = { 0, 150, 50, 150 };
-		buildingSprite.setTextureRect(textureRect);
-	}
-	else
-	{
-		textureRect = { 0, 0, 50, 150 };
-		buildingSprite.setTextureRect(textureRect);
-	} 
 
 	buildingSprite.setOrigin(buildingSprite.getLocalBounds().width * 0.5f,
 		buildingSprite.getLocalBounds().height - sceneGame.lock()->GetGridSize().y);
@@ -143,6 +147,9 @@ void TileBuilding::SetPosition(const sf::Vector2f& position)
 {
 	ObjectTile::SetPosition(position);
 	buildingSprite.setPosition(position + sceneGame.lock()->GetGridSize() * 0.5f);
+	environmentSound.setPosition(gridCenterPos.x, gridCenterPos.y,0.f);
+	environmentSound.setMinDistance(200.f);
+	environmentSound.setAttenuation(10.f);
 }
 
 void TileBuilding::UpdateAdjacent()
@@ -188,6 +195,7 @@ void TileBuilding::UseR(std::weak_ptr<ObjectUnit> citizen)
 {
 	rci.residenceSlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
 	SFGM_RCI.UseRegidence(1);
+	PlaySound();
 }
 
 void TileBuilding::UnuseR(const std::string& key)
@@ -212,6 +220,7 @@ void TileBuilding::UseI(std::weak_ptr<ObjectUnit> citizen)
 {
 	rci.industrySlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
 	SFGM_RCI.UseIndustry(1);
+	PlaySound();
 }
 
 void TileBuilding::UnuseI(const std::string& key)
@@ -224,6 +233,7 @@ void TileBuilding::UseC(std::weak_ptr<ObjectUnit> citizen)
 {
 	rci.commerceSlot.insert(std::make_pair(citizen.lock()->GetKey(), citizen));
 	SFGM_RCI.UseCommerce(1);
+	PlaySound();
 }
 
 void TileBuilding::UnuseC(const std::string& key)
@@ -252,4 +262,12 @@ bool TileBuilding::ConditionCheck(GAME_OBJECT_TAG tag)
 		break;
 	}
 	return false;
+}
+
+void TileBuilding::PlaySound()
+{
+	if (environmentSound.getStatus() != sf::Sound::Playing)
+	{
+		environmentSound.play();
+	}
 }

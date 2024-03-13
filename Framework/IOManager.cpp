@@ -15,7 +15,7 @@ std::wstring IOManager::inputText;
 bool IOManager::doInputText = false;
 size_t IOManager::textSize = 12;
 
-void IOManager::EventUpdate(const sf::Event& event)
+void IOManager::KeyEventUpdate(const sf::Event& event)
 {
 
 	switch (event.type)
@@ -67,7 +67,7 @@ void IOManager::EventUpdate(const sf::Event& event)
 				switch (event.text.unicode)
 				{
 				case 0x0008:
-					if(!inputText.empty())
+					if (!inputText.empty())
 						inputText.pop_back();
 					break;
 				case 0x000D:
@@ -76,7 +76,7 @@ void IOManager::EventUpdate(const sf::Event& event)
 				}
 				break;
 			}
-			else if(inputText.size() < textSize && event.text.unicode <= 0x007E)
+			else if (inputText.size() < textSize && event.text.unicode <= 0x007E)
 			{
 				switch (event.text.unicode)
 				{
@@ -100,7 +100,7 @@ void IOManager::EventUpdate(const sf::Event& event)
 	}
 }
 
-void IOManager::Update(float timedetla, float timeScale)
+void IOManager::KeyUpdate(float timedetla, float timeScale)
 {
 	keyDownList.clear();
 	keyUpList.clear();
@@ -235,4 +235,133 @@ void IOManager::SetDoInputText(bool value, size_t textSize)
 {
 	doInputText = value;
 	IOManager::textSize = textSize;
+}
+
+
+
+
+
+
+
+
+
+//////////////////////////////////////////////////////////////////////////////////////////////
+//    
+//     Sound
+// 
+//////////////////////////////////////////////////////////////////////////////////////////////
+std::pair<std::pair<std::string, sf::Sound>, std::pair<std::string, sf::Sound>> IOManager::bgm[2];
+
+void IOManager::SoundRelease()
+{
+	bgm[0].first.second.stop();
+	bgm[0].second.second.stop();
+	bgm[1].first.second.stop();
+	bgm[1].second.second.stop();
+
+}
+
+void IOManager::PlayBGMCh1(const std::string& path, bool loop)
+{
+	if (bgm->first.first != path)
+	{
+		bgm->first.second.stop();
+		bgm->first.second.setBuffer(SFGM_SOUNDBUFFER.Load(path));
+		bgm->first.first = path;
+		bgm->first.second.play();
+	}
+	bgm->first.second.setLoop(loop);
+}
+
+void IOManager::PlayBGMCh2(const std::string& path, bool loop)
+{
+	if (bgm->second.first != path)
+	{
+		bgm->second.second.stop();
+		bgm->second.second.setBuffer(SFGM_SOUNDBUFFER.Load(path));
+		bgm->second.first = path;
+		bgm->second.second.play();
+	}
+	bgm->second.second.setLoop(loop);
+}
+
+
+void IOManager::BGMSyncPlay(const std::string& path1, const std::string& path2, bool loop)
+{
+	if (bgm->first.first != path1)
+	{
+		bgm[0].first.second.stop();
+		bgm[0].first.second.setBuffer(SFGM_SOUNDBUFFER.Load(path1));
+		bgm[0].first.first = path1;
+	}
+	if (bgm->second.first != path2)
+	{
+		bgm[0].second.second.stop();
+		bgm[0].second.second.setBuffer(SFGM_SOUNDBUFFER.Load(path2));
+		bgm[0].second.first = path2;
+	}
+	bgm[0].first.second.setLoop(loop);
+	bgm[0].second.second.setLoop(loop);
+
+	bgm[0].first.second.play();
+	bgm[0].second.second.play();
+}
+
+void IOManager::BGMSyncPlay(const std::string& path1, const std::string& path2, unsigned int channel, bool loop)
+{
+	BGMSyncSwitch(channel);
+	BGMSyncPlay(path1, path2, loop);
+}
+
+void IOManager::BGMSyncSwitch(unsigned int channel)
+{
+	if (channel <= 1)
+	{
+		bgm[0].first.second.setVolume(100.f);
+		bgm[0].second.second.setVolume(0.f);
+	}
+	else
+	{
+		bgm[0].second.second.setVolume(100.f);
+		bgm[0].first.second.setVolume(0.f);
+	}
+}
+
+void IOManager::SetBGMCh1Volume(float volume)
+{
+	bgm[0].first.second.setVolume(volume);
+	bgm[1].first.second.setVolume(volume);
+}
+
+void IOManager::SetBGMCh2Volume(float volume)
+{
+	bgm[0].second.second.setVolume(volume);
+	bgm[1].second.second.setVolume(volume);
+}
+
+void IOManager::StopBGM(unsigned int channel)
+{
+	if (channel <= 1)
+	{
+		bgm[0].first.second.stop();
+		bgm[1].first.second.stop();
+	}
+	else
+	{
+		bgm[0].second.second.stop();
+		bgm[1].second.second.stop();
+	}
+}
+
+void IOManager::StopBGM()
+{
+	bgm[0].first.second.stop();
+	bgm[0].second.second.stop();
+	bgm[1].first.second.stop();
+	bgm[1].second.second.stop();
+}
+
+void IOManager::SetVolume(float volume)
+{
+	sf::Listener::setGlobalVolume(volume);
 }

@@ -1,6 +1,7 @@
 #pragma once
 
 //c++, STL
+#define _USE_MATH_DEFINES
 #include <iostream>
 #include <string>
 #include <list>
@@ -9,6 +10,7 @@
 #include <unordered_set>
 #include <random>
 #include <thread>
+#include <cmath>
 
 //SFML
 #include "SFML/Graphics.hpp"

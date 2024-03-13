@@ -20,14 +20,14 @@ void SceneGame::AddResource()
 	//Texture
 	SFGM_TEXTURE.Add("resource/tile/Buildings.png");
 	SFGM_TEXTURE.Add("resource/tile/Tile.png");
-	SFGM_TEXTURE.Add("resource/unit/Cat-1-Run.png");
-	SFGM_TEXTURE.Add("resource/unit/Cat-1-Walk.png");
-	SFGM_TEXTURE.Add("resource/unit/Cat-2-Run.png");
-	SFGM_TEXTURE.Add("resource/unit/Cat-2-Walk.png");
-	SFGM_TEXTURE.Add("resource/unit/Cat-5-Run.png");
-	SFGM_TEXTURE.Add("resource/unit/Cat-5-Walk.png");
-	SFGM_TEXTURE.Add("resource/unit/Cat-6-Run.png");
-	SFGM_TEXTURE.Add("resource/unit/Cat-6-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat0-Run.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat0-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat1-Run.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat1-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat2-Run.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat2-Walk.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat3-Run.png");
+	SFGM_TEXTURE.Add("resource/unit/Cat3-Walk.png");
 
 	//Music
 	SFGM_SOUNDBUFFER.Add("resource/music/LittleClose.wav");
@@ -45,6 +45,28 @@ void SceneGame::AddResource()
 	SFGM_SOUNDBUFFER.Add("resource/sfx/sparrows.wav");
 	SFGM_SOUNDBUFFER.Add("resource/sfx/type_in.wav");
 
+	//csv
+	SFGM_CSVFILE.Add("data/TileData.csv");
+	SFGM_CSVFILE.Add("data/UnitData.csv");
+	SFGM_CSVFILE.Add("data/CitizenData.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat0-Run.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat0-Walk.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat1-Run.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat1-Walk.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat2-Run.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat2-Walk.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat3-Run.csv");
+	SFGM_CSVFILE.Add("resource/unit/Cat3-Walk.csv");
+
+	//animation
+	SFGM_ANICLIP.Add("resource/unit/Cat0-Run.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat0-Walk.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat1-Run.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat1-Walk.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat2-Run.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat2-Walk.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat3-Run.csv");
+	SFGM_ANICLIP.Add("resource/unit/Cat3-Walk.csv");
 
 }
 
@@ -55,10 +77,6 @@ void SceneGame::Init()
 	//선택된 타일 표시용 (임시)
 	Scene::Init();
 	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
-
-	background.setFillColor({ 20,120,20,255 });
-	background.setSize(view.getSize());
-	tool::SetOrigin(background, ORIGIN::M);
 
 	groundTileMap = ObjectTileMap::Create(This());
 
@@ -123,12 +141,17 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	{
 		view.zoom(1.f / 1.05f);
 		zoomY *= 1.f / 1.05f;
+		zoomRatio *= 1.f / 1.05f;
+		SetBGMSync();
 	}
 	else if (IOManager::GetWheelDelta() < 0)
 	{
 		view.zoom(1.05f);
 		zoomY *= 1.05f;
+		zoomRatio *= 1.05f;
+		SetBGMSync();
 	}
+
 	if (IOManager::IsKeyPress(sf::Mouse::Middle))
 	{
 		if (!isTilt)
@@ -154,7 +177,10 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		tilt = 1.f;
 	}
 
-	background.setPosition(view.getCenter());
+	sf::Listener::setPosition(view.getCenter().x, view.getCenter().y, zoomRatio * 100.f);
+	sf::Vector2f vecUp = { 1.f, 0.f };
+	vecUp = sf::Transform().rotate(view.getRotation()).translate(vecUp).transformPoint(vecUp);
+	sf::Listener::setUpVector(vecUp.x, vecUp.y, 0.f);
 }
 
 void SceneGame::Update(float timeDelta, float timeScale)
@@ -202,7 +228,7 @@ void SceneGame::PostUpdate(float timeDelta, float timeScale)
 					if (!ptr.expired())
 					{
 						std::shared_ptr<ObjectUnit> tempPtr = ptr.lock();
-						if (tempPtr->GetNextTile().expired()||tempPtr->GetNextTile().lock()->GetGridCoord() == gridCoord)
+						if (tempPtr->GetNextTile().expired() || tempPtr->GetNextTile().lock()->GetGridCoord() == gridCoord)
 							tempPtr->SetPosition({ sf::Vector2f(teleport).x * gridSize.x + gridSize.x * 0.5f,
 								sf::Vector2f(teleport).y * gridSize.y + gridSize.y * 0.5f });
 						else
@@ -264,6 +290,11 @@ void SceneGame::Release()
 	Scene::Release();
 }
 
+void SceneGame::Enter()
+{
+	IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav", 1, true);
+}
+
 std::shared_ptr<ObjectUnit> SceneGame::AddUnit(const std::shared_ptr<ObjectUnit>& unit)
 {
 	unitList.insert(std::make_pair(unit->GetKey(), unit));
@@ -310,6 +341,7 @@ void SceneGame::MoneyReport()
 {
 	city.money += city.moneyProfit;
 	city.moneyProfit = 0;
+	ChangeBGM();
 }
 
 bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
@@ -470,4 +502,42 @@ void SceneGame::SetMousePosGrid()
 		mousePosGrid.y = mousePosWorld.y / gridSize.y;
 	else
 		mousePosGrid.y = floor(mousePosWorld.y / gridSize.y);
+}
+
+void SceneGame::SetBGMSync()
+{
+	if (zoomRatio < 0.1f)
+	{
+		IOManager::SetBGMCh1Volume(0.f);
+		IOManager::SetBGMCh2Volume(0.f);
+	}
+	else if (zoomRatio <= 1.1f)
+	{
+		IOManager::SetBGMCh1Volume(100.f * (zoomRatio - 0.1f));
+		IOManager::SetBGMCh2Volume(0.f);
+	}
+	else if (zoomRatio <= 2.1f)
+	{
+		IOManager::SetBGMCh1Volume(100.f * (2.1f - zoomRatio));
+		IOManager::SetBGMCh2Volume(100.f * (zoomRatio - 1.1f));
+	}
+	else
+	{
+		IOManager::SetBGMCh1Volume(0.f);
+		IOManager::SetBGMCh2Volume(100.f);
+	}
+}
+
+void SceneGame::ChangeBGM()
+{
+	if (!isMiddleCity && ObjectUnit::GetUnitCount() >= 100)
+	{
+		isMiddleCity = true;
+		IOManager::BGMSyncPlay("resource/music/MiddleClose.wav", "resource/music/MiddleFar.wav", 1, true);
+	}
+	else if (isMiddleCity && ObjectUnit::GetUnitCount() <= 50)
+	{
+		isMiddleCity = false;
+		IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav", 1, true);
+	}
 }

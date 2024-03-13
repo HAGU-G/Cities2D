@@ -136,6 +136,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="Framework\Animator.cpp" />
     <ClCompile Include="Object\UI\ButtonNameTag.cpp" />
     <ClCompile Include="Object\UI\ButtonNineSlice.cpp" />
     <ClCompile Include="GameManager\DataManager.cpp" />
@@ -164,6 +165,7 @@
     <ClCompile Include="Object\Tile\TileBuilding.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Framework\Animator.h" />
     <ClInclude Include="Object\UI\ButtonNameTag.h" />
     <ClInclude Include="Object\UI\ButtonNineSlice.h" />
     <ClInclude Include="GameManager\DataManager.h" />

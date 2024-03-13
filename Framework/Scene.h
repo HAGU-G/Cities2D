@@ -49,6 +49,9 @@ public:
 	virtual void Reset();
 	virtual void Release();
 
+	virtual void Enter();
+	virtual void Exit();
+
 	//Set
 	void UseGlobalTimeScale(bool value) { useGlobalTimeScale = value; }
 	void SetTimeScale(float value) { timeScale = value; }

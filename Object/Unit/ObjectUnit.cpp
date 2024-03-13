@@ -63,6 +63,8 @@ ObjectUnit::~ObjectUnit()
 void ObjectUnit::Init()
 {
 	sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(scene.lock());
+	spriteAnimator.SetTarget(&unitSprite);
+
 }
 
 void ObjectUnit::PreUpdate(float timeDelta, float timeScale)
@@ -71,19 +73,22 @@ void ObjectUnit::PreUpdate(float timeDelta, float timeScale)
 	{
 		GridUpdate();
 	}
-
 	UpdateHome(timeDelta, timeScale);
 	UpdateWorkSpace(timeDelta, timeScale);
 }
 
 void ObjectUnit::Update(float timeDelta, float timeScale)
 {
-
 	if (isCitizen)
 	{
+		spriteAnimator.Update(timeDelta, timeScale);
 		GridUpdate();
 		LifeCycle(timeDelta, timeScale);
+		if (patience > maxPatience)
+			patience = maxPatience;
 	}
+	unitSprite.setRotation(scene.lock()->GetView().getRotation());
+	unitSprite.setScale(1.f + (tool::Angle360(direction, scene.lock()->GetView().getRotation()) > 90.f ? -2.f : 0.f), sceneGame.lock()->GetTilt());
 }
 
 void ObjectUnit::PostUpdate(float timeDelta, float timeScale)
@@ -98,20 +103,12 @@ void ObjectUnit::Draw(sf::RenderWindow& window)
 {
 	if (status >= STATUS::WALK && status < STATUS::WALK_END)
 	{
-		window.draw(tempRender);
+		window.draw(unitSprite);
 	}
 }
 
 void ObjectUnit::Reset()
 {
-
-	findInterval = GameManager::RandomRange(0.1f, 1.f);
-
-	tempRender.setRadius(GameManager::RandomRange(5.f, 7.f));
-	tempRender.setFillColor(sf::Color(GameManager::RandomRange(0, 255), GameManager::RandomRange(0, 255), GameManager::RandomRange(0, 255), 255));
-	tempRender.setOrigin(tempRender.getLocalBounds().getSize() * 0.5f);
-	tempRender.setOutlineColor(sf::Color::Black);
-	tempRender.setOutlineThickness(1);
 
 	ResetHome();
 	ResetWorkPlace();
@@ -125,20 +122,33 @@ void ObjectUnit::Reset()
 	walkPath.clear();
 	isMoving = false;
 
-	money = 100;
-	findTimer = 0.f;
-	patience = 10;
-
-	lifeTimer = 0.f;
-	lifeInterval = 1.f;
-
-	speed = 50.f;
-
 	nextTile.reset();
 	startingPoint.reset();
 	destination.reset();
 
-	GameObject::Reset();
+	//CitizenData
+	const rapidcsv::Document& citizenData = SFGM_CSVFILE.Get("data/CitizenData.csv").GetDocument();
+	auto cRow = citizenData.GetRow<float>(0);
+	money = GameManager::RandomRange((int)cRow[0], (int)cRow[1]);
+	patience = GameManager::RandomRange((int)cRow[2], (int)cRow[3]);
+	maxPatience = patience;
+
+	findTimer = 0.f;
+	findInterval = GameManager::RandomRange(cRow[4], cRow[5]);
+
+	lifeTimer = 0.f;
+	lifeInterval = GameManager::RandomRange(cRow[6], cRow[7]);
+
+	needShop = false;
+	needShopTimer = 0.f;
+	needShopInterval = GameManager::RandomRange(cRow[8], cRow[9]);
+	speed = GameManager::RandomRange(cRow[10], cRow[11]);
+
+	//sprite
+	const rapidcsv::Document& unitData = SFGM_CSVFILE.Get("data/UnitData.csv").GetDocument();
+	auto uRow = unitData.GetRow<std::string>(0);
+	spriteNum = GameManager::RandomRange(0, std::stoi(uRow[4]) - 1);
+	SetTexture(spriteNum);
 }
 
 void ObjectUnit::Release()
@@ -169,7 +179,6 @@ void ObjectUnit::SetPosition(const sf::Vector2f& position)
 {
 
 	GameObject::SetPosition(position);
-	tempRender.setPosition(position);
 
 	sf::Vector2f gridSize = sceneGame.lock()->GetGridSize();
 	if (position.x >= 0)
@@ -181,6 +190,22 @@ void ObjectUnit::SetPosition(const sf::Vector2f& position)
 		gridCoord.y = position.y / gridSize.y;
 	else
 		gridCoord.y = floor(position.y / gridSize.y);
+
+	unitSprite.setPosition(position);
+}
+
+void ObjectUnit::SetTexture(int spriteNum)
+{
+	const rapidcsv::Document& citizenData = SFGM_CSVFILE.Get("data/CitizenData.csv").GetDocument();
+	auto cRow = citizenData.GetRow<float>(0);
+	const rapidcsv::Document& unitData = SFGM_CSVFILE.Get("data/UnitData.csv").GetDocument();
+	auto uRow = unitData.GetRow<std::string>(0);
+	std::string spriteAct = (speed > (cRow[11] + cRow[10]) / 2) ? "-Run" : "-Walk";
+	unitSprite.setTexture(SFGM_TEXTURE.Get(uRow[2] + uRow[3] + to_string(spriteNum) + spriteAct + ".png"));
+	unitSprite.setOrigin(std::stof(uRow[5]), std::stof(uRow[6]));
+
+	spriteAnimator.ClearEvent();
+	spriteAnimator.Play(uRow[2] + uRow[3] + to_string(spriteNum) + spriteAct + ".csv");
 }
 
 void ObjectUnit::GridUpdate()

@@ -44,16 +44,11 @@ void SceneMenu::AddResource()
 
 	SFGM_SOUNDBUFFER.Add("resource/sfx/InMouse.wav");
 	SFGM_SOUNDBUFFER.Add("resource/sfx/Click.wav");
-	SFGM_SOUNDBUFFER.Add("resource/music/LittleClose.wav");
 }
 
 void SceneMenu::Init()
 {
 	Scene::Init();
-
-	menuBgm.setBuffer(SFGM_SOUNDBUFFER.Get("resource/music/LittleClose.wav"));
-	menuBgm.setLoop(true);
-	menuBgm.play();
 
 	background.setFillColor({ 0,0,0,200 });
 	background.setSize(view.getSize());
@@ -99,10 +94,12 @@ void SceneMenu::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::GetWheelDelta() > 0)
 	{
 		saveListView.move(0.f , 20.f);
+		IOManager::BGMSyncSwitch(1);
 	}
 	else if (IOManager::GetWheelDelta() < 0)
 	{
 		saveListView.move(0.f, -20.f);
+		IOManager::BGMSyncSwitch(2);
 	}
 }
 
@@ -217,17 +214,17 @@ void SceneMenu::LoadSaveList()
 		size_t num = 0;
 		if ((num = temp.find("Mayor.csv")) != std::string::npos)
 		{
-			std::cout << temp.erase(num) << std::endl;
+			temp.erase(num);
 			fileList[temp] += 1;
 		}
 		else if ((num = temp.find("Tiles.csv")) != std::string::npos)
 		{
-			std::cout << temp.erase(num) << std::endl;
+			temp.erase(num);
 			fileList[temp] += 10;
 		}
 		else if((num = temp.find("Units.csv")) != std::string::npos)
 		{
-			std::cout << temp.erase(num) << std::endl;
+			temp.erase(num);
 			fileList[temp] += 100;
 		}
 		else

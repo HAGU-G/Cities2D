@@ -32,7 +32,12 @@ namespace tool {
 	//conversion
 	std::string ThousandsSeparator(int num);
 
-
+	//Angle
+	float RadianToDegree(float radian);
+	float Angle(const sf::Vector2f& vec);
+	float Angle360(const sf::Vector2f& vec);
+	float Angle360(const sf::Vector2f& vec1, const sf::Vector2f& vec2);
+	float Angle360(const sf::Vector2f& vec1, float degree);
 
 
 

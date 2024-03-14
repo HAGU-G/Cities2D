@@ -338,7 +338,7 @@ void SceneGame::Release()
 
 void SceneGame::Enter()
 {
-	IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav", 1, true);
+	IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav");
 	SetBGMSync();
 }
 
@@ -554,6 +554,7 @@ void SceneGame::GameOver()
 {
 	gameOver = true;
 	timeScale = 0.f;
+	IOManager::BGMSyncPlay("resource/music/NightClose.wav", "resource/music/NightFar.wav");
 }
 
 void SceneGame::SetMousePosGrid()
@@ -590,12 +591,12 @@ void SceneGame::ChangeBGM()
 	if (!isMiddleCity && ObjectUnit::GetUnitCount() >= 100)
 	{
 		isMiddleCity = true;
-		IOManager::BGMSyncPlay("resource/music/MiddleClose.wav", "resource/music/MiddleFar.wav", 1, true);
+		IOManager::BGMSyncPlay("resource/music/MiddleClose.wav", "resource/music/MiddleFar.wav", true, true);
 	}
 	else if (isMiddleCity && ObjectUnit::GetUnitCount() <= 50)
 	{
 		isMiddleCity = false;
-		IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav", 1, true);
+		IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav", true, true);
 	}
 	SetBGMSync();
 }

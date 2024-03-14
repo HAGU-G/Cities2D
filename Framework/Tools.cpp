@@ -112,6 +112,15 @@ namespace tool
 		return Angle360(vec1, vec2);
 	}
 
+	float Clamp(float target, float a, float b)
+	{
+		if (target > std::max(a, b))
+			target = std::max(a, b);
+		else if (target < std::min(a, b))
+			target = std::min(a, b);
+		return target;
+	}
+
 
 
 

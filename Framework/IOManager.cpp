@@ -254,6 +254,14 @@ std::pair<std::pair<std::string, sf::Sound>, std::pair<std::string, sf::Sound>> 
 
 std::list<std::shared_ptr<sf::Sound>> IOManager::usingSfx;
 std::list<std::shared_ptr<sf::Sound>> IOManager::waitingSfx;
+float IOManager::bgmVolume = 100.f;
+float IOManager::bgm1Fade = 100.f;
+float IOManager::bgm2Fade = 100.f;
+float IOManager::bgm1Volume = 100.f;
+float IOManager::bgm2Volume = 100.f;
+int IOManager::mainChannel = 0;
+bool IOManager::isCrossFading = false;
+float IOManager::fadeDuration = 10.f;
 
 void IOManager::SoundInit(int sfxCount)
 {
@@ -265,6 +273,8 @@ void IOManager::SoundInit(int sfxCount)
 
 void IOManager::SoundUpdate(float timeDelta, float timeScale)
 {
+	CrossFade(timeDelta);
+
 	auto it = usingSfx.begin();
 	while (it != usingSfx.end())
 	{
@@ -296,71 +306,76 @@ void IOManager::SoundRelease()
 
 }
 
-void IOManager::PlayBGMCh1(const std::string& path, bool loop)
+void IOManager::PlayBGMCh1(const std::string& path, bool crossFade, bool loop)
 {
-	if (bgm->first.first != path)
+	if (crossFade)
 	{
-		bgm->first.second.stop();
-		bgm->first.second.setBuffer(SFGM_SOUNDBUFFER.Get(path));
-		bgm->first.first = path;
-		bgm->first.second.play();
+		mainChannel = 1 - mainChannel;
+		isCrossFading = true;
+		bgm1Fade = 0.f;
+		BGMVolumeRatio();
 	}
-	bgm->first.second.setLoop(loop);
+
+	bgm[mainChannel].first.second.setLoop(loop);
+	if (bgm[mainChannel].first.first != path)
+	{
+		bgm[mainChannel].first.second.stop();
+		bgm[mainChannel].first.second.setBuffer(SFGM_SOUNDBUFFER.Get(path));
+		bgm[mainChannel].first.first = path;
+		bgm[mainChannel].first.second.play();
+	}
 }
 
-void IOManager::PlayBGMCh2(const std::string& path, bool loop)
+void IOManager::PlayBGMCh2(const std::string& path, bool crossFade, bool loop)
 {
-	if (bgm->second.first != path)
+	if (crossFade)
 	{
-		bgm->second.second.stop();
-		bgm->second.second.setBuffer(SFGM_SOUNDBUFFER.Get(path));
-		bgm->second.first = path;
-		bgm->second.second.play();
+		mainChannel = 1 - mainChannel;
+		isCrossFading = true;
+		bgm2Fade = 0.f;
+		BGMVolumeRatio();
 	}
-	bgm->second.second.setLoop(loop);
+
+	bgm[mainChannel].second.second.setLoop(loop);
+	if (bgm[mainChannel].second.first != path)
+	{
+		bgm[mainChannel].second.second.stop();
+		bgm[mainChannel].second.second.setBuffer(SFGM_SOUNDBUFFER.Get(path));
+		bgm[mainChannel].second.first = path;
+		bgm[mainChannel].second.second.play();
+	}
+
 }
 
 
-void IOManager::BGMSyncPlay(const std::string& path1, const std::string& path2, bool loop)
+void IOManager::BGMSyncPlay(const std::string& path1, const std::string& path2, bool crossFade, bool loop)
 {
+	if (crossFade)
+	{
+		mainChannel = 1 - mainChannel;
+		isCrossFading = true;
+		bgm1Fade = 0.f;
+		bgm2Fade = 0.f;
+		BGMVolumeRatio();
+	}
+
 	if (bgm->first.first != path1)
 	{
-		bgm[0].first.second.stop();
-		bgm[0].first.second.setBuffer(SFGM_SOUNDBUFFER.Get(path1));
-		bgm[0].first.first = path1;
+		bgm[mainChannel].first.second.stop();
+		bgm[mainChannel].first.second.setBuffer(SFGM_SOUNDBUFFER.Get(path1));
+		bgm[mainChannel].first.first = path1;
 	}
 	if (bgm->second.first != path2)
 	{
-		bgm[0].second.second.stop();
-		bgm[0].second.second.setBuffer(SFGM_SOUNDBUFFER.Get(path2));
-		bgm[0].second.first = path2;
+		bgm[mainChannel].second.second.stop();
+		bgm[mainChannel].second.second.setBuffer(SFGM_SOUNDBUFFER.Get(path2));
+		bgm[mainChannel].second.first = path2;
 	}
-	bgm[0].first.second.setLoop(loop);
-	bgm[0].second.second.setLoop(loop);
+	bgm[mainChannel].first.second.setLoop(loop);
+	bgm[mainChannel].second.second.setLoop(loop);
 
-	bgm[0].first.second.play();
-	bgm[0].second.second.play();
-}
-
-void IOManager::BGMSyncPlay(const std::string& path1, const std::string& path2, unsigned int channel, bool loop)
-{
-	BGMSyncSwitch(channel);
-	BGMSyncPlay(path1, path2, loop);
-}
-
-void IOManager::BGMSyncSwitch(unsigned int channel)
-{
-	if (channel <= 1)
-	{
-		bgm[0].first.second.setVolume(100.f);
-		bgm[0].second.second.setVolume(0.f);
-	}
-	else
-	{
-		bgm[0].second.second.setVolume(100.f);
-		bgm[0].first.second.setVolume(0.f);
-	}
-	SetBGMVolume();
+	bgm[mainChannel].first.second.play();
+	bgm[mainChannel].second.second.play();
 }
 
 std::shared_ptr<sf::Sound> IOManager::PlaySfx(const std::string& path, bool listener, bool play)
@@ -384,7 +399,7 @@ std::shared_ptr<sf::Sound> IOManager::PlaySfx(const std::string& path, bool list
 	sfx->setAttenuation(1);
 	sfx->setRelativeToListener(listener);
 	usingSfx.push_back(sfx);
-	if(play)
+	if (play)
 		sfx->play();
 	return sfx;
 }
@@ -399,26 +414,48 @@ float IOManager::PlaySfx(const std::string& path, sf::Vector3f pos, float minD, 
 	return sfx->getBuffer()->getDuration().asSeconds();
 }
 
+void IOManager::SetFadeDuration(float duration)
+{
+	fadeDuration = duration;
+}
+
 void IOManager::SetBGMCh1Volume(float volume)
 {
-	bgm[0].first.second.setVolume(volume);
-	bgm[1].first.second.setVolume(volume);
-	SetBGMVolume();
+	bgm1Volume = tool::Clamp(volume, 0.f, 100.f);
+	BGMVolumeRatio();
 }
 
 void IOManager::SetBGMCh2Volume(float volume)
 {
-	bgm[0].second.second.setVolume(volume);
-	bgm[1].second.second.setVolume(volume);
-	SetBGMVolume();
+	bgm2Volume = tool::Clamp(volume, 0.f, 100.f);
+	BGMVolumeRatio();
 }
 
-void IOManager::SetBGMVolume()
+void IOManager::BGMVolumeRatio()
 {
-	bgm[0].first.second.setVolume(bgm[0].first.second.getVolume() * 0.7f);
-	bgm[0].second.second.setVolume(bgm[0].second.second.getVolume() * 0.7f);
-	bgm[1].first.second.setVolume(bgm[1].first.second.getVolume() * 0.7f);
-	bgm[1].second.second.setVolume(bgm[1].second.second.getVolume() * 0.7f);
+	bgm[mainChannel].first.second.setVolume(bgm1Volume * bgmVolume / 100.f * bgm1Fade / 100.f);
+	bgm[mainChannel].second.second.setVolume(bgm2Volume * bgmVolume / 100.f * bgm2Fade / 100.f);
+}
+
+void IOManager::CrossFade(float timeDelta)
+{
+	if (bgm[1-mainChannel].first.second.getVolume() == 0.f && bgm[1-mainChannel].second.second.getVolume() == 0.f
+		&& bgm1Fade == 100.f && bgm2Fade == 100.f)
+	{
+		bgm[1-mainChannel].first.second.stop();
+		bgm[1-mainChannel].second.second.stop();
+		isCrossFading = false;
+	}
+	else
+	{
+		bgm1Fade = tool::Clamp(bgm1Fade + (100.f / fadeDuration) * timeDelta, 0.f, 100.f);
+		bgm2Fade = tool::Clamp(bgm2Fade + (100.f / fadeDuration) * timeDelta, 0.f, 100.f);
+		float volumeMain1 = tool::Clamp(bgm[1-mainChannel].first.second.getVolume() - (100.f / fadeDuration) * timeDelta, 0.f, 100.f);
+		float volumeMain2 = tool::Clamp(bgm[1-mainChannel].second.second.getVolume() - (100.f / fadeDuration) * timeDelta, 0.f, 100.f);
+		bgm[1-mainChannel].first.second.setVolume(volumeMain1);
+		bgm[1-mainChannel].second.second.setVolume(volumeMain2);
+		BGMVolumeRatio();
+	}
 }
 
 void IOManager::StopBGM(unsigned int channel)
@@ -446,4 +483,10 @@ void IOManager::StopBGM()
 void IOManager::SetVolume(float volume)
 {
 	sf::Listener::setGlobalVolume(volume);
+}
+
+void IOManager::SetBGMVolume(float volume)
+{
+	bgmVolume = volume;
+	BGMVolumeRatio();
 }

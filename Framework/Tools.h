@@ -39,6 +39,8 @@ namespace tool {
 	float Angle360(const sf::Vector2f& vec1, const sf::Vector2f& vec2);
 	float Angle360(const sf::Vector2f& vec1, float degree);
 
+	//clamp
+	float Clamp(float target, float a, float b);
 
 
 }

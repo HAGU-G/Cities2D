@@ -99,17 +99,17 @@ void SceneGame::Init()
 
 void SceneGame::PreUpdate(float timeDelta, float timeScale)
 {
+	bool onCameraMove = false;
+
 	if (IOManager::IsKeyPress(sf::Keyboard::Q))
 	{
 		view.rotate(45.f * timeDelta);
-		//ViewRotation();
-		OnCamaraMove();
+		onCameraMove = true;
 	}
 	if (IOManager::IsKeyPress(sf::Keyboard::E))
 	{
 		view.rotate(-45.f * timeDelta);
-		//ViewRotation();
-		OnCamaraMove();
+		onCameraMove = true;
 	}
 
 
@@ -117,22 +117,22 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	if (IOManager::IsKeyPress(sf::Keyboard::W))
 	{
 		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, -view.getSize().y * 0.2f * timeDelta));
-		OnCamaraMove();
+		onCameraMove = true;
 	}
 	if (IOManager::IsKeyPress(sf::Keyboard::S))
 	{
 		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, view.getSize().y * 0.2f * timeDelta));
-		OnCamaraMove();
+		onCameraMove = true;
 	}
 	if (IOManager::IsKeyPress(sf::Keyboard::A))
 	{
 		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(-view.getSize().y * 0.2f * timeDelta, 0.f));
-		OnCamaraMove();
+		onCameraMove = true;
 	}
 	if (IOManager::IsKeyPress(sf::Keyboard::D))
 	{
 		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(view.getSize().y * 0.2f * timeDelta, 0.f));
-		OnCamaraMove();
+		onCameraMove = true;
 	}
 
 	if (IOManager::GetWheelDelta() > 0)
@@ -140,7 +140,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		view.zoom(1.f / 1.05f);
 		zoomY *= 1.f / 1.05f;
 		zoomRatio *= 1.f / 1.05f;
-		OnCamaraMove();
+		onCameraMove = true;
 		SetBGMSync();
 	}
 	else if (IOManager::GetWheelDelta() < 0)
@@ -148,7 +148,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		view.zoom(1.05f);
 		zoomY *= 1.05f;
 		zoomRatio *= 1.05f;
-		OnCamaraMove();
+		onCameraMove = true;
 		SetBGMSync();
 	}
 
@@ -165,7 +165,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 			tilt = std::max(1.f, tilt);
 			view.setSize(view.getSize().x, zoomY * tilt);
 			startTilt = GameManager::GetMousePosWindow().y;
-			OnCamaraMove();
+			onCameraMove = true;
 		}
 	}
 	if (IOManager::IsKeyUp(sf::Mouse::Middle))
@@ -176,12 +176,8 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	{
 		view = resetView;
 		tilt = 1.f;
-		OnCamaraMove();
+		onCameraMove = true;
 	}
-
-
-
-
 
 	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), view);
 	SetMousePosGrid();
@@ -203,7 +199,8 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		citizenTimer = 0.f;
 		SceneGame::AddUnit(ObjectUnit::Create(This(), GAME_OBJECT_TYPE::CITIZEN));
 	}
-
+	if (onCameraMove)
+		OnCameraMove();
 	Scene::PreUpdate(timeDelta, timeScale);
 }
 
@@ -269,28 +266,14 @@ void SceneGame::PostUpdate(float timeDelta, float timeScale)
 
 void SceneGame::Draw(sf::RenderWindow& window)
 {
-	OrganizeGridInfo();
-	std::thread ts(&SceneGame::TileSort, this);
-	std::thread us(&SceneGame::UnitSort, this);
-	ts.join();
-	us.join();
 	ResetDrawList();
 
 	const sf::View& preView = window.getView();
 	window.setView(view);
 	groundTileMap->Draw(window);
-	Scene::Draw(window);
-
-	sf::CircleShape d;
-	d.setPosition(nearPlane.x,nearPlane.y);
-	d.setRadius(100);
-	d.setFillColor(sf::Color::Magenta);
-	d.setOrigin(100, 100);
-	window.draw(d);
-	d.setPosition(view.getCenter());
-	d.setFillColor(sf::Color::Red);
-	window.draw(d);
 	window.setView(preView);
+
+	Scene::Draw(window);
 }
 
 void SceneGame::Reset()
@@ -384,6 +367,7 @@ void SceneGame::MoneyReport()
 	city.money += city.moneyProfit;
 	city.moneyProfit = 0;
 	ChangeBGM();
+	OrganizeGridInfo();
 }
 
 bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type)
@@ -410,6 +394,7 @@ bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OB
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, 1));
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(1, 0));
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(-1, 0));
+		void TileSort();
 		return true;
 	}
 
@@ -419,30 +404,55 @@ bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OB
 
 void SceneGame::OrganizeGridInfo()
 {
-	for (auto& x : gridInfo)
+	auto x1 = gridInfo.begin();
+	while (x1 != gridInfo.end())
 	{
-		auto it = x.second.begin();
-		while (it != x.second.end())
+		if (x1->second.empty())
 		{
-			if (it->second.second.expired())
-				it = x.second.erase(it);
-			else
-				it++;
+			x1 = gridInfo.erase(x1);
+			continue;
 		}
-	}
-	for (auto& x : unitOnGrid)
-	{
-		for (auto& y : x.second)
+
+		auto y = x1->second.begin();
+		while (y != x1->second.end())
 		{
-			auto it = y.second.begin();
-			while (it != y.second.end())
+			if (y->second.second.expired())
+				y = x1->second.erase(y);
+			else
+				y++;
+		}
+		x1++;
+	}
+
+	auto x = unitOnGrid.begin();
+	while (x != unitOnGrid.end())
+	{
+		if (x->second.empty())
+		{
+			x = unitOnGrid.erase(x);
+			continue;
+		}
+
+		auto y = x->second.begin();
+		while (y != x->second.end())
+		{
+			if (y->second.empty())
+			{
+				y = x->second.erase(y);
+				continue;
+			}
+
+			auto it = y->second.begin();
+			while (it != y->second.end())
 			{
 				if (it->expired())
-					it = y.second.erase(it);
+					it = y->second.erase(it);
 				else
 					it++;
 			}
+			y++;
 		}
+		x++;
 	}
 }
 
@@ -508,6 +518,7 @@ void SceneGame::LoadGame()
 	DataManager::LoadUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	std::dynamic_pointer_cast<SceneGameUI, Scene>(SceneManager::Get("SceneGameUI"))->Reset();
 	GameManager::lastGameName = city.mayorName;
+	void TileSort();
 }
 
 void SceneGame::LoadMayor(CITY city)
@@ -552,7 +563,7 @@ void SceneGame::GameOver()
 	IOManager::BGMSyncPlay("resource/music/NightClose.wav", "resource/music/NightFar.wav");
 }
 
-void SceneGame::OnCamaraMove()
+void SceneGame::OnCameraMove()
 {
 
 	//Listener 위치 설정
@@ -606,76 +617,71 @@ void SceneGame::OnCamaraMove()
 	}
 	preListenerGridCoord = PosToGridCoord({ sf::Listener::getPosition().x, sf::Listener::getPosition().y });
 
-	cameraPlane = sf::Listener::getPosition();
-	if (sf::Vector2f(cameraPlane.x, cameraPlane.y) == view.getCenter())
-	{
-		cameraPlane += sf::Listener::getUpVector();
-	}
-
 	sf::RenderWindow& window = GameManager::GetWindow();
-	nearPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x / 2, window.getSize().y ), view));
-	farPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x / 2, 0 ), view) );
-	leftPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(0 , window.getSize().y / 2 ), view));
-	rightPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x, window.getSize().y / 2), view));
+	frustum.nearPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x / 2, window.getSize().y), view));
+	frustum.farPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x / 2, 0), view));
+	frustum.leftPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(0, window.getSize().y / 2), view));
+	frustum.rightPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x, window.getSize().y / 2), view));
+
+	TileSort();
 }
 
 void SceneGame::TileSort()
 {
-	//for (auto& x : gridInfo)
-	//{
-	//	for (auto& y : x.second)
-	//	{
-	//		sf::Vector3f building = tool::To3D(y.second.second.lock()->GetGridCenterPos()- view.getCenter());
-	//		sf::Vector3f plane = sf::Vector3f(view.getCenter().x, view.getCenter().y, 0) - nearPlane;
-	//		float distance = tool::DistancePlane(plane, building);
-	//		if (tool::OnPlane(plane, building) >= 0.f)
-	//		{
-	//			y.second.second.lock()->SetDrawDeep(distance);
-	//			y.second.second.lock()->SetShow(true);
-	//		}
-	//		else
-	//		{
-	//			y.second.second.lock()->SetShow(false);
-	//		}
-	//	}
-	//}
+	sf::Vector3f plane;
+	sf::Vector3f building;
 	for (auto& x : gridInfo)
 	{
 		for (auto& y : x.second)
 		{
-			sf::Vector3f building = tool::To3D(y.second.second.lock()->GetGridCenterPos() - view.getCenter());
-			sf::Vector3f plane = sf::Listener::getPosition() - tool::To3D(view.getCenter());
-			float distance = tool::DistancePlane(plane, building);
-			if (tool::OnPlane(plane, building) >= 0.f)
+			plane = frustum.nearPlane - tool::To3D(view.getCenter());
+			building = tool::To3D(y.second.second.lock()->GetGridCenterPos()) - frustum.nearPlane;
+			float OnN = tool::OnPlane(plane, building);
+			if (OnN > 0.f)
 			{
-				y.second.second.lock()->SetDrawDeep(distance);
+				y.second.second.lock()->SetDrawDeep(0.f);
+				y.second.second.lock()->SetShow(false);
+				continue;
+			}
+
+			plane = frustum.farPlane - tool::To3D(view.getCenter());
+			building = tool::To3D(y.second.second.lock()->GetGridCenterPos()) - frustum.farPlane;
+			float OnF = tool::OnPlane(plane, building);
+			if (OnF > 0.f)
+			{
+				y.second.second.lock()->SetDrawDeep(0.f);
+				y.second.second.lock()->SetShow(false);
+				continue;
+			}
+
+			plane = frustum.leftPlane - tool::To3D(view.getCenter());
+			building = tool::To3D(y.second.second.lock()->GetGridCenterPos()) - frustum.leftPlane;
+			float OnL = tool::OnPlane(plane, building);
+			if (OnL > 0.f)
+			{
+				y.second.second.lock()->SetDrawDeep(0.f);
+				y.second.second.lock()->SetShow(false);
+				continue;
+			}
+
+			plane = frustum.rightPlane - tool::To3D(view.getCenter());
+			building = tool::To3D(y.second.second.lock()->GetGridCenterPos()) - frustum.rightPlane;
+			float OnR = tool::OnPlane(plane, building);
+			if (OnR > 0.f)
+			{
+				y.second.second.lock()->SetDrawDeep(0.f);
+				y.second.second.lock()->SetShow(false);
+				continue;
 			}
 			else
 			{
-				y.second.second.lock()->SetDrawDeep(-distance);
+				y.second.second.lock()->SetDrawDeep(-OnN);
+				y.second.second.lock()->SetShow(true);
 			}
 		}
 	}
 }
-void SceneGame::UnitSort()
-{
-	for (auto& x : unitOnGrid)
-	{
-		for (auto& y : x.second)
-		{
-			for (auto& unit : y.second)
-			{
-				sf::Vector3f citizen = tool::To3D(unit.lock()->GetPosition() - view.getCenter());
-				sf::Vector3f plane = (cameraPlane - tool::To3D(view.getCenter())) * 2.f;
-				float distance = tool::DistancePlane(plane, citizen);
-				if (tool::OnPlane(plane, citizen) >= 0.f)
-					unit.lock()->SetDrawDeep(distance);
-				else
-					unit.lock()->SetDrawDeep(-distance);
-			}
-		}
-	}
-}
+
 void SceneGame::SetMousePosGrid()
 {
 	mousePosGrid = PosToGridCoord(mousePosWorld);

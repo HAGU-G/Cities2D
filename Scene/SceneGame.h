@@ -5,6 +5,13 @@
 
 class ObjectTileMap;
 
+struct Frustum {
+	sf::Vector3f nearPlane;
+	sf::Vector3f farPlane;
+	sf::Vector3f leftPlane;
+	sf::Vector3f rightPlane;
+};
+
 struct CITY
 {
 	std::string mayorName = "My City";
@@ -29,10 +36,7 @@ protected:
 	sf::Vector3f cameraPlane;
 	float preViewRotation = 0.f;
 
-	sf::Vector3f nearPlane;
-	sf::Vector3f farPlane;
-	sf::Vector3f leftPlane;
-	sf::Vector3f rightPlane;
+	Frustum frustum;
 
 	bool isTilt = false;
 	float startTilt = 0.f;
@@ -100,8 +104,6 @@ public:
 	const GridInfo& GetGridInfo();
 	GridInfo& GetGridInfoRaw();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
-
-
 	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord){	return gridInfo[gridCoord.x][gridCoord.y];	}
 
 
@@ -125,10 +127,9 @@ public:
 	void GameOver();
 	inline bool IsGameOver() const { return gameOver; }
 
-
-	void OnCamaraMove();
+	void OnCameraMove();
+	inline const Frustum& GetFrustum() const { return frustum; }
 	void TileSort();
-	void UnitSort();
 
 };
 

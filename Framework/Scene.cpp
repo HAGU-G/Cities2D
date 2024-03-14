@@ -198,6 +198,8 @@ void Scene::ResetDrawList()
 	drawList.clear();
 	for (auto& pair : gameObjectList)
 	{
+		if (!pair.second->IsShow())
+			continue;
 		if (drawList.empty())
 		{
 			drawList.push_back(pair);

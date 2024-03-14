@@ -44,11 +44,6 @@ namespace tool
 		return abs(tool::OnPlane(plane,point)) / sqrt(plane.x * plane.x + plane.y * plane.y + plane.z * plane.z);
 	}
 
-	float DistancePlane(const sf::Vector2f& plane, const sf::Vector2f& point)
-	{
-		return abs(tool::OnPlane(plane, point)) / sqrt(plane.x * plane.x + plane.y * plane.y);
-	}
-
 	sf::Vector2f SetOrigin(sf::Transformable& transformable, ORIGIN origin, const sf::FloatRect& rect)
 	{
 		// Rect Width, Height
@@ -124,15 +119,10 @@ namespace tool
 
 	float OnPlane(const sf::Vector3f& plane, const sf::Vector3f& target)
 	{
-		return (plane.x) * target.x + (plane.y) * target.y + (plane.z) * target.z
+		return plane.x * target.x + plane.y * target.y + plane.z * target.z
 			+ sqrt(plane.x * plane.x + plane.y * plane.y + plane.z * plane.z);
 	}
 
-	float OnPlane(const sf::Vector2f& plane, const sf::Vector2f& target)
-	{
-		return (plane.x) * target.x + (plane.y) * target.y
-			+ sqrt(plane.x * plane.x + plane.y * plane.y);
-	}
 
 	float Clamp(float target, float a, float b)
 	{

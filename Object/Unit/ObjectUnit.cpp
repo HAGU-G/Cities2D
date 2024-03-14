@@ -99,6 +99,10 @@ void ObjectUnit::PostUpdate(float timeDelta, float timeScale)
 	{
 		scene.lock()->DeleteObject(GetKey());
 	}
+	else
+	{
+		AutoDrawDeep();
+	}
 }
 
 void ObjectUnit::Draw(sf::RenderWindow& window)
@@ -863,6 +867,53 @@ void ObjectUnit::MovingReverse(float timeDelta, float timeScale)
 	{
 		SetPosition(nextGridCenterPosition);
 		isMoving = false;
+	}
+}
+
+void ObjectUnit::AutoDrawDeep()
+{
+	const Frustum& frustum = sceneGame.lock()->GetFrustum();
+	sf::Vector3f veiwCenter = tool::To3D(sceneGame.lock()->GetView().getCenter());
+
+	sf::Vector3f plane = frustum.nearPlane - veiwCenter;
+	sf::Vector3f citizen = tool::To3D(position) - frustum.nearPlane;
+	float onN = tool::OnPlane(plane, citizen);
+	if (onN > 0.f)
+	{
+		drawDeep = 0.f;
+		isShow = false;
+	}
+
+	plane = frustum.farPlane - veiwCenter;
+	citizen = tool::To3D(position) - frustum.farPlane;
+	float onF = tool::OnPlane(plane, citizen);
+	if (onF > 0.f)
+	{
+		drawDeep = 0.f;
+		isShow = false;
+	}
+
+	plane = frustum.leftPlane - veiwCenter;
+	citizen = tool::To3D(position) - frustum.leftPlane;
+	float onL = tool::OnPlane(plane, citizen);
+	if (onL > 0.f)
+	{
+		drawDeep = 0.f;
+		isShow = false;
+	}
+
+	plane = frustum.rightPlane - veiwCenter;
+	citizen = tool::To3D(position) - frustum.rightPlane;
+	float onR = tool::OnPlane(plane, citizen);
+	if (onR > 0.f)
+	{
+		drawDeep = 0.f;
+		isShow = false;
+	}
+	else
+	{
+		drawDeep = -onN;
+		isShow = true;
 	}
 }
 

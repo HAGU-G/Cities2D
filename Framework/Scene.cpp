@@ -37,7 +37,7 @@ void Scene::PreUpdate(float timeDelta, float timeScale)
 	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), view);
 	for (auto& pair : gameObjectList)
 	{
-		if (pair.second->GetActive())
+		if (pair.second->IsActive())
 			pair.second->PreUpdate(timeDelta, timeScale);
 	}
 }
@@ -46,7 +46,7 @@ void Scene::Update(float timeDelta, float timeScale)
 {
 	for (auto& pair : gameObjectList)
 	{
-		if (pair.second->GetActive())
+		if (pair.second->IsActive())
 			pair.second->Update(timeDelta, timeScale);
 	}
 }
@@ -54,7 +54,7 @@ void Scene::PostUpdate(float timeDelta, float timeScale)
 {
 	for (auto& pair : gameObjectList)
 	{
-		if (pair.second->GetActive())
+		if (pair.second->IsActive())
 			pair.second->PostUpdate(timeDelta, timeScale);
 	}
 
@@ -84,22 +84,13 @@ void Scene::PostUpdate(float timeDelta, float timeScale)
 	}
 }
 
-void Scene::PhysicsUpdate(float timeDelta, float timeScale)
-{
-	for (auto& pair : gameObjectList)
-	{
-		if (pair.second->GetActive())
-			pair.second->PhysicsUpdate(timeDelta, timeScale);
-	}
-}
-
 void Scene::Draw(sf::RenderWindow& window)
 {
 	const sf::View& preView = window.getView();
 	window.setView(view);
 	for (auto& pair : drawList)
 	{
-		if (pair.second.lock()->GetActive())
+		if (pair.second.lock()->IsActive() && pair.second.lock()->IsShow())
 			pair.second.lock()->Draw(window);
 	}
 	window.setView(preView);
@@ -187,7 +178,7 @@ const std::shared_ptr<GameObject>& Scene::AddObject(const std::shared_ptr<GameOb
 		auto drawIt = drawList.begin();
 		while (drawIt != drawList.end())
 		{
-			if (it.first->second->GetDrawLayer() < drawIt->second.lock()->GetDrawLayer())
+			if (it.first->second->GetDrawDeep() > drawIt->second.lock()->GetDrawDeep())
 			{
 				drawList.insert(drawIt, *it.first);
 				return object;
@@ -208,13 +199,30 @@ void Scene::ResetDrawList()
 	for (auto& pair : gameObjectList)
 	{
 		if (drawList.empty())
+		{
 			drawList.push_back(pair);
-		else if (pair.second->GetDrawLayer() >= drawList.front().second.lock()->GetDrawLayer())
-			drawList.push_back(pair);
-		else
-			drawList.push_front(pair);
-	}
+			continue;
+		}
 
+		auto drawIt = drawList.begin();
+		while (drawIt != drawList.end())
+		{
+			if (pair.second->GetDrawDeep() > drawIt->second.lock()->GetDrawDeep())
+			{
+				drawList.insert(drawIt, pair);
+				break;
+			}
+			else
+			{
+				drawIt++;
+				if (drawIt == drawList.end())
+				{
+					drawList.push_back(pair);
+				}
+			}
+		}
+
+	}
 }
 
 const std::shared_ptr<GameObject>& Scene::GetObject(const std::string& key) const

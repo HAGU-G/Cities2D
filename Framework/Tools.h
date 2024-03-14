@@ -22,6 +22,8 @@ namespace tool {
 	sf::Vector2f GetNormalize(const sf::Vector2f& vec);
 	void Normalize(sf::Vector2f& vec);
 	float Distance(const sf::Vector2f& p1, const sf::Vector2f& p2);
+	float DistancePlane(const sf::Vector3f& plane, const sf::Vector3f& point);
+	float DistancePlane(const sf::Vector2f& plane, const sf::Vector2f& point);
 
 	//Origin
 	sf::Vector2f SetOrigin(sf::Transformable& transformable, ORIGIN origin, const sf::FloatRect& rect);
@@ -42,6 +44,9 @@ namespace tool {
 	//clamp
 	float Clamp(float target, float a, float b);
 
-
+	//3D
+	float OnPlane(const sf::Vector3f& plane, const sf::Vector3f& target);
+	float OnPlane(const sf::Vector2f& plane, const sf::Vector2f& target);
+	sf::Vector3f To3D(const sf::Vector2f& point);
 }
 #endif // !TOOLS_H

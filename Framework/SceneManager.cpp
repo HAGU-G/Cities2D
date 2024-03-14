@@ -57,14 +57,6 @@ void SceneManager::PostUpdate(float timeDelta)
 	}
 }
 
-void SceneManager::PhysicsUpdate(float timeDelta)
-{
-	for (auto& scene : usingSceneList)
-	{
-		scene.second->PhysicsUpdate(timeDelta, scene.second->GetTimeScale());
-	}
-}
-
 void SceneManager::Draw(sf::RenderWindow& window)
 {
 	for (auto& scene : usingSceneList)

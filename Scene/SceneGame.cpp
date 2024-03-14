@@ -100,24 +100,47 @@ void SceneGame::Init()
 void SceneGame::PreUpdate(float timeDelta, float timeScale)
 {
 	if (IOManager::IsKeyPress(sf::Keyboard::Q))
+	{
 		view.rotate(45.f * timeDelta);
+		//ViewRotation();
+		OnCamaraMove();
+	}
 	if (IOManager::IsKeyPress(sf::Keyboard::E))
+	{
 		view.rotate(-45.f * timeDelta);
+		//ViewRotation();
+		OnCamaraMove();
+	}
+
+
 
 	if (IOManager::IsKeyPress(sf::Keyboard::W))
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, -200.f * timeDelta));
+	{
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, -view.getSize().y * 0.2f * timeDelta));
+		OnCamaraMove();
+	}
 	if (IOManager::IsKeyPress(sf::Keyboard::S))
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, 200.f * timeDelta));
+	{
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, view.getSize().y * 0.2f * timeDelta));
+		OnCamaraMove();
+	}
 	if (IOManager::IsKeyPress(sf::Keyboard::A))
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(-200.f * timeDelta, 0.f));
+	{
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(-view.getSize().y * 0.2f * timeDelta, 0.f));
+		OnCamaraMove();
+	}
 	if (IOManager::IsKeyPress(sf::Keyboard::D))
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(200.f * timeDelta, 0.f));
+	{
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(view.getSize().y * 0.2f * timeDelta, 0.f));
+		OnCamaraMove();
+	}
 
 	if (IOManager::GetWheelDelta() > 0)
 	{
 		view.zoom(1.f / 1.05f);
 		zoomY *= 1.f / 1.05f;
 		zoomRatio *= 1.f / 1.05f;
+		OnCamaraMove();
 		SetBGMSync();
 	}
 	else if (IOManager::GetWheelDelta() < 0)
@@ -125,6 +148,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		view.zoom(1.05f);
 		zoomY *= 1.05f;
 		zoomRatio *= 1.05f;
+		OnCamaraMove();
 		SetBGMSync();
 	}
 
@@ -141,6 +165,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 			tilt = std::max(1.f, tilt);
 			view.setSize(view.getSize().x, zoomY * tilt);
 			startTilt = GameManager::GetMousePosWindow().y;
+			OnCamaraMove();
 		}
 	}
 	if (IOManager::IsKeyUp(sf::Mouse::Middle))
@@ -151,58 +176,11 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 	{
 		view = resetView;
 		tilt = 1.f;
+		OnCamaraMove();
 	}
 
-	//Listener 위치 설정
-	sf::Vector2f tempV = { 0.f, 1.f };
-	tempV = sf::Transform().rotate(view.getRotation()).translate(tempV).transformPoint(tempV);
-	sf::Listener::setUpVector(tempV.x, tempV.y, tilt - 1.f);
-	tempV *= zoomY * (tilt - 1.f) * 0.05f;
-	sf::Listener::setPosition(view.getCenter().x + tempV.x, view.getCenter().y + tempV.y, zoomRatio * 400.f);
 
-	sf::Vector2i unMute = PosToGridCoord({ sf::Listener::getPosition().x, sf::Listener::getPosition().y });
-	if (unMute != preListenerGridCoord)
-	{
-		unMute.x -= soundRadius + 1;
-		unMute.y -= soundRadius + 1;
-		for (int x = 0; x < (soundRadius + 1) * 2; x++)
-		{
-			for (int y = 0; y < (soundRadius + 1) * 2; y++)
-			{
-				if (x == 0 || x == (soundRadius + 1) * 2 - 1 || y == 0 || y == (soundRadius + 1) * 2 - 1)
-				{
-					if (!gridInfo[unMute.x + x][unMute.y + y].second.expired())
-						gridInfo[unMute.x + x][unMute.y + y].second.lock()->AddTag(GAME_OBJECT_TAG::MUTE);
-					else
-						gridInfo[unMute.x + x].erase(unMute.y + y);
 
-					for (auto& ptr : unitOnGrid[unMute.x + x][unMute.y + y])
-					{
-						if (!ptr.expired())
-						{
-							ptr.lock()->AddTag(GAME_OBJECT_TAG::MUTE);
-						}
-					}
-				}
-				else
-				{
-					if (!gridInfo[unMute.x + x][unMute.y + y].second.expired())
-						gridInfo[unMute.x + x][unMute.y + y].second.lock()->RemoveTag(GAME_OBJECT_TAG::MUTE);
-					else
-						gridInfo[unMute.x + x].erase(unMute.y + y);
-
-					for (auto& ptr : unitOnGrid[unMute.x + x][unMute.y + y])
-					{
-						if (!ptr.expired())
-						{
-							ptr.lock()->RemoveTag(GAME_OBJECT_TAG::MUTE);
-						}
-					}
-				}
-			}
-		}
-	}
-	preListenerGridCoord = PosToGridCoord({ sf::Listener::getPosition().x, sf::Listener::getPosition().y });
 
 
 	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), view);
@@ -291,11 +269,28 @@ void SceneGame::PostUpdate(float timeDelta, float timeScale)
 
 void SceneGame::Draw(sf::RenderWindow& window)
 {
+	OrganizeGridInfo();
+	std::thread ts(&SceneGame::TileSort, this);
+	std::thread us(&SceneGame::UnitSort, this);
+	ts.join();
+	us.join();
+	ResetDrawList();
+
 	const sf::View& preView = window.getView();
 	window.setView(view);
-	//window.draw(background);
-	window.setView(preView);
+	groundTileMap->Draw(window);
 	Scene::Draw(window);
+
+	sf::CircleShape d;
+	d.setPosition(nearPlane.x,nearPlane.y);
+	d.setRadius(100);
+	d.setFillColor(sf::Color::Magenta);
+	d.setOrigin(100, 100);
+	window.draw(d);
+	d.setPosition(view.getCenter());
+	d.setFillColor(sf::Color::Red);
+	window.draw(d);
+	window.setView(preView);
 }
 
 void SceneGame::Reset()
@@ -521,7 +516,7 @@ void SceneGame::LoadMayor(CITY city)
 }
 
 bool SceneGame::LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
-	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer,float soundDuration)
+	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration)
 {
 	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
@@ -557,6 +552,130 @@ void SceneGame::GameOver()
 	IOManager::BGMSyncPlay("resource/music/NightClose.wav", "resource/music/NightFar.wav");
 }
 
+void SceneGame::OnCamaraMove()
+{
+
+	//Listener 위치 설정
+	sf::Vector2f tempV = { 0.f, 1.f };
+	tempV = sf::Transform().rotate(view.getRotation()).translate(tempV).transformPoint(tempV);
+	sf::Listener::setUpVector(tempV.x, tempV.y, tilt - 1.f);
+	tempV *= zoomY * (tilt - 1.f) * 0.05f;
+	sf::Listener::setPosition(view.getCenter().x + tempV.x, view.getCenter().y + tempV.y, zoomRatio * 400.f);
+
+	sf::Vector2i unMute = PosToGridCoord({ sf::Listener::getPosition().x, sf::Listener::getPosition().y });
+	if (unMute != preListenerGridCoord)
+	{
+		unMute.x -= soundRadius + 1;
+		unMute.y -= soundRadius + 1;
+		for (int x = 0; x < (soundRadius + 1) * 2; x++)
+		{
+			for (int y = 0; y < (soundRadius + 1) * 2; y++)
+			{
+				if (x == 0 || x == (soundRadius + 1) * 2 - 1 || y == 0 || y == (soundRadius + 1) * 2 - 1)
+				{
+					if (!gridInfo[unMute.x + x][unMute.y + y].second.expired())
+						gridInfo[unMute.x + x][unMute.y + y].second.lock()->SetMute(true);
+					else
+						gridInfo[unMute.x + x].erase(unMute.y + y);
+
+					for (auto& ptr : unitOnGrid[unMute.x + x][unMute.y + y])
+					{
+						if (!ptr.expired())
+						{
+							ptr.lock()->SetMute(true);
+						}
+					}
+				}
+				else
+				{
+					if (!gridInfo[unMute.x + x][unMute.y + y].second.expired())
+						gridInfo[unMute.x + x][unMute.y + y].second.lock()->SetMute(false);
+					else
+						gridInfo[unMute.x + x].erase(unMute.y + y);
+
+					for (auto& ptr : unitOnGrid[unMute.x + x][unMute.y + y])
+					{
+						if (!ptr.expired())
+						{
+							ptr.lock()->SetMute(false);
+						}
+					}
+				}
+			}
+		}
+	}
+	preListenerGridCoord = PosToGridCoord({ sf::Listener::getPosition().x, sf::Listener::getPosition().y });
+
+	cameraPlane = sf::Listener::getPosition();
+	if (sf::Vector2f(cameraPlane.x, cameraPlane.y) == view.getCenter())
+	{
+		cameraPlane += sf::Listener::getUpVector();
+	}
+
+	sf::RenderWindow& window = GameManager::GetWindow();
+	nearPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x / 2, window.getSize().y ), view));
+	farPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x / 2, 0 ), view) );
+	leftPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(0 , window.getSize().y / 2 ), view));
+	rightPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x, window.getSize().y / 2), view));
+}
+
+void SceneGame::TileSort()
+{
+	//for (auto& x : gridInfo)
+	//{
+	//	for (auto& y : x.second)
+	//	{
+	//		sf::Vector3f building = tool::To3D(y.second.second.lock()->GetGridCenterPos()- view.getCenter());
+	//		sf::Vector3f plane = sf::Vector3f(view.getCenter().x, view.getCenter().y, 0) - nearPlane;
+	//		float distance = tool::DistancePlane(plane, building);
+	//		if (tool::OnPlane(plane, building) >= 0.f)
+	//		{
+	//			y.second.second.lock()->SetDrawDeep(distance);
+	//			y.second.second.lock()->SetShow(true);
+	//		}
+	//		else
+	//		{
+	//			y.second.second.lock()->SetShow(false);
+	//		}
+	//	}
+	//}
+	for (auto& x : gridInfo)
+	{
+		for (auto& y : x.second)
+		{
+			sf::Vector3f building = tool::To3D(y.second.second.lock()->GetGridCenterPos() - view.getCenter());
+			sf::Vector3f plane = sf::Listener::getPosition() - tool::To3D(view.getCenter());
+			float distance = tool::DistancePlane(plane, building);
+			if (tool::OnPlane(plane, building) >= 0.f)
+			{
+				y.second.second.lock()->SetDrawDeep(distance);
+			}
+			else
+			{
+				y.second.second.lock()->SetDrawDeep(-distance);
+			}
+		}
+	}
+}
+void SceneGame::UnitSort()
+{
+	for (auto& x : unitOnGrid)
+	{
+		for (auto& y : x.second)
+		{
+			for (auto& unit : y.second)
+			{
+				sf::Vector3f citizen = tool::To3D(unit.lock()->GetPosition() - view.getCenter());
+				sf::Vector3f plane = (cameraPlane - tool::To3D(view.getCenter())) * 2.f;
+				float distance = tool::DistancePlane(plane, citizen);
+				if (tool::OnPlane(plane, citizen) >= 0.f)
+					unit.lock()->SetDrawDeep(distance);
+				else
+					unit.lock()->SetDrawDeep(-distance);
+			}
+		}
+	}
+}
 void SceneGame::SetMousePosGrid()
 {
 	mousePosGrid = PosToGridCoord(mousePosWorld);

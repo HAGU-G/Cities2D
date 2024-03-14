@@ -16,7 +16,6 @@ enum class GAME_OBJECT_TAG
 	R,
 	C,
 	I,
-	MUTE,
 
 	COUNT
 };

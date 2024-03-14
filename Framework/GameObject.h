@@ -21,10 +21,11 @@ protected:
 	std::weak_ptr<Scene> scene;
 	std::list<GAME_OBJECT_TAG> gameObjectTagList;
 
-	int drawLayer = 0;
-	int phygicsLayer = 0;
+	float drawDeep = 0.f;
 
-	bool active = true;
+	bool isActive = true;
+	bool isShow = true;
+	bool isMute = false;
 
 	sf::Vector2f position;
 	sf::Vector2f direction;
@@ -43,7 +44,6 @@ public:
 	virtual void PreUpdate(float timeDelta, float timeScale); //empty
 	virtual void Update(float timeDelta, float timeScale); //empty
 	virtual void PostUpdate(float timeDelta, float timeScale); //empty
-	virtual void PhysicsUpdate(float timeDelta, float timeScale); //empty
 	virtual void Draw(sf::RenderWindow& window); //empty
 	virtual void Reset(); //empty
 	virtual void Release();
@@ -53,9 +53,10 @@ public:
 	void SetPositionX(float x);
 	void SetPositionY(float y);
 	virtual void SetPosition(const sf::Vector2f& position);
-	void SetDrawLayer(int value);
-	void SetPhygicsLayer(int value);
+	void SetDrawDeep(float deep);
 	void SetActive(bool value);
+	inline void SetShow(bool value) { isShow = value; }
+	inline void SetMute(bool value) { isMute = value; }
 
 	//Get
 	const std::shared_ptr<GameObject>& This();
@@ -64,10 +65,11 @@ public:
 	std::string GetKey() const;
 	const GAME_OBJECT_TYPE& GetGameObjectType() const;
 	const std::list<GAME_OBJECT_TAG>& GetGameObjectTagList() const;
-	bool GetActive() const { return active; }
 	const sf::Vector2f& GetPosition() const;
-	const int& GetDrawLayer() const;
-	const int& GetPhygicsLayer() const;
+	const float& GetDrawDeep() const;
+	inline bool IsActive() const { return isActive; }
+	inline bool IsShow() const { return isShow; }
+	inline bool IsMute() const { return isMute; }
 
 	//Add
 	bool AddTag(GAME_OBJECT_TAG tag);

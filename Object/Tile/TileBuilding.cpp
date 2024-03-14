@@ -40,8 +40,8 @@ void TileBuilding::Update(float timeDelta, float timeScale)
 
 void TileBuilding::Draw(sf::RenderWindow& window)
 {
-	window.draw(buildingSprite);
-	ObjectTile::Draw(window);
+		window.draw(buildingSprite);
+		ObjectTile::Draw(window);
 }
 
 void TileBuilding::Reset()
@@ -288,8 +288,7 @@ void TileBuilding::Enter()
 void TileBuilding::PlaySound()
 {
 
-	if (soundTimer >= soundDuration
-		&& std::find(gameObjectTagList.begin(), gameObjectTagList.end(), GAME_OBJECT_TAG::MUTE) == gameObjectTagList.end())
+	if (soundTimer >= soundDuration	&& !isMute)
 	{
 		soundTimer = 0.f;
 		

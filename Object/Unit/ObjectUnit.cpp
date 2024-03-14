@@ -317,7 +317,7 @@ void ObjectUnit::BeHomeLess()
 	spriteAnimator.Play(uRow[2] + uRow[3] + to_string(spriteNum) + "-Laying.csv");
 	status = STATUS::HOMELESS;
 
-	if (!isReset && soundTimer >= soundDuration)
+	if (!isReset && soundTimer >= soundDuration && !isMute)
 	{
 		soundTimer = 0.f;
 		soundDuration = IOManager::PlaySfx("resource/sfx/homeless.wav", { position.x, position.y, 0.f }, 100, 4);
@@ -782,7 +782,7 @@ void ObjectUnit::Moving(float timeDelta, float timeScale)
 	}
 	if (doCheck)
 	{
-		if (soundTimer >= soundDuration)
+		if (soundTimer >= soundDuration && !isMute)
 		{
 			soundTimer = 0.f;
 			soundDuration = IOManager::PlaySfx("resource/sfx/leave.wav", { position.x, position.y, 0.f }, 30, 7);

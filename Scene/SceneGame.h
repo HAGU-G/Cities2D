@@ -26,7 +26,13 @@ protected:
 	std::deque<sf::Vector2i> deleteTileDeque;
 
 	sf::Vector2i mousePosGrid;
-	
+	sf::Vector3f cameraPlane;
+	float preViewRotation = 0.f;
+
+	sf::Vector3f nearPlane;
+	sf::Vector3f farPlane;
+	sf::Vector3f leftPlane;
+	sf::Vector3f rightPlane;
 
 	bool isTilt = false;
 	float startTilt = 0.f;
@@ -118,6 +124,11 @@ public:
 
 	void GameOver();
 	inline bool IsGameOver() const { return gameOver; }
+
+
+	void OnCamaraMove();
+	void TileSort();
+	void UnitSort();
 
 };
 

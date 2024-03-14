@@ -28,8 +28,7 @@ public:
 	static void Init(); //usingList
 	static void PreUpdate(float timeDelta); //usingList
 	static void Update(float timeDelta); //usingList
-	static void PostUpdate(float timeDelta); //usingList
-	static void PhysicsUpdate(float timeDelta); //usingList
+	static void PostUpdate(float timeDelta); //usingList\
 
 	//Draw - sceneList에 추가된 순서대로 Draw. Scene안에서는 게임오브젝트의 레이어 순서대로 Draw
 	static void Draw(sf::RenderWindow& window); //usingList

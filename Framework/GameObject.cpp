@@ -62,10 +62,6 @@ void GameObject::PostUpdate(float timeDelta, float timeScale)
 {
 }
 
-void GameObject::PhysicsUpdate(float timeDelta, float timeScale)
-{
-}
-
 void GameObject::Draw(sf::RenderWindow& window)
 {
 }
@@ -99,19 +95,14 @@ void GameObject::SetPosition(const sf::Vector2f& position)
 	this->position = position;
 }
 
-void GameObject::SetDrawLayer(int value)
+void GameObject::SetDrawDeep(float value)
 {
-	drawLayer = value;
-}
-
-void GameObject::SetPhygicsLayer(int value)
-{
-	drawLayer = value;
+	drawDeep = value;
 }
 
 void GameObject::SetActive(bool value)
 {
-	active = value;
+	isActive = value;
 }
 
 const std::shared_ptr<GameObject>& GameObject::This()
@@ -144,14 +135,9 @@ const std::list<GAME_OBJECT_TAG>& GameObject::GetGameObjectTagList() const
 	return gameObjectTagList;
 }
 
-const int& GameObject::GetDrawLayer() const
+const float &GameObject::GetDrawDeep() const
 {
-	return drawLayer;
-}
-
-const int& GameObject::GetPhygicsLayer() const
-{
-	return phygicsLayer;
+	return drawDeep;
 }
 
 const sf::Vector2f& GameObject::GetPosition() const

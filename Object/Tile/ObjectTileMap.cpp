@@ -6,6 +6,7 @@
 ObjectTileMap::ObjectTileMap(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType)
 	:GameObject(scene, objectType)
 {
+	isShow = false;
 }
 
 ObjectTileMap::~ObjectTileMap()

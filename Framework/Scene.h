@@ -44,7 +44,6 @@ public:
 	virtual void PreUpdate(float timeDelta, float timeScale);	//생성
 	virtual void Update(float timeDelta, float timeScale);		//메인 업데이트
 	virtual void PostUpdate(float timeDelta, float timeScale);	//삭제
-	virtual void PhysicsUpdate(float timeDelta, float timeScale);
 	virtual void Draw(sf::RenderWindow& window);
 	virtual void Reset();
 	virtual void Release();

@@ -99,7 +99,7 @@ void ObjectUnit::PostUpdate(float timeDelta, float timeScale)
 	{
 		scene.lock()->DeleteObject(GetKey());
 	}
-	else
+	else if(timeScale != 0.f)
 	{
 		AutoDrawDeep();
 	}

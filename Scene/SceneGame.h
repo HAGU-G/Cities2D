@@ -133,6 +133,7 @@ public:
 	void OnCameraMove();
 	inline const Frustum& GetFrustum() const { return frustum; }
 	void TileSort();
+	void UnitSort();
 
 };
 

@@ -27,8 +27,9 @@ private:
 	static std::random_device* rd; // randomDevice
 	static std::mt19937* rg; //randomGenerator
 
-
+	static bool doDebug;
 public:
+
 	static std::string lastGameName;
 
 	static void Init();
@@ -38,6 +39,7 @@ public:
 	//Window
 	static void DebugUpdate();
 	static void Exit();
+	static void SetDoDebug(bool valuse);
 
 	//Set
 	inline static float SetGlobalTimeScale(float value) { globalTimeScale = value; }

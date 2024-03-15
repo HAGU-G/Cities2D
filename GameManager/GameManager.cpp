@@ -27,6 +27,8 @@ std::mt19937* GameManager::rg = nullptr; //randomGenerator
 
 std::string GameManager::lastGameName = "";
 
+bool GameManager::doDebug = false;
+
 
 void GameManager::Init()
 {
@@ -58,13 +60,12 @@ void GameManager::Init()
 	debugWindow.create(sf::VideoMode(200, 400), "Cities2D : Debug", sf::Style::Close);
 	debugWindow.setPosition(sf::Vector2i(window.getPosition().x - debugWindow.getSize().x, window.getPosition().y));
 	debugWindow.display();
+	debugWindow.setVisible(false);
 	window.requestFocus(); //메인 윈도우 포커싱
 	for (int i = 0; i <= fpsGraph.getVertexCount() - 4; i++)
 	{
 		fpsGraph[i + 2].position = { 1.f + i * 198.f / (fpsGraph.getVertexCount() - 4) ,1.f };
 	}
-
-
 
 	/////////////////////////////
 	// 
@@ -203,6 +204,8 @@ void GameManager::DebugUpdate()
 			debugWindow.close();
 	}
 
+	if (!doDebug)
+		return;
 	//텍스트
 	sf::Text text;
 	int fontSize = 24;
@@ -279,6 +282,19 @@ void GameManager::Exit()
 {
 	debugWindow.close();
 	window.close();
+}
+
+void GameManager::SetDoDebug(bool value)
+{
+	if (!doDebug && value)
+	{
+		debugWindow.setVisible(true);
+		doDebug = value;
+	}
+	else if (doDebug && !value)
+	{
+		debugWindow.setVisible(false);
+	}
 }
 
 float GameManager::RandomRange(float a, float b)

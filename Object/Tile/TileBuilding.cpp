@@ -26,8 +26,8 @@ void TileBuilding::Update(float timeDelta, float timeScale)
 {
 	ObjectTile::Update(timeDelta, timeScale);
 
-	if(soundTimer <= soundDuration)
-	soundTimer += timeDelta;
+	if (soundTimer <= soundDuration)
+		soundTimer += timeDelta;
 
 	buildingSprite.setRotation(scene.lock()->GetView().getRotation());
 	buildingSprite.setScale(1.f, sceneGame.lock()->GetTilt());
@@ -40,8 +40,8 @@ void TileBuilding::Update(float timeDelta, float timeScale)
 
 void TileBuilding::Draw(sf::RenderWindow& window)
 {
-		window.draw(buildingSprite);
-		ObjectTile::Draw(window);
+	window.draw(buildingSprite);
+	ObjectTile::Draw(window);
 }
 
 void TileBuilding::Reset()
@@ -87,21 +87,10 @@ void TileBuilding::Reset()
 	}
 
 
-	std::initializer_list<int> elements = { rci.residence, rci.commerce, rci.industry };
-	int rciMax = std::max(elements);
 
-	const rapidcsv::Document& tileData = SFGM_CSVFILE.Get("data/TileData.csv").GetDocument();
-	for (int i = 0; i < tileData.GetRowCount(); i++)
-	{
-		auto row = tileData.GetRow<std::string>(i);
-		if (std::stoi(row[1]) == (int)GetGameObjectType() - (int)GAME_OBJECT_TYPE::TILE)
-		{
-			buildingSprite.setTexture(SFGM_TEXTURE.Get(row[5]));
-			textureRect = { std::stoi(row[6]), std::stoi(row[7]), std::stoi(row[8]), std::stoi(row[9]) };
-			buildingSprite.setTextureRect(textureRect);
-			break;
-		}
-	}
+	buildingSprite.setTexture(SFGM_TEXTURE.Get(rci.texturePath));
+	buildingSprite.setTextureRect(rci.textureRect);
+
 
 	buildingSprite.setOrigin(buildingSprite.getLocalBounds().width * 0.5f,
 		buildingSprite.getLocalBounds().height - sceneGame.lock()->GetGridSize().y);
@@ -288,10 +277,10 @@ void TileBuilding::Enter()
 void TileBuilding::PlaySound()
 {
 
-	if (soundTimer >= soundDuration	&& !isMute)
+	if (soundTimer >= soundDuration && !isMute)
 	{
 		soundTimer = 0.f;
-		
+
 		switch (GetGameObjectType())
 		{
 		case GAME_OBJECT_TYPE::HOME:

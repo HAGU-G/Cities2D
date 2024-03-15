@@ -16,6 +16,9 @@ struct RCI
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> commerceSlot;
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> industrySlot;
 
+	std::string texturePath;
+	sf::IntRect textureRect;
+
 };
 
 class RCIManager final

@@ -19,6 +19,7 @@ protected:
 	sf::RectangleShape underBarBack;
 	sf::RectangleShape underBarFront;
 
+	rapidcsv::Document rciDoc;
 	sf::RectangleShape rBar;
 	sf::RectangleShape cBar;
 	sf::RectangleShape iBar;

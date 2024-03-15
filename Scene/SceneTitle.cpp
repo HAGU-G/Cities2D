@@ -116,9 +116,9 @@ void SceneTitle::PostInit()
 
 
 
-	LoadingGame();
-	//t1 = std::thread(&SceneTitle::LoadingGame, this);
-	//t1.detach();
+	//LoadingGame();
+	t1 = std::thread(&SceneTitle::LoadingGame, this);
+	t1.detach();
 }
 
 void SceneTitle::Draw(sf::RenderWindow& window)
@@ -156,4 +156,5 @@ void SceneTitle::LoadingGame()
 	SceneManager::Wait("SceneMenu",true);
 	SceneManager::canChange = true;
 	isLoaded = true;
+	GameManager::SetDoDebug(true);
 }

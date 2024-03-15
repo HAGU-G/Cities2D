@@ -60,6 +60,8 @@ void SceneGameUI::AddResource()
 
 	SFGM_SOUNDBUFFER.Add("resource/sfx/InMouse.wav");
 	SFGM_SOUNDBUFFER.Add("resource/sfx/Click.wav");
+
+	SFGM_CSVFILE.Add("data/BuildingData.csv");
 }
 
 void SceneGameUI::Init()
@@ -207,6 +209,7 @@ void SceneGameUI::Reset()
 	textTex.setString(to_string(0));
 	textProfit.setString(to_string(0));
 	SetMayorName();
+	rciDoc = SFGM_CSVFILE.Get("data/BuildingData.csv").GetDocument();
 }
 void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 {
@@ -294,7 +297,7 @@ void SceneGameUI::Menu()
 
 void SceneGameUI::SetMayorName()
 {
-	if(buttonRCI->IsInputMode())
+	if (buttonRCI->IsInputMode())
 		sceneGame.lock()->SetMayorName(buttonRCI->GetString());
 	else
 	{
@@ -405,14 +408,21 @@ void SceneGameUI::R()
 	else
 	{
 		SetClickMode(1);
-
-		rci = RCI();
-		rci.cost = 10;
-		rci.tex = -10;
-		rci.residence = 2;
-		rci.commerce = 1;
-		rci.industry = 0;
 		type = GAME_OBJECT_TYPE::HOME;
+		auto rRow = rciDoc.GetRow<std::string>(0);
+
+		rci.residence = stoi(rRow[1]);
+		rci.commerce = stoi(rRow[2]);
+		rci.industry = stoi(rRow[3]);
+
+		rci.cost = stoi(rRow[4]);
+		rci.tex = stoi(rRow[5]);
+
+		rci.texturePath = rRow[6];
+		rci.textureRect.left = stoi(rRow[7]);
+		rci.textureRect.top = stoi(rRow[8]);
+		rci.textureRect.width = stoi(rRow[9]);
+		rci.textureRect.height = stoi(rRow[10]);
 	}
 }
 void SceneGameUI::C()
@@ -430,14 +440,21 @@ void SceneGameUI::C()
 	else
 	{
 		SetClickMode(1);
-
-		rci = RCI();
-		rci.cost = 20;
-		rci.tex = -20;
-		rci.residence = 0;
-		rci.commerce = 10;
-		rci.industry = 0;
 		type = GAME_OBJECT_TYPE::SHOP;
+		auto rRow = rciDoc.GetRow<std::string>(1);
+
+		rci.residence = stoi(rRow[1]);
+		rci.commerce = stoi(rRow[2]);
+		rci.industry = stoi(rRow[3]);
+
+		rci.cost = stoi(rRow[4]);
+		rci.tex = stoi(rRow[5]);
+
+		rci.texturePath = rRow[6];
+		rci.textureRect.left = stoi(rRow[7]);
+		rci.textureRect.top = stoi(rRow[8]);
+		rci.textureRect.width = stoi(rRow[9]);
+		rci.textureRect.height = stoi(rRow[10]);
 	}
 }
 void SceneGameUI::I()
@@ -456,14 +473,21 @@ void SceneGameUI::I()
 	else
 	{
 		SetClickMode(1);
+		type = GAME_OBJECT_TYPE::HOME;
+		auto rRow = rciDoc.GetRow<std::string>(2);
 
-		rci = RCI();
-		rci.cost = 30;
-		rci.tex = -30;
-		rci.residence = 0;
-		rci.commerce = 0;
-		rci.industry = 1;
-		type = GAME_OBJECT_TYPE::WORK_PLACE;
+		rci.residence = stoi(rRow[1]);
+		rci.commerce = stoi(rRow[2]);
+		rci.industry = stoi(rRow[3]);
+
+		rci.cost = stoi(rRow[4]);
+		rci.tex = stoi(rRow[5]);
+
+		rci.texturePath = rRow[6];
+		rci.textureRect.left = stoi(rRow[7]);
+		rci.textureRect.top = stoi(rRow[8]);
+		rci.textureRect.width = stoi(rRow[9]);
+		rci.textureRect.height = stoi(rRow[10]);
 	}
 }
 void SceneGameUI::Destroy()

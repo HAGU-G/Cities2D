@@ -54,6 +54,7 @@ void SceneGame::AddResource()
 
 	//csv
 	SFGM_CSVFILE.Add("data/TileData.csv");
+	SFGM_CSVFILE.Add("data/BuildingData.csv");
 	SFGM_CSVFILE.Add("data/UnitData.csv");
 	SFGM_CSVFILE.Add("data/CitizenData.csv");
 	SFGM_CSVFILE.Add("resource/unit/Cat0-Run.csv");
@@ -644,6 +645,8 @@ void SceneGame::OnCameraMove()
 	frustum.rightPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x, window.getSize().y / 2), view));
 
 	TileSort();
+	if (timeScale == 0.f)
+		UnitSort();
 }
 
 void SceneGame::TileSort()
@@ -699,6 +702,67 @@ void SceneGame::TileSort()
 			{
 				y.second.second.lock()->SetDrawDeep(-OnN);
 				y.second.second.lock()->SetShow(true);
+			}
+		}
+	}
+}
+
+void SceneGame::UnitSort()
+{
+	sf::Vector3f plane;
+	sf::Vector3f unit;
+	for (auto& x : unitOnGrid)
+	{
+		for (auto& y : x.second)
+		{
+			for (auto& units : y.second)
+			{
+				if (units.expired())
+					continue;
+				plane = frustum.nearPlane - tool::To3D(view.getCenter());
+				unit = tool::To3D(units.lock()->GetPosition()) - frustum.nearPlane;
+				float OnN = tool::OnPlane(plane, unit);
+				if (OnN > 0.f)
+				{
+					units.lock()->SetDrawDeep(0.f);
+					units.lock()->SetShow(false);
+					continue;
+				}
+
+				plane = frustum.farPlane - tool::To3D(view.getCenter());
+				unit = tool::To3D(units.lock()->GetPosition()) - frustum.farPlane;
+				float OnF = tool::OnPlane(plane, unit);
+				if (OnF > 0.f)
+				{
+					units.lock()->SetDrawDeep(0.f);
+					units.lock()->SetShow(false);
+					continue;
+				}
+
+				plane = frustum.leftPlane - tool::To3D(view.getCenter());
+				unit = tool::To3D(units.lock()->GetPosition()) - frustum.leftPlane;
+				float OnL = tool::OnPlane(plane, unit);
+				if (OnL > 0.f)
+				{
+					units.lock()->SetDrawDeep(0.f);
+					units.lock()->SetShow(false);
+					continue;
+				}
+
+				plane = frustum.rightPlane - tool::To3D(view.getCenter());
+				unit = tool::To3D(units.lock()->GetPosition()) - frustum.rightPlane;
+				float OnR = tool::OnPlane(plane, unit);
+				if (OnR > 0.f)
+				{
+					units.lock()->SetDrawDeep(0.f);
+					units.lock()->SetShow(false);
+					continue;
+				}
+				else
+				{
+					units.lock()->SetDrawDeep(-OnN);
+					units.lock()->SetShow(true);
+				}
 			}
 		}
 	}

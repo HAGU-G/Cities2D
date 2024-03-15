@@ -29,7 +29,7 @@ void TileBuilding::Update(float timeDelta, float timeScale)
 	if (soundTimer <= soundDuration)
 		soundTimer += timeDelta;
 
-	buildingSprite.setRotation(scene.lock()->GetView().getRotation());
+	buildingSprite.setRotation(sceneGame.lock()->GetView().getRotation());
 	buildingSprite.setScale(1.f, sceneGame.lock()->GetTilt());
 
 	if (sceneGame.lock()->DoPayTex())
@@ -86,12 +86,8 @@ void TileBuilding::Reset()
 		AddTag(GAME_OBJECT_TAG::I);
 	}
 
-
-
 	buildingSprite.setTexture(SFGM_TEXTURE.Get(rci.texturePath));
 	buildingSprite.setTextureRect(rci.textureRect);
-
-
 	buildingSprite.setOrigin(buildingSprite.getLocalBounds().width * 0.5f,
 		buildingSprite.getLocalBounds().height - sceneGame.lock()->GetGridSize().y);
 

@@ -63,6 +63,7 @@ public:
 	static size_t GetObjectsCount();
 	static size_t GetObjectsTotalCount();
 	std::string GetKey() const;
+	inline std::weak_ptr<Scene> GetScene() const { return scene; }
 	const GAME_OBJECT_TYPE& GetGameObjectType() const;
 	const std::list<GAME_OBJECT_TAG>& GetGameObjectTagList() const;
 	const sf::Vector2f& GetPosition() const;

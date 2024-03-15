@@ -224,7 +224,6 @@ void SceneMenu::Save()
 
 void SceneMenu::LoadSaveList()
 {
-
 	saveList.clear();
 	float buttonPosY = 85.f;
 	std::filesystem::directory_iterator dIt("./data/save/");
@@ -259,6 +258,7 @@ void SceneMenu::LoadSaveList()
 		{
 			std::shared_ptr<ButtonNineSlice> load = std::make_shared<ButtonNineSlice>(This(), sf::Vector2f(view.getCenter().x + 2.5f, view.getCenter().y + buttonPosY), "load", temp);
 			saveList.push_back(load);
+			load->SetView(&saveListView);
 			buttonPosY += 85.f;
 		}
 	}

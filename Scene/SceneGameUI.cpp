@@ -209,7 +209,11 @@ void SceneGameUI::Reset()
 	textTex.setString(to_string(0));
 	textProfit.setString(to_string(0));
 	SetMayorName();
-	rciDoc = SFGM_CSVFILE.Get("data/BuildingData.csv").GetDocument();
+	buildingDoc = SFGM_CSVFILE.Get("data/BuildingData.csv").GetDocument();
+
+	LoadBuildingButton();
+
+
 }
 void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 {
@@ -308,13 +312,221 @@ void SceneGameUI::SetMayorName()
 void SceneGameUI::UnSeleteAll()
 {
 	buttonRoad->UnSelect();
+	for (auto& pair : roadList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonR->UnSelect();
+	for (auto& pair : rList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonC->UnSelect();
+	for (auto& pair : cList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonI->UnSelect();
+	for (auto& pair : iList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonDestroy->UnSelect();
 	SetClickMode(0);
 	rci = RCI();
 	type = GAME_OBJECT_TYPE::NONE;
+}
+
+void SceneGameUI::LoadBuildingButton()
+{
+	roadList.clear();
+	rList.clear();
+	cList.clear();
+	iList.clear();
+
+	int buttonRoadCount = 0;
+	int buttonRCount = 0;
+	int buttonCCount = 0;
+	int buttonICount = 0;
+	for (int i = 0; i < buildingDoc.GetRowCount(); i++)
+	{
+		auto rciRow = buildingDoc.GetRow<std::string>(i);
+		RCI rciInfo;
+
+		rciInfo.residence = stoi(rciRow[1]);
+		rciInfo.commerce = stoi(rciRow[2]);
+		rciInfo.industry = stoi(rciRow[3]);
+
+		rciInfo.cost = stoi(rciRow[4]);
+		rciInfo.tex = stoi(rciRow[5]);
+
+		rciInfo.texturePath = rciRow[6];
+		rciInfo.textureRect.left = stoi(rciRow[7]);
+		rciInfo.textureRect.top = stoi(rciRow[8]);
+		rciInfo.textureRect.width = stoi(rciRow[9]);
+		rciInfo.textureRect.height = stoi(rciRow[10]);
+
+		//////////길 버튼
+		if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::ROAD - (int)GAME_OBJECT_TYPE::TILE)
+		{
+			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
+				{ view.getCenter().x + buttonRoadCount * 69.f, underBarBack.getGlobalBounds().top - 5.f }, "r_");
+			button.lock()->SetFuntion(
+				[button, this, row = i]()
+				{
+					auto thisButton = button.lock();
+					for (auto& pair : std::dynamic_pointer_cast<SceneGameUI, Scene>(thisButton->GetScene().lock())->roadList)
+					{
+						if (pair.first->GetKey() == thisButton->GetKey())
+							continue;
+						pair.first->UnSelect();
+					}
+
+					if (!thisButton->IsSelect())
+					{
+						SetClickMode(0);
+						type = GAME_OBJECT_TYPE::NONE;
+					}
+					else
+					{
+						SetClickMode(1);
+						type = GAME_OBJECT_TYPE::ROAD;
+						auto rRow = buildingDoc.GetRow<std::string>(row);
+
+						for (auto& pair : roadList)
+						{
+							if (pair.first->GetKey() == thisButton->GetKey())
+								rci = pair.second;
+						}
+						sceneGame.lock()->GetIndicater().lock()->SetRCI(rci);
+					}
+				});
+			button.lock()->SetOrigin(ORIGIN::BC);
+			buttonRoadCount++;
+			roadList.push_back(std::make_pair(button.lock(), rciInfo));
+		}
+		////////주거 버튼
+		else if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::HOME - (int)GAME_OBJECT_TYPE::TILE)
+		{
+			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
+				{ view.getCenter().x + buttonRCount * 69.f, underBarBack.getGlobalBounds().top - 5.f }, "r_");
+			button.lock()->SetFuntion(
+				[button, this, row = i]()
+				{
+					auto thisButton = button.lock();
+					for (auto& pair : std::dynamic_pointer_cast<SceneGameUI, Scene>(thisButton->GetScene().lock())->rList)
+					{
+						if (pair.first->GetKey() == thisButton->GetKey())
+							continue;
+						pair.first->UnSelect();
+					}
+
+					if (!thisButton->IsSelect())
+					{
+						SetClickMode(0);
+						type = GAME_OBJECT_TYPE::NONE;
+					}
+					else
+					{
+						SetClickMode(1);
+						type = GAME_OBJECT_TYPE::HOME;
+						auto rRow = buildingDoc.GetRow<std::string>(row);
+
+						for (auto& pair : rList)
+						{
+							if (pair.first->GetKey() == thisButton->GetKey())
+								rci = pair.second;
+						}
+						sceneGame.lock()->GetIndicater().lock()->SetRCI(rci);
+					}
+				});
+			button.lock()->SetOrigin(ORIGIN::BC);
+			buttonRCount++;
+			rList.push_back(std::make_pair(button.lock(), rciInfo));
+		}
+		////////상업 버튼
+		else if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::SHOP - (int)GAME_OBJECT_TYPE::TILE)
+		{
+			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
+				{ view.getCenter().x + buttonCCount * 69.f, underBarBack.getGlobalBounds().top - 5.f }, "r_");
+			button.lock()->SetFuntion(
+				[button, this, row = i]()
+				{
+					auto thisButton = button.lock();
+					for (auto& pair : std::dynamic_pointer_cast<SceneGameUI, Scene>(thisButton->GetScene().lock())->cList)
+					{
+						if (pair.first->GetKey() == thisButton->GetKey())
+							continue;
+						pair.first->UnSelect();
+					}
+
+					if (!thisButton->IsSelect())
+					{
+						SetClickMode(0);
+						type = GAME_OBJECT_TYPE::NONE;
+					}
+					else
+					{
+						SetClickMode(1);
+						type = GAME_OBJECT_TYPE::SHOP;
+						auto rRow = buildingDoc.GetRow<std::string>(row);
+
+						for (auto& pair : cList)
+						{
+							if (pair.first->GetKey() == thisButton->GetKey())
+								rci = pair.second;
+						}
+						sceneGame.lock()->GetIndicater().lock()->SetRCI(rci);
+					}
+				});
+			button.lock()->SetOrigin(ORIGIN::BC);
+			buttonCCount++;
+			cList.push_back(std::make_pair(button.lock(), rciInfo));
+		}
+		////////산업 버튼
+		else if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::WORK_PLACE - (int)GAME_OBJECT_TYPE::TILE)
+		{
+			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
+				{ view.getCenter().x + buttonICount * 69.f, underBarBack.getGlobalBounds().top - 5.f }, "r_");
+			button.lock()->SetFuntion(
+				[button, this, row = i]()
+				{
+					auto thisButton = button.lock();
+					for (auto& pair : std::dynamic_pointer_cast<SceneGameUI, Scene>(thisButton->GetScene().lock())->iList)
+					{
+						if (pair.first->GetKey() == thisButton->GetKey())
+							continue;
+						pair.first->UnSelect();
+					}
+
+					if (!thisButton->IsSelect())
+					{
+						SetClickMode(0);
+						type = GAME_OBJECT_TYPE::NONE;
+					}
+					else
+					{
+						SetClickMode(1);
+						type = GAME_OBJECT_TYPE::WORK_PLACE;
+						auto rRow = buildingDoc.GetRow<std::string>(row);
+
+						for (auto& pair : iList)
+						{
+							if (pair.first->GetKey() == thisButton->GetKey())
+								rci = pair.second;
+						}
+						sceneGame.lock()->GetIndicater().lock()->SetRCI(rci);
+					}
+				});
+			button.lock()->SetOrigin(ORIGIN::BC);
+			buttonICount++;
+			iList.push_back(std::make_pair(button.lock(), rciInfo));
+		}
+	}
 }
 
 void SceneGameUI::UpdateRCIGraph(int r, int c, int i)
@@ -373,132 +585,192 @@ void SceneGameUI::Fast()
 void SceneGameUI::Road()
 {
 	buttonR->UnSelect();
+	for (auto& pair : rList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonC->UnSelect();
+	for (auto& pair : cList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonI->UnSelect();
+	for (auto& pair : iList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonDestroy->UnSelect();
 
-	if (!buttonRoad->IsSelete())
+	SetClickMode(0);
+
+	if (!buttonRoad->IsSelect())
 	{
-		SetClickMode(0);
-		type = GAME_OBJECT_TYPE::NONE;
+		for (auto& pair : roadList)
+		{
+			pair.first->UnSelect();
+			pair.first->SetActive(false);
+		}
 	}
 	else
 	{
-		SetClickMode(1);
-
-		rci = RCI();
-		rci.cost = 10;
-		type = GAME_OBJECT_TYPE::ROAD;
+		for (auto& pair : roadList)
+		{
+			pair.first->SetActive(true);
+		}
 	}
 }
 void SceneGameUI::R()
 {
 	buttonRoad->UnSelect();
+	for (auto& pair : roadList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonC->UnSelect();
+	for (auto& pair : cList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonI->UnSelect();
+	for (auto& pair : iList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonDestroy->UnSelect();
 
+	SetClickMode(0);
 
-
-	if (!buttonR->IsSelete())
+	if (!buttonR->IsSelect())
 	{
-		SetClickMode(0);
-		type = GAME_OBJECT_TYPE::NONE;
+		for (auto& pair : rList)
+		{
+			pair.first->UnSelect();
+			pair.first->SetActive(false);
+		}
 	}
 	else
 	{
-		SetClickMode(1);
-		type = GAME_OBJECT_TYPE::HOME;
-		auto rRow = rciDoc.GetRow<std::string>(0);
-
-		rci.residence = stoi(rRow[1]);
-		rci.commerce = stoi(rRow[2]);
-		rci.industry = stoi(rRow[3]);
-
-		rci.cost = stoi(rRow[4]);
-		rci.tex = stoi(rRow[5]);
-
-		rci.texturePath = rRow[6];
-		rci.textureRect.left = stoi(rRow[7]);
-		rci.textureRect.top = stoi(rRow[8]);
-		rci.textureRect.width = stoi(rRow[9]);
-		rci.textureRect.height = stoi(rRow[10]);
+		for (auto& pair : rList)
+		{
+			pair.first->SetActive(true);
+		}
 	}
 }
 void SceneGameUI::C()
 {
-	buttonRoad->UnSelect();
 	buttonR->UnSelect();
+	for (auto& pair : rList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
+	buttonRoad->UnSelect();
+	for (auto& pair : roadList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonI->UnSelect();
+	for (auto& pair : iList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonDestroy->UnSelect();
 
-	if (!buttonC->IsSelete())
+	SetClickMode(0);
+
+	if (!buttonC->IsSelect())
 	{
-		SetClickMode(0);
-		type = GAME_OBJECT_TYPE::NONE;
+		for (auto& pair : cList)
+		{
+			pair.first->UnSelect();
+			pair.first->SetActive(false);
+		}
 	}
 	else
 	{
-		SetClickMode(1);
-		type = GAME_OBJECT_TYPE::SHOP;
-		auto rRow = rciDoc.GetRow<std::string>(1);
-
-		rci.residence = stoi(rRow[1]);
-		rci.commerce = stoi(rRow[2]);
-		rci.industry = stoi(rRow[3]);
-
-		rci.cost = stoi(rRow[4]);
-		rci.tex = stoi(rRow[5]);
-
-		rci.texturePath = rRow[6];
-		rci.textureRect.left = stoi(rRow[7]);
-		rci.textureRect.top = stoi(rRow[8]);
-		rci.textureRect.width = stoi(rRow[9]);
-		rci.textureRect.height = stoi(rRow[10]);
+		for (auto& pair : cList)
+		{
+			pair.first->SetActive(true);
+		}
 	}
 }
 void SceneGameUI::I()
 {
-	buttonRoad->UnSelect();
 	buttonR->UnSelect();
+	for (auto& pair : rList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonC->UnSelect();
+	for (auto& pair : cList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
+	buttonRoad->UnSelect();
+	for (auto& pair : roadList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonDestroy->UnSelect();
 
-	if (!buttonI->IsSelete())
+	SetClickMode(0);
+
+	if (!buttonI->IsSelect())
 	{
-		SetClickMode(0);
-		rci = RCI();
-		type = GAME_OBJECT_TYPE::NONE;
+		for (auto& pair : iList)
+		{
+			pair.first->UnSelect();
+			pair.first->SetActive(false);
+		}
 	}
 	else
 	{
-		SetClickMode(1);
-		type = GAME_OBJECT_TYPE::HOME;
-		auto rRow = rciDoc.GetRow<std::string>(2);
-
-		rci.residence = stoi(rRow[1]);
-		rci.commerce = stoi(rRow[2]);
-		rci.industry = stoi(rRow[3]);
-
-		rci.cost = stoi(rRow[4]);
-		rci.tex = stoi(rRow[5]);
-
-		rci.texturePath = rRow[6];
-		rci.textureRect.left = stoi(rRow[7]);
-		rci.textureRect.top = stoi(rRow[8]);
-		rci.textureRect.width = stoi(rRow[9]);
-		rci.textureRect.height = stoi(rRow[10]);
+		for (auto& pair : iList)
+		{
+			pair.first->SetActive(true);
+		}
 	}
 }
 void SceneGameUI::Destroy()
 {
 	buttonRoad->UnSelect();
+	for (auto& pair : roadList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonR->UnSelect();
+	for (auto& pair : rList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonC->UnSelect();
+	for (auto& pair : cList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 	buttonI->UnSelect();
+	for (auto& pair : iList)
+	{
+		pair.first->UnSelect();
+		pair.first->SetActive(false);
+	}
 
 
-	if (!buttonDestroy->IsSelete())
+	if (!buttonDestroy->IsSelect())
 	{
 		SetClickMode(0);
 	}

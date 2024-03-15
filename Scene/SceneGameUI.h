@@ -19,7 +19,6 @@ protected:
 	sf::RectangleShape underBarBack;
 	sf::RectangleShape underBarFront;
 
-	rapidcsv::Document rciDoc;
 	sf::RectangleShape rBar;
 	sf::RectangleShape cBar;
 	sf::RectangleShape iBar;
@@ -29,10 +28,19 @@ protected:
 	std::shared_ptr<ObjectButton> button4x;
 	std::shared_ptr<ObjectButton> buttonPause;
 	sf::RectangleShape pauseOutline;
+
+
+	rapidcsv::Document buildingDoc;
 	std::shared_ptr<ObjectButton> buttonRoad;
+	std::list<std::pair<std::shared_ptr<ObjectButton>, RCI>> roadList;
 	std::shared_ptr<ObjectButton> buttonR;
+	std::list<std::pair<std::shared_ptr<ObjectButton>,RCI>> rList;
 	std::shared_ptr<ObjectButton> buttonC;
+	std::list<std::pair<std::shared_ptr<ObjectButton>, RCI>> cList;
 	std::shared_ptr<ObjectButton> buttonI;
+	std::list<std::pair<std::shared_ptr<ObjectButton>, RCI>> iList;
+
+
 	std::shared_ptr<ObjectButton> buttonDestroy;
 	std::shared_ptr<ButtonNameTag> buttonRCI;
 	std::shared_ptr<ButtonNameTag> buttonCityTime;
@@ -67,6 +75,8 @@ public:
 	void SetCityTimeString(const time_t& cityTime);
 	void SetClickMode(int value);
 
+	const RCI& GetRCI() const { return rci; }
+
 	void Play();
 	void Fast();
 	void Pause();
@@ -79,5 +89,6 @@ public:
 	void SetMayorName();
 
 	void UnSeleteAll();
+	void LoadBuildingButton();
 };
 

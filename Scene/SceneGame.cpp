@@ -84,6 +84,9 @@ void SceneGame::AddResource()
 	SFGM_ANICLIP.Add("resource/unit/Cat3-Walk.csv");
 	SFGM_ANICLIP.Add("resource/unit/Cat3-Laying.csv");
 
+	//font
+	SFGM_FONT.Add("resource/font/DOSIyagiBoldface.ttf");
+
 }
 
 void SceneGame::Init()

@@ -7,6 +7,9 @@ protected:
 	std::string iconName;
 	sf::FloatRect bound;
 
+	const sf::View* view;
+	sf::Vector2f mousePos;
+
 	sf::Vector2f origin;
 	sf::Vector2f scale = {1.f,1.f};
 	float rotate = 0.f;
@@ -38,11 +41,14 @@ public:
 	virtual void SetOrigin(const sf::Vector2f& origin);
 	virtual void SetPosition(const sf::Vector2f& position) override;
 	virtual void SetState(int state);
-	void SetIcon(const std::string& path);
+	void SetIcon(const std::string& iconName);
+	//texture, origin, scale   ->  크기가 (64, 64)가 되도록 scale을 조정해서 넘기자
+	void SetIconFromSprite(const sf::Sprite& sprite);
 	inline void SetFuntion(std::function<void()> func) { funcVoid_void = func; }
 	void SetDoToggle(bool value) { doToggle = value; }
 	inline void SetOnlyDown(bool value) { isOnlyDown = value; }
 	inline void SetCanReact(bool value) { canReact = value; }
+	inline void SetView(const sf::View* view) { this->view = view; }
 
 	void UnSelect();
 	void Select();
@@ -53,7 +59,7 @@ public:
 	static std::shared_ptr<ObjectButton> Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::function<void()>& func = nullptr, bool toggle = true);
 
 	inline int GetState() const { return state; }
-	inline bool IsSelete() const { return isSelect; }
+	inline bool IsSelect() const { return isSelect; }
 	inline const sf::FloatRect& GetBound() const { return bound; }
 
 };

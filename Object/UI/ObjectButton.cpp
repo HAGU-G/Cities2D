@@ -14,29 +14,29 @@ void ObjectButton::Init()
 	icon.setOrigin(0.f, icon.getLocalBounds().height * 0.5f);
 	icon.setScale(0.25f, 0.25f);
 
-
-
 	mouseOn.setBuffer(SFGM_SOUNDBUFFER.Get("resource/sfx/InMouse.wav"));
 	click.setBuffer(SFGM_SOUNDBUFFER.Get("resource/sfx/Click.wav"));
 
 	SetPosition(position);
+
+	view = &(scene.lock()->GetView());
 }
 
 void ObjectButton::Update(float timeDelta, float timeScale)
 {
-	if (canReact)
-	{
+	mousePos = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), *view);
+
 		switch (state)
 		{
 		case 0:
-			if (bound.contains(scene.lock()->GetMousePosWorld()))
+			if (canReact && bound.contains(mousePos))
 			{
 				SetState(1);
 				mouseOn.play();
 			}
 			break;
 		case 1:
-			if (!bound.contains(scene.lock()->GetMousePosWorld()))
+			if (!bound.contains(mousePos))
 			{
 				SetState(0);
 			}
@@ -49,7 +49,7 @@ void ObjectButton::Update(float timeDelta, float timeScale)
 		case 2:
 			if (IOManager::IsKeyUp(sf::Mouse::Left))
 			{
-				if (bound.contains(scene.lock()->GetMousePosWorld()))
+				if (canReact && bound.contains(mousePos))
 				{
 					if (doToggle)
 						isSelect = !isSelect;
@@ -72,7 +72,6 @@ void ObjectButton::Update(float timeDelta, float timeScale)
 		default:
 			break;
 		}
-	}
 }
 
 void ObjectButton::Draw(sf::RenderWindow& window)
@@ -137,6 +136,13 @@ void ObjectButton::SetPosition(const sf::Vector2f& position)
 void ObjectButton::SetIcon(const std::string& iconName)
 {
 	icon.setTexture(SFGM_TEXTURE.Get("resource/ui/" + iconName + ".png"));
+}
+
+void ObjectButton::SetIconFromSprite(const sf::Sprite& sprite)
+{
+	icon.setTexture(*sprite.getTexture());
+	icon.setOrigin(sprite.getOrigin());
+	icon.setScale(sprite.getScale());
 }
 
 void ObjectButton::UnSelect()

@@ -107,6 +107,7 @@ public:
 	GridInfo& GetGridInfoRaw();
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
 	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord){	return gridInfo[gridCoord.x][gridCoord.y];	}
+	inline float GetZoomRatio() const { return zoomRatio; }
 
 
 	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };

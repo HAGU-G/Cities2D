@@ -409,8 +409,8 @@ void SceneGameUI::R()
 		rci = RCI();
 		rci.cost = 10;
 		rci.tex = -10;
-		rci.residence = 10;
-		rci.commerce = 0;
+		rci.residence = 2;
+		rci.commerce = 1;
 		rci.industry = 0;
 		type = GAME_OBJECT_TYPE::HOME;
 	}
@@ -462,7 +462,7 @@ void SceneGameUI::I()
 		rci.tex = -30;
 		rci.residence = 0;
 		rci.commerce = 0;
-		rci.industry = 10;
+		rci.industry = 1;
 		type = GAME_OBJECT_TYPE::WORK_PLACE;
 	}
 }

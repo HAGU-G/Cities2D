@@ -24,51 +24,54 @@ void ObjectButton::Init()
 
 void ObjectButton::Update(float timeDelta, float timeScale)
 {
-	switch (state)
+	if (canReact)
 	{
-	case 0:
-		if (bound.contains(scene.lock()->GetMousePosWorld()))
+		switch (state)
 		{
-			SetState(1);
-			mouseOn.play();
-		}
-		break;
-	case 1:
-		if (!bound.contains(scene.lock()->GetMousePosWorld()))
-		{
-			SetState(0);
-		}
-		else if (IOManager::IsKeyDown(sf::Mouse::Left))
-		{
-			SetState(2);
-			click.play();
-		}
-		break;
-	case 2:
-		if (IOManager::IsKeyUp(sf::Mouse::Left))
-		{
+		case 0:
 			if (bound.contains(scene.lock()->GetMousePosWorld()))
 			{
-				if (doToggle)
-					isSelect = !isSelect;
-
-				if (!isOnlyDown)
-				{
-					SetState(1);
-				}
-				if (funcVoid_void != nullptr)
-					funcVoid_void();
-				OnDown();
-
+				SetState(1);
+				mouseOn.play();
 			}
-			else if(!isOnlyDown)
+			break;
+		case 1:
+			if (!bound.contains(scene.lock()->GetMousePosWorld()))
 			{
 				SetState(0);
 			}
+			else if (IOManager::IsKeyDown(sf::Mouse::Left))
+			{
+				SetState(2);
+				click.play();
+			}
+			break;
+		case 2:
+			if (IOManager::IsKeyUp(sf::Mouse::Left))
+			{
+				if (bound.contains(scene.lock()->GetMousePosWorld()))
+				{
+					if (doToggle)
+						isSelect = !isSelect;
+
+					if (!isOnlyDown)
+					{
+						SetState(1);
+					}
+					if (funcVoid_void != nullptr)
+						funcVoid_void();
+					OnDown();
+
+				}
+				else if (!isOnlyDown)
+				{
+					SetState(0);
+				}
+			}
+			break;
+		default:
+			break;
 		}
-		break;
-	default:
-		break;
 	}
 }
 

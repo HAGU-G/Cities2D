@@ -76,8 +76,8 @@ void SceneMenu::Init()
 	resetGame->SetActive(false);
 
 	//불러오기
-	saveListView.setSize(450.f,250.f);
-	saveListView.setCenter(view.getCenter().x + 2.5f+225.f, view.getCenter().y + 85.f + 125.f);
+	saveListView.setSize(450.f, 250.f);
+	saveListView.setCenter(view.getCenter().x + 2.5f + 225.f, view.getCenter().y + 85.f + 125.f);
 	saveListView.setViewport({ (view.getCenter().x + 2.5f) / resetView.getSize().x,(view.getCenter().y + 85.f) / resetView.getSize().y
 		,450.f / resetView.getSize().x, 250.f / resetView.getSize().y });
 
@@ -86,26 +86,43 @@ void SceneMenu::Init()
 void SceneMenu::PreUpdate(float timeDelta, float timeScale)
 {
 	Scene::PreUpdate(timeDelta, timeScale);
+	sf::FloatRect saveListViewBound({ view.getCenter().x + 2.5f,view.getCenter().y + 85.f }, saveListView.getSize());
+
 	for (auto& ptr : saveList)
 	{
 		ptr->PreUpdate(timeDelta, timeScale);
 	}
 
-	if (IOManager::GetWheelDelta() > 0)
+	if (saveListViewBound.contains(mousePosWorld))
 	{
 		for (auto& ptr : saveList)
 		{
-			ptr->SetPosition(sf::Vector2f( 0.f, 20.f ) + ptr->GetPosition());
+			ptr->SetCanReact(true);
 		}
-		
+		if (IOManager::GetWheelDelta() > 0)
+		{
+			for (auto& ptr : saveList)
+			{
+				ptr->SetPosition(sf::Vector2f(0.f, 20.f) + ptr->GetPosition());
+			}
+
+		}
+		else if (IOManager::GetWheelDelta() < 0)
+		{
+			for (auto& ptr : saveList)
+			{
+				ptr->SetPosition(sf::Vector2f(0.f, -20.f) + ptr->GetPosition());
+			}
+		}
 	}
-	else if (IOManager::GetWheelDelta() < 0)
+	else
 	{
 		for (auto& ptr : saveList)
 		{
-			ptr->SetPosition(sf::Vector2f(0.f, -20.f) + ptr->GetPosition());
+			ptr->SetCanReact(false);
 		}
 	}
+
 }
 
 void SceneMenu::Update(float timeDelta, float timeScale)
@@ -211,7 +228,7 @@ void SceneMenu::LoadSaveList()
 	saveList.clear();
 	float buttonPosY = 85.f;
 	std::filesystem::directory_iterator dIt("./data/save/");
-	std::unordered_map<std::string,int> fileList;
+	std::unordered_map<std::string, int> fileList;
 
 	for (auto& dEntry : dIt)
 	{
@@ -228,7 +245,7 @@ void SceneMenu::LoadSaveList()
 			temp.erase(num);
 			fileList[temp] += 10;
 		}
-		else if((num = temp.find("Units.csv")) != std::string::npos)
+		else if ((num = temp.find("Units.csv")) != std::string::npos)
 		{
 			temp.erase(num);
 			fileList[temp] += 100;
@@ -237,10 +254,10 @@ void SceneMenu::LoadSaveList()
 		{
 			continue;
 		}
-			
+
 		if (fileList[temp] == 111)
 		{
-			std::shared_ptr<ButtonNineSlice> load = std::make_shared<ButtonNineSlice>(This(), sf::Vector2f(view.getCenter().x + 2.5f, view.getCenter().y + buttonPosY),	"load", temp);
+			std::shared_ptr<ButtonNineSlice> load = std::make_shared<ButtonNineSlice>(This(), sf::Vector2f(view.getCenter().x + 2.5f, view.getCenter().y + buttonPosY), "load", temp);
 			saveList.push_back(load);
 			buttonPosY += 85.f;
 		}

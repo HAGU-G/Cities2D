@@ -190,6 +190,7 @@ bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 		}
 		float soundTimer = std::stoi(row[5]);
 		float soundDuration = std::stoi(row[6]);
+		rci.texturePath = row[7];
 		//오브젝트 생성
 		if (!sceneGame->LoadObjectTile(rci, grid, tagList, rect, type, soundTimer, soundDuration))
 			return false;
@@ -207,7 +208,7 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 	if (!outFile.is_open())
 		return false;
 
-	outFile << "OBJECT_TYPE,GRID,TAGS,TEXTURE_RECT,RCI,SOUND_TIMER,SOUND_DURATION" << std::endl;
+	outFile << "OBJECT_TYPE,GRID,TAGS,TEXTURE_RECT,RCI,SOUND_TIMER,SOUND_DURATION,TEXTURE_PATH" << std::endl;
 
 	const GridInfo& gridInfo = sceneGame->GetGridInfo();
 	if (gridInfo.empty())
@@ -240,7 +241,7 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 			if (y.second.first == GAME_OBJECT_TYPE::ROAD)
 			{
 				str = to_string((int)y.second.first) + str;
-				str += "0/0/0/0/,0,0";
+				str += "0/0/0/0/,0,0,N";
 			}
 			else if (y.second.first >= GAME_OBJECT_TYPE::BUILDING && y.second.first < GAME_OBJECT_TYPE::BUILDING_END)
 			{
@@ -250,7 +251,8 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 				const RCI& rci = building->GetRCI();
 				str += to_string(rci.residence) + slash + to_string(rci.commerce) + slash + to_string(rci.industry) + slash + to_string(rci.cost) + slash + comma;
 				str += to_string(building->soundTimer) + comma;
-				str += to_string(building->soundDuration);
+				str += to_string(building->soundDuration) + comma;
+				str += building->GetRCI().texturePath;
 			}
 
 

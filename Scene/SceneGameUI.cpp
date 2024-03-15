@@ -55,6 +55,33 @@ void SceneGameUI::AddResource()
 	SFGM_TEXTURE.Add("resource/ui/fast.png");
 	SFGM_TEXTURE.Add("resource/ui/fastOn.png");
 	SFGM_TEXTURE.Add("resource/ui/fastDown.png");
+	SFGM_TEXTURE.Add("resource/ui/r_b_1.png");
+	SFGM_TEXTURE.Add("resource/ui/r_b_1On.png");
+	SFGM_TEXTURE.Add("resource/ui/r_b_1Down.png");
+	SFGM_TEXTURE.Add("resource/ui/r_b_2.png");
+	SFGM_TEXTURE.Add("resource/ui/r_b_2On.png");
+	SFGM_TEXTURE.Add("resource/ui/r_b_2Down.png");
+	SFGM_TEXTURE.Add("resource/ui/r_b_3.png");
+	SFGM_TEXTURE.Add("resource/ui/r_b_3On.png");
+	SFGM_TEXTURE.Add("resource/ui/r_b_3Down.png");
+	SFGM_TEXTURE.Add("resource/ui/i_b_1.png");
+	SFGM_TEXTURE.Add("resource/ui/i_b_1On.png");
+	SFGM_TEXTURE.Add("resource/ui/i_b_1Down.png");
+	SFGM_TEXTURE.Add("resource/ui/i_b_2.png");
+	SFGM_TEXTURE.Add("resource/ui/i_b_2On.png");
+	SFGM_TEXTURE.Add("resource/ui/i_b_2Down.png");
+	SFGM_TEXTURE.Add("resource/ui/i_b_3.png");
+	SFGM_TEXTURE.Add("resource/ui/i_b_3On.png");
+	SFGM_TEXTURE.Add("resource/ui/i_b_3Down.png");
+	SFGM_TEXTURE.Add("resource/ui/c_b_1.png");
+	SFGM_TEXTURE.Add("resource/ui/c_b_1On.png");
+	SFGM_TEXTURE.Add("resource/ui/c_b_1Down.png");
+	SFGM_TEXTURE.Add("resource/ui/c_b_2.png");
+	SFGM_TEXTURE.Add("resource/ui/c_b_2On.png");
+	SFGM_TEXTURE.Add("resource/ui/c_b_2Down.png");
+	SFGM_TEXTURE.Add("resource/ui/road_b_1.png");
+	SFGM_TEXTURE.Add("resource/ui/road_b_1On.png");
+	SFGM_TEXTURE.Add("resource/ui/road_b_1Down.png");
 
 	SFGM_FONT.Add("resource/font/ROKAF Sans Medium.ttf");
 
@@ -174,9 +201,8 @@ void SceneGameUI::Init()
 	tempText.setCharacterSize(40);
 	tempText.setFont(SFGM_FONT.Get("resource/font/ROKAF Sans Medium.ttf"));
 
-
-
-
+	buildingDoc = SFGM_CSVFILE.Get("data/BuildingData.csv").GetDocument();
+	LoadBuildingButton();
 }
 
 void SceneGameUI::Draw(sf::RenderWindow& window)
@@ -209,9 +235,8 @@ void SceneGameUI::Reset()
 	textTex.setString(to_string(0));
 	textProfit.setString(to_string(0));
 	SetMayorName();
-	buildingDoc = SFGM_CSVFILE.Get("data/BuildingData.csv").GetDocument();
 
-	LoadBuildingButton();
+
 
 
 }
@@ -243,17 +268,7 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 
 	if (!sceneGame->IsGameOver() && IOManager::IsKeyDown(sf::Mouse::Right))
 	{
-		switch (clickMode)
-		{
-		case -1:
 			UnSeleteAll();
-			break;
-		case 0:
-			break;
-		case 1:
-			UnSeleteAll();
-			break;
-		}
 	}
 
 	Scene::PreUpdate(timeDelta, timeScale);
@@ -339,6 +354,7 @@ void SceneGameUI::UnSeleteAll()
 	SetClickMode(0);
 	rci = RCI();
 	type = GAME_OBJECT_TYPE::NONE;
+	underBarBack.setScale(1.f, 1.f);
 }
 
 void SceneGameUI::LoadBuildingButton()
@@ -374,7 +390,7 @@ void SceneGameUI::LoadBuildingButton()
 		if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::ROAD - (int)GAME_OBJECT_TYPE::TILE)
 		{
 			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
-				{ view.getCenter().x + buttonRoadCount * 69.f, underBarBack.getGlobalBounds().top - 5.f }, "r_");
+				{ view.getCenter().x + (buttonRoadCount-1) * 69.f, underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
 			button.lock()->SetFuntion(
 				[button, this, row = i]()
 				{
@@ -413,7 +429,7 @@ void SceneGameUI::LoadBuildingButton()
 		else if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::HOME - (int)GAME_OBJECT_TYPE::TILE)
 		{
 			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
-				{ view.getCenter().x + buttonRCount * 69.f, underBarBack.getGlobalBounds().top - 5.f }, "r_");
+				{ view.getCenter().x + buttonRCount * 69.f, underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
 			button.lock()->SetFuntion(
 				[button, this, row = i]()
 				{
@@ -452,7 +468,7 @@ void SceneGameUI::LoadBuildingButton()
 		else if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::SHOP - (int)GAME_OBJECT_TYPE::TILE)
 		{
 			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
-				{ view.getCenter().x + buttonCCount * 69.f, underBarBack.getGlobalBounds().top - 5.f }, "r_");
+				{ view.getCenter().x + (buttonCCount+1) * 69.f, underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
 			button.lock()->SetFuntion(
 				[button, this, row = i]()
 				{
@@ -491,7 +507,7 @@ void SceneGameUI::LoadBuildingButton()
 		else if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::WORK_PLACE - (int)GAME_OBJECT_TYPE::TILE)
 		{
 			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
-				{ view.getCenter().x + buttonICount * 69.f, underBarBack.getGlobalBounds().top - 5.f }, "r_");
+				{ view.getCenter().x + (buttonICount+2) * 69.f , underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
 			button.lock()->SetFuntion(
 				[button, this, row = i]()
 				{
@@ -584,6 +600,7 @@ void SceneGameUI::Fast()
 
 void SceneGameUI::Road()
 {
+	
 	buttonR->UnSelect();
 	for (auto& pair : rList)
 	{
@@ -613,9 +630,11 @@ void SceneGameUI::Road()
 			pair.first->UnSelect();
 			pair.first->SetActive(false);
 		}
+		underBarBack.setScale(1.f, 1.f);
 	}
 	else
 	{
+		underBarBack.setScale(1.f, 1.5f);
 		for (auto& pair : roadList)
 		{
 			pair.first->SetActive(true);
@@ -653,9 +672,11 @@ void SceneGameUI::R()
 			pair.first->UnSelect();
 			pair.first->SetActive(false);
 		}
+		underBarBack.setScale(1.f, 1.f);
 	}
 	else
 	{
+		underBarBack.setScale(1.f, 1.5f);
 		for (auto& pair : rList)
 		{
 			pair.first->SetActive(true);
@@ -693,9 +714,11 @@ void SceneGameUI::C()
 			pair.first->UnSelect();
 			pair.first->SetActive(false);
 		}
+		underBarBack.setScale(1.f, 1.f);
 	}
 	else
 	{
+		underBarBack.setScale(1.f, 1.5f);
 		for (auto& pair : cList)
 		{
 			pair.first->SetActive(true);
@@ -733,9 +756,11 @@ void SceneGameUI::I()
 			pair.first->UnSelect();
 			pair.first->SetActive(false);
 		}
+		underBarBack.setScale(1.f, 1.f);
 	}
 	else
 	{
+		underBarBack.setScale(1.f, 1.5f);
 		for (auto& pair : iList)
 		{
 			pair.first->SetActive(true);
@@ -768,7 +793,7 @@ void SceneGameUI::Destroy()
 		pair.first->UnSelect();
 		pair.first->SetActive(false);
 	}
-
+	underBarBack.setScale(1.f, 1.f);
 
 	if (!buttonDestroy->IsSelect())
 	{

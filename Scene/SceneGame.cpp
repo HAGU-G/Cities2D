@@ -304,7 +304,7 @@ void SceneGame::Reset()
 	}
 
 	Scene::Reset();
-
+	view.setCenter(gridSize * 0.5f);
 
 
 	city = CITY();

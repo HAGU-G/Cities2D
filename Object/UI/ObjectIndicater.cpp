@@ -25,7 +25,7 @@ void ObjectIndicater::Init()
 	destroySprite.setColor(destroy);
 }
 
-void ObjectIndicater::Update(float timeDelta, float timeScale)
+void ObjectIndicater::PreUpdate(float timeDelta, float timeScale)
 {
 	auto sceneGame = this->sceneGame.lock();
 
@@ -42,10 +42,15 @@ void ObjectIndicater::Update(float timeDelta, float timeScale)
 	if (sceneGame->GetTileInfo(gridCoord).second.expired())
 		buildingSprite = nullptr;
 
-	//클릭 모드
+
+
 	switch (clickMode)
 	{
 	case -1:
+		if (gridCoord == sf::Vector2i(0, 0))
+			canClick = false;
+		else
+			canClick = true;
 		rect.setFillColor({ 160,60,50,80 });
 		rect.setOutlineColor({ 120,30,20,180 });
 		destroySprite.setRotation(sceneGame->GetView().getRotation());
@@ -68,11 +73,11 @@ void ObjectIndicater::Update(float timeDelta, float timeScale)
 			|| sceneGame->GetTileInfo(gridCoord + sf::Vector2i(-1, 0)).first == GAME_OBJECT_TYPE::ROAD
 			|| sceneGame->GetTileInfo(gridCoord + sf::Vector2i(1, 0)).first == GAME_OBJECT_TYPE::ROAD)
 			&& sceneGame->GetTileInfo(gridCoord).first == GAME_OBJECT_TYPE::NONE)
-			canBuild = true;
+			canClick = true;
 		else
-			canBuild = false;
+			canClick = false;
 
-		if (canBuild)
+		if (canClick)
 		{
 			rect.setFillColor({ 50,120,60,80 });
 			rect.setOutlineColor({ 20,80,30,180 });
@@ -84,7 +89,10 @@ void ObjectIndicater::Update(float timeDelta, float timeScale)
 		}
 		break;
 	}
+}
 
+void ObjectIndicater::Update(float timeDelta, float timeScale)
+{
 }
 
 void ObjectIndicater::Draw(sf::RenderWindow& window)

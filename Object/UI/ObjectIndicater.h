@@ -17,7 +17,7 @@ protected:
 	sf::Vector2i gridCoord;
 	sf::Vector2i preGridCoord;
 
-	bool canBuild = false;
+	bool canClick = false;
 
 public:
 	int clickMode = 0; //0:Nothing 1:build -1:destroy
@@ -30,11 +30,12 @@ public:
 	ObjectIndicater& operator=(ObjectIndicater&&) = delete;
 
 	void Init() override;
+	void PreUpdate(float timeDelta, float timeScale) override;
 	void Update(float timeDelta, float timeScale) override;
 	void Draw(sf::RenderWindow& window) override;
 	void SetPosition(const sf::Vector2f& position) override;
 
-	inline bool CanBuild() const { return canBuild; }
+	inline bool CanClick() const { return canClick; }
 
 	static std::shared_ptr<ObjectIndicater> Create(std::weak_ptr<Scene> scene);
 };

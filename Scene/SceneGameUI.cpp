@@ -217,21 +217,20 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 	if (!sceneGame->IsGameOver() && IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld())
 		&& !buttonMenu->GetBound().contains(GetMousePosWorld()))
 	{
-
-		switch (clickMode)
+		if (sceneGame->GetIndicater().lock()->CanClick())
 		{
-		case -1:
-			sceneGame->DeleteObjectTile(sceneGame->GetMouseGridCoord());
-			break;
-		case 0:
-			break;
-		case 1:
-			if (sceneGame->GetIndicater().lock()->CanBuild())
+			switch (clickMode)
 			{
+			case -1:
+				sceneGame->DeleteObjectTile(sceneGame->GetMouseGridCoord());
+				break;
+			case 0:
+				break;
+			case 1:
 				if (sceneGame->MoneyUse(rci.cost))
 					sceneGame->CreateObjectTile(rci, sceneGame->GetMouseGridCoord(), type);
+				break;
 			}
-			break;
 		}
 	}
 

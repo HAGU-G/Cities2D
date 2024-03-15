@@ -4,8 +4,9 @@
 #include "RCIManager.h"
 
 class ObjectTileMap;
-
-struct Frustum {
+class ObjectIndicater;
+struct Frustum
+{
 	sf::Vector3f nearPlane;
 	sf::Vector3f farPlane;
 	sf::Vector3f leftPlane;
@@ -33,7 +34,6 @@ protected:
 	std::deque<sf::Vector2i> deleteTileDeque;
 
 	sf::Vector2i mousePosGrid;
-	sf::Vector3f cameraPlane;
 	float preViewRotation = 0.f;
 
 	Frustum frustum;
@@ -48,6 +48,7 @@ protected:
 
 	GridInfo gridInfo; //[x][y]
 	std::shared_ptr<ObjectTileMap> groundTileMap;
+	std::shared_ptr<ObjectIndicater> indicater;
 	std::unordered_map<std::string, std::weak_ptr<ObjectUnit>> unitList;
 
 	float citizenTimer = 0.f;
@@ -65,6 +66,7 @@ protected:
 	bool isMiddleCity = false;
 
 public:
+	bool isLoading = false;
 	UnitOnGrid unitOnGrid; //[x][y]
 
 	explicit SceneGame(const std::string& name);
@@ -108,7 +110,8 @@ public:
 
 
 	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };
-	inline const std::weak_ptr<ObjectTileMap> GetTileMap() { return groundTileMap; }
+	inline std::weak_ptr<ObjectTileMap> GetTileMap() const { return groundTileMap; }
+	inline std::weak_ptr<ObjectIndicater> GetIndicater() const { return indicater; }
 	inline int GetMoney() const { return city.money; }
 	inline int GetProfit() const { return city.moneyProfit; }
 	inline int GetTex() const { return city.moneyTex; }

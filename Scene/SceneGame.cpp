@@ -32,6 +32,7 @@ void SceneGame::AddResource()
 	SFGM_TEXTURE.Add("resource/unit/Cat3-Run.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat3-Walk.png");
 	SFGM_TEXTURE.Add("resource/unit/Cat3-Laying.png");
+	SFGM_TEXTURE.Add("resource/ui/destroySprite.png");
 
 	//Music
 	SFGM_SOUNDBUFFER.Add("resource/music/LittleClose.wav");
@@ -93,8 +94,14 @@ void SceneGame::Init()
 	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
 
 	groundTileMap = ObjectTileMap::Create(This());
-
+	indicater = ObjectIndicater::Create(This());
 	zoomY = view.getSize().y;
+
+	sf::RenderWindow& window = GameManager::GetWindow();
+	frustum.nearPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x / 2, window.getSize().y), view));
+	frustum.farPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x / 2, 0), view));
+	frustum.leftPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(0, window.getSize().y / 2), view));
+	frustum.rightPlane = tool::To3D(window.mapPixelToCoords(sf::Vector2i(window.getSize().x, window.getSize().y / 2), view));
 }
 
 void SceneGame::PreUpdate(float timeDelta, float timeScale)
@@ -286,9 +293,18 @@ void SceneGame::Reset()
 	drawList.clear();
 
 	AddObject(groundTileMap);
+	AddObject(indicater);
+
+	//기본 타일 생성
+	if(!isLoading)
+	{
+		gridInfo[0][0].first = GAME_OBJECT_TYPE::ROAD;
+		gridInfo[0][0].second = TileRoad::Create(This(), { 0, 0 });
+		groundTileMap->UpdateTile({ 0, 0 });
+	}
+
 	Scene::Reset();
 
-	AddObject(std::make_shared<ObjectIndicater>(This(), GAME_OBJECT_TYPE::NONE))->Init();
 
 
 	city = CITY();
@@ -394,7 +410,9 @@ bool SceneGame::CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OB
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(0, 1));
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(1, 0));
 		groundTileMap->UpdateTile(gridCoord + sf::Vector2i(-1, 0));
-		void TileSort();
+
+		OrganizeGridInfo();
+		TileSort();
 		return true;
 	}
 
@@ -513,12 +531,14 @@ void SceneGame::SaveGame()
 
 void SceneGame::LoadGame()
 {
+	isLoading = true;
 	DataManager::LoadMayor(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::LoadTile(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	DataManager::LoadUnit(std::dynamic_pointer_cast<SceneGame, Scene>(This()));
 	std::dynamic_pointer_cast<SceneGameUI, Scene>(SceneManager::Get("SceneGameUI"))->Reset();
 	GameManager::lastGameName = city.mayorName;
 	void TileSort();
+	isLoading = false;
 }
 
 void SceneGame::LoadMayor(CITY city)
@@ -634,6 +654,8 @@ void SceneGame::TileSort()
 	{
 		for (auto& y : x.second)
 		{
+			if (y.second.second.expired())
+				continue;
 			plane = frustum.nearPlane - tool::To3D(view.getCenter());
 			building = tool::To3D(y.second.second.lock()->GetGridCenterPos()) - frustum.nearPlane;
 			float OnN = tool::OnPlane(plane, building);

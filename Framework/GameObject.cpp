@@ -82,12 +82,12 @@ void GameObject::SetScene(std::weak_ptr<Scene> scene)
 
 void GameObject::SetPositionX(float x)
 {
-	position.x = x;
+	SetPosition({ x,position.y });
 }
 
 void GameObject::SetPositionY(float y)
 {
-	position.y = y;
+	SetPosition({ position.x,y });
 }
 
 void GameObject::SetPosition(const sf::Vector2f& position)

@@ -202,6 +202,7 @@ void SceneMenu::Save()
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"));
 	sceneGame->SaveGame();
 	DataManager::SaveConfig();
+	LoadSaveList();
 }
 
 void SceneMenu::LoadSaveList()
@@ -266,6 +267,7 @@ void SceneMenu::LoadSaveList()
 void SceneMenu::Load(const std::string& str)
 {
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"));
+	sceneGame->isLoading = true;
 	sceneGame->Reset();
 	sceneGame->SetMayorName(str);
 	sceneGame->LoadGame();

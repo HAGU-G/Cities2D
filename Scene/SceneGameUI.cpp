@@ -7,6 +7,7 @@
 #include "ObjectUnit.h"
 #include "ObjectTile.h"
 #include "ObjectTileMap.h"
+#include "ObjectIndicater.h"
 
 SceneGameUI::SceneGameUI(const std::string& name)
 	:Scene(name)
@@ -225,7 +226,7 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 		case 0:
 			break;
 		case 1:
-			if (sceneGame->GetTileInfo(sceneGame->GetMouseGridCoord()).first == GAME_OBJECT_TYPE::NONE)
+			if (sceneGame->GetIndicater().lock()->CanBuild())
 			{
 				if (sceneGame->MoneyUse(rci.cost))
 					sceneGame->CreateObjectTile(rci, sceneGame->GetMouseGridCoord(), type);
@@ -309,7 +310,7 @@ void SceneGameUI::UnSeleteAll()
 	buttonC->UnSelect();
 	buttonI->UnSelect();
 	buttonDestroy->UnSelect();
-	clickMode = 0;
+	SetClickMode(0);
 	rci = RCI();
 	type = GAME_OBJECT_TYPE::NONE;
 }
@@ -338,6 +339,12 @@ void SceneGameUI::SetCityTimeString(const time_t& cityTime)
 		+ std::to_wstring(cT.tm_mon + 1) + L"¿ù "
 		+ std::to_wstring(cT.tm_mday) + L"ÀÏ "
 		+ hourZero + std::to_wstring(cT.tm_hour) + L"½Ã");
+}
+
+void SceneGameUI::SetClickMode(int value)
+{
+	clickMode = value;
+	sceneGame.lock()->GetIndicater().lock()->clickMode = clickMode;
 }
 
 
@@ -370,12 +377,12 @@ void SceneGameUI::Road()
 
 	if (!buttonRoad->IsSelete())
 	{
-		clickMode = 0;
+		SetClickMode(0);
 		type = GAME_OBJECT_TYPE::NONE;
 	}
 	else
 	{
-		clickMode = 1;
+		SetClickMode(1);
 
 		rci = RCI();
 		rci.cost = 10;
@@ -393,12 +400,12 @@ void SceneGameUI::R()
 
 	if (!buttonR->IsSelete())
 	{
-		clickMode = 0;
+		SetClickMode(0);
 		type = GAME_OBJECT_TYPE::NONE;
 	}
 	else
 	{
-		clickMode = 1;
+		SetClickMode(1);
 
 		rci = RCI();
 		rci.cost = 10;
@@ -418,12 +425,12 @@ void SceneGameUI::C()
 
 	if (!buttonC->IsSelete())
 	{
-		clickMode = 0;
+		SetClickMode(0);
 		type = GAME_OBJECT_TYPE::NONE;
 	}
 	else
 	{
-		clickMode = 1;
+		SetClickMode(1);
 
 		rci = RCI();
 		rci.cost = 20;
@@ -443,13 +450,13 @@ void SceneGameUI::I()
 
 	if (!buttonI->IsSelete())
 	{
-		clickMode = 0;
+		SetClickMode(0);
 		rci = RCI();
 		type = GAME_OBJECT_TYPE::NONE;
 	}
 	else
 	{
-		clickMode = 1;
+		SetClickMode(1);
 
 		rci = RCI();
 		rci.cost = 30;
@@ -470,11 +477,11 @@ void SceneGameUI::Destroy()
 
 	if (!buttonDestroy->IsSelete())
 	{
-		clickMode = 0;
+		SetClickMode(0);
 	}
 	else
 	{
-		clickMode = -1;
+		SetClickMode(-1);
 
 		rci = RCI();
 		type = GAME_OBJECT_TYPE::NONE;

@@ -10,7 +10,6 @@ class TileBuilding : public ObjectTile
 
 protected:
 	RCI rci;
-	sf::Sprite buildingSprite;
 	float soundTimer = 0.f;
 	float soundDuration = 0.f;
 

@@ -21,6 +21,7 @@ protected:
 	bool doToggle = false;
 	bool isOnlyDown = false;
 	bool isSelect = false;
+	bool canReact = true;
 
 public:
 	explicit ObjectButton(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::function<void()>& func = nullptr);
@@ -40,8 +41,9 @@ public:
 	void SetIcon(const std::string& path);
 	inline void SetFuntion(std::function<void()> func) { funcVoid_void = func; }
 	void SetDoToggle(bool value) { doToggle = value; }
-
 	inline void SetOnlyDown(bool value) { isOnlyDown = value; }
+	inline void SetCanReact(bool value) { canReact = value; }
+
 	void UnSelect();
 	void Select();
 	virtual void OnDown();

@@ -21,6 +21,7 @@ protected:
 	std::weak_ptr<SceneGame> sceneGame;
 	sf::Vector2i gridCoord;
 	sf::Vector2f gridCenterPos;
+	sf::Sprite buildingSprite;
 
 	std::unordered_map<ADDIREC, std::weak_ptr<ObjectTile>> adjacent; //인접 리스트 최대 4개
 	sf::VertexArray edge;
@@ -52,6 +53,7 @@ public:
 	inline const sf::IntRect& GetTextureRect() { return textureRect; }
 	inline static size_t GetTileCount() { return tileCount; }
 	inline std::unordered_map<ADDIREC, std::weak_ptr<ObjectTile>>& GetAdjacent() { return adjacent; }
+	inline const sf::Sprite& GetSprite() { return buildingSprite; }
 
 	//fromTile에서 목표 태그 찾기
 	static std::deque<sf::Vector2i> FindShortPath(

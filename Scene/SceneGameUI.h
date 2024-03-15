@@ -64,6 +64,7 @@ public:
 	void UpdateRCIGraph(int r, int c, int i); //Debug
 	void SetTempText(const std::string& str); //Debug
 	void SetCityTimeString(const time_t& cityTime);
+	void SetClickMode(int value);
 
 	void Play();
 	void Fast();

@@ -44,6 +44,7 @@
     <UseDebugLibraries>true</UseDebugLibraries>
     <PlatformToolset>v143</PlatformToolset>
     <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>false</WholeProgramOptimization>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -72,6 +73,11 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\</OutDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)bin\</OutDir>
+    <LinkIncremental>
+    </LinkIncremental>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -107,15 +113,15 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>.\Object\Unit;.\GameManager;.\Object\UI;.\Scene;.\Object\Tile;.\Framework;.\SFML-2.6.1\bin;.\SFML-2.6.1\include;.;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <AdditionalIncludeDirectories>.;.\SFML-2.6.1\include;.\Framework;.\GameManager;.\Scene;.\Object\Tile;.\Object\UI;.\Object\Unit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-network-d.lib;sfml-audio-d.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>sfml-graphics-d.lib;sfml-window-d.lib;sfml-system-d.lib;sfml-network-d.lib;sfml-audio-d.lib</AdditionalDependencies>
       <AdditionalLibraryDirectories>.\SFML-2.6.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
@@ -127,12 +133,18 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>.;.\SFML-2.6.1\include;.\Framework;.\GameManager;.\Scene;.\Object\Tile;.\Object\UI;.\Object\Unit;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PrecompiledHeader>Use</PrecompiledHeader>
+      <PrecompiledHeaderFile>pch.h</PrecompiledHeaderFile>
+      <LanguageStandard>stdcpp17</LanguageStandard>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>sfml-graphics.lib;sfml-window.lib;sfml-system.lib;sfml-network.lib;sfml-audio.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>.\SFML-2.6.1\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
@@ -159,6 +171,7 @@
     <ClCompile Include="Object\UI\ObjectIndicater.cpp" />
     <ClCompile Include="pch.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="Scene\SceneGame.cpp" />
     <ClCompile Include="Object\Tile\TileRoad.cpp" />

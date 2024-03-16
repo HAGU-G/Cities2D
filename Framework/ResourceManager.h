@@ -2,11 +2,7 @@
 #ifndef RESOURCEMANAGER_H
 #define RESOURCEMANAGER_H
 
-#define SFGM_TEXTURE (ResourceManager<sf::Texture>::Instance())
-#define SFGM_FONT (ResourceManager<sf::Font>::Instance())
-#define SFGM_SOUNDBUFFER (ResourceManager<sf::SoundBuffer>::Instance())
-#define SFGM_CSVFILE (ResourceManager<CsvFile>::Instance())
-#define SFGM_ANICLIP (ResourceManager<AnimationClip>::Instance())
+
 
 #include "Scene.h"
 #include "CsvFile.h"
@@ -25,7 +21,7 @@ private:
 		if (typeid(T).name() == typeid(sf::Texture).name())
 			unknownResource.loadFromFile("resource/Unknown.png");
 		else if (typeid(T).name() == typeid(sf::Font).name())
-			unknownResource.loadFromFile("resource/font/ROKAF Sans Medium.ttf");
+			unknownResource.loadFromFile("resource/font/ROKAF Sans Bold.ttf");
 		else if (typeid(T).name() == typeid(CsvFile).name())
 			unknownResource.loadFromFile("data/Unknown.csv");
 		//else if (typeid(T).name() == typeid(sf::SoundBuffer))
@@ -37,6 +33,8 @@ public:
 		resourcePathList.clear();
 		resourceObjectList.clear();
 	}
+	ResourceManager(ResourceManager&&) = delete;
+	ResourceManager(const ResourceManager&) = delete;
 
 	//리소스 경로 추가. 중복 제외.
 	bool Add(const std::string& path)
@@ -236,6 +234,10 @@ public:
 };
 
 
-
+#define SFGM_TEXTURE (ResourceManager<sf::Texture>::Instance())
+#define SFGM_FONT (ResourceManager<sf::Font>::Instance())
+#define SFGM_SOUNDBUFFER (ResourceManager<sf::SoundBuffer>::Instance())
+#define SFGM_CSVFILE (ResourceManager<CsvFile>::Instance())
+#define SFGM_ANICLIP (ResourceManager<AnimationClip>::Instance())
 
 #endif // !RESOURCEMANAGER_H

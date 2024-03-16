@@ -43,6 +43,8 @@ protected:
 	float tilt = 1.f;
 	float zoomY = 0.f;
 	float zoomRatio = 1.f;
+	bool isCameraFixed = false;
+	bool isCameraMoved = false;
 
 	sf::Vector2f gridSize = { 50.f, 50.f };
 
@@ -90,6 +92,7 @@ public:
 	bool CreateObjectTile(RCI rci, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type);
 	std::shared_ptr<ObjectUnit> AddUnit(const std::shared_ptr<ObjectUnit>& unit);
 
+	inline void SetCameraFixed(bool value) { isCameraFixed = value; }
 	void UpdateCityTime(float timeDelta, float TimeScale);
 	inline const time_t& GetCityTime() const { return city.cityTime; }
 	void MoneyProfit(unsigned int value);
@@ -126,11 +129,12 @@ public:
 	void LoadGame();
 	void LoadMayor(CITY city);
 	bool LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
-		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration);
+		const std::list<GAME_OBJECT_TAG>& tagList, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration);
 
 	void GameOver();
 	inline bool IsGameOver() const { return gameOver; }
 
+	void CameraInput(float timeDelta);
 	void OnCameraMove();
 	inline const Frustum& GetFrustum() const { return frustum; }
 	void TileSort();

@@ -118,41 +118,7 @@ bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 			}
 			it++;
 		}
-		//TextureRect
-		sf::IntRect rect;
-		divide = 0;
-		tempStr = "";
-		it = row[3].begin();
-		while (it != row[3].end())
-		{
-			if (*it == '/')
-			{
-				switch (divide)
-				{
-				case 0:
-					rect.left = std::stoi(tempStr);
-					break;
-				case 1:
-					rect.top = std::stoi(tempStr);
-					break;
-				case 2:
-					rect.width = std::stoi(tempStr);
-					break;
-				case 3:
-					rect.height = std::stoi(tempStr);
-					break;
-				default:
-					break;
-				}
-				tempStr = "";
-				divide++;
-			}
-			else
-			{
-				tempStr += *it;
-			}
-			it++;
-		}
+
 		//RCI
 		RCI rci;
 		divide = 0;
@@ -188,11 +154,51 @@ bool DataManager::LoadTile(const std::shared_ptr<SceneGame>& sceneGame)
 			}
 			it++;
 		}
+
+		//TextureRect
+		divide = 0;
+		tempStr = "";
+		it = row[3].begin();
+		while (it != row[3].end())
+		{
+			if (*it == '/')
+			{
+				switch (divide)
+				{
+				case 0:
+					rci.textureRect.left = std::stoi(tempStr);
+					break;
+				case 1:
+					rci.textureRect.top = std::stoi(tempStr);
+					break;
+				case 2:
+					rci.textureRect.width = std::stoi(tempStr);
+					break;
+				case 3:
+					rci.textureRect.height = std::stoi(tempStr);
+					break;
+				default:
+					break;
+				}
+				tempStr = "";
+				divide++;
+			}
+			else
+			{
+				tempStr += *it;
+			}
+			it++;
+		}
+
+		//Sound
 		float soundTimer = std::stoi(row[5]);
 		float soundDuration = std::stoi(row[6]);
+
+		//texturePath
 		rci.texturePath = row[7];
+
 		//오브젝트 생성
-		if (!sceneGame->LoadObjectTile(rci, grid, tagList, rect, type, soundTimer, soundDuration))
+		if (!sceneGame->LoadObjectTile(rci, grid, tagList, type, soundTimer, soundDuration))
 			return false;
 	}
 
@@ -234,17 +240,19 @@ bool DataManager::SaveTile(const std::shared_ptr<SceneGame>& sceneGame)
 			}
 			str += comma;
 
-			const sf::IntRect& rect = tile->GetTextureRect();
-			str += to_string(rect.left) + slash + to_string(rect.top) + slash
-				+ to_string(rect.width) + slash + to_string(rect.height) + slash + comma;
+
 
 			if (y.second.first == GAME_OBJECT_TYPE::ROAD)
 			{
 				str = to_string((int)y.second.first) + str;
-				str += "0/0/0/0/,0,0,N";
+				str += "0/0/0/0/,0/0/0/0/,0,0,N";
 			}
 			else if (y.second.first >= GAME_OBJECT_TYPE::BUILDING && y.second.first < GAME_OBJECT_TYPE::BUILDING_END)
 			{
+				const sf::IntRect& rect = C_TILE_BUILDING(tile)->GetTextureRect();
+				str += to_string(rect.left) + slash + to_string(rect.top) + slash
+					+ to_string(rect.width) + slash + to_string(rect.height) + slash + comma;
+
 				str = std::to_string((int)y.second.first) + str;
 				std::shared_ptr<TileBuilding> building = std::dynamic_pointer_cast<TileBuilding, ObjectTile>(tile);
 

@@ -164,6 +164,7 @@ void SceneGameUI::Init()
 	buttonCityTime = ButtonNameTag::Create(This(), { 206.f, firstFloarY }, "grid", "0");
 	buttonCityTime->SetOrigin(ORIGIN::LM);
 	buttonCityTime->SetWidth(400);
+	buttonCityTime->SetCanReact(false);
 
 	buttonGrid = ButtonNameTag::Create(This(), { view.getSize().x - 685.f, firstFloarY }, "grid", "0");
 	buttonGrid->SetOrigin(ORIGIN::RM);
@@ -172,10 +173,12 @@ void SceneGameUI::Init()
 	buttonCitizen = ButtonNameTag::Create(This(), { view.getSize().x - 345.f, firstFloarY }, "citizen", "0");
 	buttonCitizen->SetOrigin(ORIGIN::RM);
 	buttonCitizen->SetWidth(300);
+	buttonCitizen->SetCanReact(false);
 
 	buttonMoney = ButtonNameTag::Create(This(), { view.getSize().x - 5.f, firstFloarY }, "money", "0");
 	buttonMoney->SetOrigin(ORIGIN::RM);
 	buttonMoney->SetWidth(300);
+	buttonMoney->SetCanReact(false);
 	textProfit.setFillColor(sf::Color::Green);
 	textProfit.setCharacterSize(18);
 	textProfit.setFont(SFGM_FONT.Get("resource/font/ROKAF Sans Medium.ttf"));
@@ -236,40 +239,65 @@ void SceneGameUI::Reset()
 	textProfit.setString(to_string(0));
 	SetMayorName();
 
-
-
-
 }
 void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 {
 	std::shared_ptr<SceneGame> sceneGame = this->sceneGame.lock();
 
-
-
-	if (!sceneGame->IsGameOver() && IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld())
-		&& !buttonMenu->GetBound().contains(GetMousePosWorld()))
+	if (sceneGame->IsGameOver())
 	{
-		if (sceneGame->GetIndicater().lock()->CanClick())
+		buttonPlay->SetCanReact(false);
+		buttonPause->SetCanReact(false);
+		button4x->SetCanReact(false);
+		buttonPlay->UnSelect();
+		button4x->UnSelect();
+		buttonPause->Select();
+	}
+	else
+	{
+		buttonPlay->SetCanReact(true);
+		buttonPause->SetCanReact(true);
+		button4x->SetCanReact(true);
+	}
+
+	if (buttonRCI->IsInputMode())
+	{
+		sceneGame->SetCameraFixed(true);
+
+		if (IOManager::IsKeyUp(sf::Mouse::Left) || IOManager::IsKeyUp(sf::Mouse::Right))
+			IOManager::SetDoInputText(false);
+	}
+	else
+	{
+		sceneGame->SetCameraFixed(false);
+
+		if (!sceneGame->IsGameOver() && IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld())
+			&& !buttonMenu->GetBound().contains(GetMousePosWorld()))
 		{
-			switch (clickMode)
+			if (sceneGame->GetIndicater().lock()->CanClick())
 			{
-			case -1:
-				sceneGame->DeleteObjectTile(sceneGame->GetMouseGridCoord());
-				break;
-			case 0:
-				break;
-			case 1:
-				if (sceneGame->MoneyUse(rci.cost))
-					sceneGame->CreateObjectTile(rci, sceneGame->GetMouseGridCoord(), type);
-				break;
+				switch (clickMode)
+				{
+				case -1:
+					sceneGame->DeleteObjectTile(sceneGame->GetMouseGridCoord());
+					break;
+				case 0:
+					break;
+				case 1:
+					if (sceneGame->MoneyUse(rci.cost))
+						sceneGame->CreateObjectTile(rci, sceneGame->GetMouseGridCoord(), type);
+					break;
+				}
 			}
+		}
+
+		if (!sceneGame->IsGameOver() && IOManager::IsKeyDown(sf::Mouse::Right))
+		{
+			UnSeleteAll();
 		}
 	}
 
-	if (!sceneGame->IsGameOver() && IOManager::IsKeyDown(sf::Mouse::Right))
-	{
-			UnSeleteAll();
-	}
+
 
 	Scene::PreUpdate(timeDelta, timeScale);
 }
@@ -307,6 +335,7 @@ void SceneGameUI::Update(float timeDelta, float timeScale)
 
 void SceneGameUI::Menu()
 {
+	sceneGame.lock()->SetCameraFixed(true);
 	buttonPause->Select();
 	Pause();
 	SceneManager::Wait("SceneGameUI");
@@ -317,7 +346,12 @@ void SceneGameUI::Menu()
 void SceneGameUI::SetMayorName()
 {
 	if (buttonRCI->IsInputMode())
-		sceneGame.lock()->SetMayorName(buttonRCI->GetString());
+	{
+		if (buttonRCI->GetString() == "")
+			buttonRCI->SetString(sceneGame.lock()->GetCityInfo().mayorName);
+		else
+			sceneGame.lock()->SetMayorName(buttonRCI->GetString());
+	}
 	else
 	{
 		buttonRCI->SetString(sceneGame.lock()->GetCityInfo().mayorName);
@@ -390,7 +424,7 @@ void SceneGameUI::LoadBuildingButton()
 		if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::ROAD - (int)GAME_OBJECT_TYPE::TILE)
 		{
 			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
-				{ view.getCenter().x + (buttonRoadCount-1) * 69.f, underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
+				{ view.getCenter().x + (buttonRoadCount - 1) * 69.f, underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
 			button.lock()->SetFuntion(
 				[button, this, row = i]()
 				{
@@ -424,6 +458,7 @@ void SceneGameUI::LoadBuildingButton()
 			button.lock()->SetOrigin(ORIGIN::BC);
 			buttonRoadCount++;
 			roadList.push_back(std::make_pair(button.lock(), rciInfo));
+			button.lock()->SetActive(false);
 		}
 		////////주거 버튼
 		else if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::HOME - (int)GAME_OBJECT_TYPE::TILE)
@@ -463,12 +498,13 @@ void SceneGameUI::LoadBuildingButton()
 			button.lock()->SetOrigin(ORIGIN::BC);
 			buttonRCount++;
 			rList.push_back(std::make_pair(button.lock(), rciInfo));
+			button.lock()->SetActive(false);
 		}
 		////////상업 버튼
 		else if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::SHOP - (int)GAME_OBJECT_TYPE::TILE)
 		{
 			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
-				{ view.getCenter().x + (buttonCCount+1) * 69.f, underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
+				{ view.getCenter().x + (buttonCCount + 1) * 69.f, underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
 			button.lock()->SetFuntion(
 				[button, this, row = i]()
 				{
@@ -502,12 +538,13 @@ void SceneGameUI::LoadBuildingButton()
 			button.lock()->SetOrigin(ORIGIN::BC);
 			buttonCCount++;
 			cList.push_back(std::make_pair(button.lock(), rciInfo));
+			button.lock()->SetActive(false);
 		}
 		////////산업 버튼
 		else if (stoi(rciRow[0]) == (int)GAME_OBJECT_TYPE::WORK_PLACE - (int)GAME_OBJECT_TYPE::TILE)
 		{
 			std::weak_ptr<ObjectButton> button = ObjectButton::Create(This(),
-				{ view.getCenter().x + (buttonICount+2) * 69.f , underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
+				{ view.getCenter().x + (buttonICount + 2) * 69.f , underBarBack.getGlobalBounds().top - 5.f }, rciRow[11]);
 			button.lock()->SetFuntion(
 				[button, this, row = i]()
 				{
@@ -541,6 +578,7 @@ void SceneGameUI::LoadBuildingButton()
 			button.lock()->SetOrigin(ORIGIN::BC);
 			buttonICount++;
 			iList.push_back(std::make_pair(button.lock(), rciInfo));
+			button.lock()->SetActive(false);
 		}
 	}
 }
@@ -600,7 +638,7 @@ void SceneGameUI::Fast()
 
 void SceneGameUI::Road()
 {
-	
+
 	buttonR->UnSelect();
 	for (auto& pair : rList)
 	{

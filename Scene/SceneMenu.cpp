@@ -120,6 +120,7 @@ void SceneMenu::PreUpdate(float timeDelta, float timeScale)
 		for (auto& ptr : saveList)
 		{
 			ptr->SetCanReact(false);
+			ptr->UnSelect();
 		}
 	}
 
@@ -183,10 +184,11 @@ void SceneMenu::Release()
 void SceneMenu::Continue()
 {
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"));
+	sceneGame->isLoading = true;
 	sceneGame->Reset();
 	sceneGame->SetMayorName(GameManager::lastGameName);
 	sceneGame->LoadGame();
-	New();
+	New();	
 }
 
 void SceneMenu::GameContinue()
@@ -216,6 +218,8 @@ void SceneMenu::Option()
 
 void SceneMenu::Save()
 {
+	if (!std::filesystem::exists("./data/save"))
+		std::filesystem::create_directory("./data/save");
 	std::shared_ptr<SceneGame> sceneGame = std::dynamic_pointer_cast<SceneGame, Scene>(SceneManager::Get("SceneGame"));
 	sceneGame->SaveGame();
 	DataManager::SaveConfig();
@@ -226,6 +230,11 @@ void SceneMenu::LoadSaveList()
 {
 	saveList.clear();
 	float buttonPosY = 85.f;
+	if (!std::filesystem::exists("./data/save"))
+	{
+		lastGame->SetActive(false);
+		return;
+	}
 	std::filesystem::directory_iterator dIt("./data/save/");
 	std::unordered_map<std::string, int> fileList;
 

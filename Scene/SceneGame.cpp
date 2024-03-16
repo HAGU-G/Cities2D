@@ -110,94 +110,13 @@ void SceneGame::Init()
 
 void SceneGame::PreUpdate(float timeDelta, float timeScale)
 {
-	bool onCameraMove = false;
-
-	if (IOManager::IsKeyPress(sf::Keyboard::Q))
-	{
-		view.rotate(45.f * timeDelta);
-		onCameraMove = true;
-	}
-	if (IOManager::IsKeyPress(sf::Keyboard::E))
-	{
-		view.rotate(-45.f * timeDelta);
-		onCameraMove = true;
-	}
-
-
-
-	if (IOManager::IsKeyPress(sf::Keyboard::W))
-	{
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, -view.getSize().y * 0.2f * timeDelta));
-		onCameraMove = true;
-	}
-	if (IOManager::IsKeyPress(sf::Keyboard::S))
-	{
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, view.getSize().y * 0.2f * timeDelta));
-		onCameraMove = true;
-	}
-	if (IOManager::IsKeyPress(sf::Keyboard::A))
-	{
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(-view.getSize().y * 0.2f * timeDelta, 0.f));
-		onCameraMove = true;
-	}
-	if (IOManager::IsKeyPress(sf::Keyboard::D))
-	{
-		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(view.getSize().y * 0.2f * timeDelta, 0.f));
-		onCameraMove = true;
-	}
-
-	if (IOManager::GetWheelDelta() > 0)
-	{
-		view.zoom(1.f / 1.05f);
-		zoomY *= 1.f / 1.05f;
-		zoomRatio *= 1.f / 1.05f;
-		onCameraMove = true;
-		SetBGMSync();
-	}
-	else if (IOManager::GetWheelDelta() < 0)
-	{
-		view.zoom(1.05f);
-		zoomY *= 1.05f;
-		zoomRatio *= 1.05f;
-		onCameraMove = true;
-		SetBGMSync();
-	}
-
-	if (IOManager::IsKeyPress(sf::Mouse::Middle))
-	{
-		if (!isTilt)
-		{
-			isTilt = true;
-			startTilt = GameManager::GetMousePosWindow().y;
-		}
-		else
-		{
-			tilt += (startTilt - GameManager::GetMousePosWindow().y) * 0.005;
-			tilt = std::max(1.f, tilt);
-			view.setSize(view.getSize().x, zoomY * tilt);
-			startTilt = GameManager::GetMousePosWindow().y;
-			onCameraMove = true;
-		}
-	}
-	if (IOManager::IsKeyUp(sf::Mouse::Middle))
-	{
-		isTilt = false;
-	}
-	if (IOManager::IsKeyDown(sf::Keyboard::Num0))
-	{
-		view = resetView;
-		tilt = 1.f;
-		onCameraMove = true;
-	}
+	isCameraMoved = false;
+	CameraInput(timeDelta);
 
 	mousePosWorld = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), view);
 	SetMousePosGrid();
 
-	if (gameOver)
-	{
-		//gameOver일때 보여줄 화면
-	}
-	else
+	if (!gameOver)
 	{
 		UpdateCityTime(timeDelta, timeScale);
 		if (city.money < 0)
@@ -210,7 +129,7 @@ void SceneGame::PreUpdate(float timeDelta, float timeScale)
 		citizenTimer = 0.f;
 		SceneGame::AddUnit(ObjectUnit::Create(This(), GAME_OBJECT_TYPE::CITIZEN));
 	}
-	if (onCameraMove)
+	if (isCameraMoved)
 		OnCameraMove();
 	Scene::PreUpdate(timeDelta, timeScale);
 }
@@ -289,7 +208,8 @@ void SceneGame::Draw(sf::RenderWindow& window)
 
 void SceneGame::Reset()
 {
-	gameOver = false;
+
+
 	gridInfo.clear();
 	unitOnGrid.clear();
 
@@ -300,11 +220,13 @@ void SceneGame::Reset()
 	AddObject(indicater);
 
 	//기본 타일 생성
-	if(!isLoading)
+	if (!isLoading)
 	{
 		gridInfo[0][0].first = GAME_OBJECT_TYPE::ROAD;
 		gridInfo[0][0].second = TileRoad::Create(This(), { 0, 0 });
 		groundTileMap->UpdateTile({ 0, 0 });
+		ChangeBGM();
+		gameOver = false;
 	}
 
 	Scene::Reset();
@@ -336,7 +258,16 @@ void SceneGame::Release()
 
 void SceneGame::Enter()
 {
-	IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav");
+	if (ObjectUnit::GetUnitCount() >= 100)
+	{
+		isMiddleCity = true;
+		IOManager::BGMSyncPlay("resource/music/MiddleClose.wav", "resource/music/MiddleFar.wav", true, true);
+	}
+	else if (ObjectUnit::GetUnitCount() <= 50)
+	{
+		isMiddleCity = false;
+		IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav", true, true);
+	}
 	SetBGMSync();
 }
 
@@ -542,6 +473,8 @@ void SceneGame::LoadGame()
 	std::dynamic_pointer_cast<SceneGameUI, Scene>(SceneManager::Get("SceneGameUI"))->Reset();
 	GameManager::lastGameName = city.mayorName;
 	void TileSort();
+	ChangeBGM();
+	gameOver = false;
 	isLoading = false;
 }
 
@@ -551,18 +484,18 @@ void SceneGame::LoadMayor(CITY city)
 }
 
 bool SceneGame::LoadObjectTile(const RCI& rci, const sf::Vector2i& gridCoord,
-	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration)
+	const std::list<GAME_OBJECT_TAG>& tagList, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration)
 {
 	if (gridInfo[gridCoord.x][gridCoord.y].first == GAME_OBJECT_TYPE::NONE)
 	{
 		gridInfo[gridCoord.x][gridCoord.y].first = type;
 		if (type == GAME_OBJECT_TYPE::ROAD)
 		{
-			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord, tagList, rect);
+			gridInfo[gridCoord.x][gridCoord.y].second = TileRoad::Create(This(), gridCoord, tagList);
 		}
 		else if (type >= GAME_OBJECT_TYPE::BUILDING && type < GAME_OBJECT_TYPE::BUILDING_END)
 		{
-			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord, tagList, rect, type, soundTimer, soundDuration);
+			gridInfo[gridCoord.x][gridCoord.y].second = TileBuilding::Create(rci, This(), gridCoord, tagList, type, soundTimer, soundDuration);
 		}
 		else
 		{
@@ -585,6 +518,90 @@ void SceneGame::GameOver()
 	gameOver = true;
 	timeScale = 0.f;
 	IOManager::BGMSyncPlay("resource/music/NightClose.wav", "resource/music/NightFar.wav");
+}
+
+void SceneGame::CameraInput(float timeDelta)
+{
+	if (isCameraFixed)
+		return;
+
+	if (IOManager::IsKeyPress(sf::Keyboard::Q))
+	{
+		view.rotate(90.f * timeDelta);
+		isCameraMoved = true;
+	}
+	if (IOManager::IsKeyPress(sf::Keyboard::E))
+	{
+		view.rotate(-90.f * timeDelta);
+		isCameraMoved = true;
+	}
+
+
+
+	if (IOManager::IsKeyPress(sf::Keyboard::W))
+	{
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, -zoomY * 0.5f * timeDelta));
+		isCameraMoved = true;
+	}
+	if (IOManager::IsKeyPress(sf::Keyboard::S))
+	{
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(0.f, zoomY * 0.5f * timeDelta));
+		isCameraMoved = true;
+	}
+	if (IOManager::IsKeyPress(sf::Keyboard::A))
+	{
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(-zoomY * 0.5f * timeDelta, 0.f));
+		isCameraMoved = true;
+	}
+	if (IOManager::IsKeyPress(sf::Keyboard::D))
+	{
+		view.move(sf::Transform().rotate(view.getRotation()) * sf::Vector2f(zoomY * 0.5f * timeDelta, 0.f));
+		isCameraMoved = true;
+	}
+
+	if (IOManager::GetWheelDelta() > 0)
+	{
+		view.zoom(1.f / 1.05f);
+		zoomY *= 1.f / 1.05f;
+		zoomRatio *= 1.f / 1.05f;
+		isCameraMoved = true;
+		SetBGMSync();
+	}
+	else if (IOManager::GetWheelDelta() < 0)
+	{
+		view.zoom(1.05f);
+		zoomY *= 1.05f;
+		zoomRatio *= 1.05f;
+		isCameraMoved = true;
+		SetBGMSync();
+	}
+
+	if (IOManager::IsKeyPress(sf::Mouse::Middle))
+	{
+		if (!isTilt)
+		{
+			isTilt = true;
+			startTilt = GameManager::GetMousePosWindow().y;
+		}
+		else
+		{
+			tilt += (startTilt - GameManager::GetMousePosWindow().y) * 0.005;
+			tilt = std::max(1.f, tilt);
+			view.setSize(view.getSize().x, zoomY * tilt);
+			startTilt = GameManager::GetMousePosWindow().y;
+			isCameraMoved = true;
+		}
+	}
+	if (IOManager::IsKeyUp(sf::Mouse::Middle))
+	{
+		isTilt = false;
+	}
+	if (IOManager::IsKeyDown(sf::Keyboard::Num0))
+	{
+		view = resetView;
+		tilt = 1.f;
+		isCameraMoved = true;
+	}
 }
 
 void SceneGame::OnCameraMove()
@@ -662,49 +679,58 @@ void SceneGame::TileSort()
 		{
 			if (y.second.second.expired())
 				continue;
+
+			if (y.second.first == GAME_OBJECT_TYPE::ROAD)
+			{
+				y.second.second.lock()->SetShow(false);
+				continue;
+			}
+
+			auto thisTile = y.second.second.lock();
+
 			plane = frustum.nearPlane - tool::To3D(view.getCenter());
-			building = tool::To3D(y.second.second.lock()->GetGridCenterPos()) - frustum.nearPlane;
+			building = tool::To3D(thisTile->GetGridCenterPos()) - frustum.nearPlane;
 			float OnN = tool::OnPlane(plane, building);
 			if (OnN > 0.f)
 			{
-				y.second.second.lock()->SetDrawDeep(0.f);
-				y.second.second.lock()->SetShow(false);
+				thisTile->SetDrawDeep(0.f);
+				thisTile->SetShow(false);
 				continue;
 			}
 
 			plane = frustum.farPlane - tool::To3D(view.getCenter());
-			building = tool::To3D(y.second.second.lock()->GetGridCenterPos()) - frustum.farPlane;
+			building = tool::To3D(thisTile->GetGridCenterPos()) - frustum.farPlane;
 			float OnF = tool::OnPlane(plane, building);
 			if (OnF > 0.f)
 			{
-				y.second.second.lock()->SetDrawDeep(0.f);
-				y.second.second.lock()->SetShow(false);
+				thisTile->SetDrawDeep(0.f);
+				thisTile->SetShow(false);
 				continue;
 			}
 
 			plane = frustum.leftPlane - tool::To3D(view.getCenter());
-			building = tool::To3D(y.second.second.lock()->GetGridCenterPos()) - frustum.leftPlane;
+			building = tool::To3D(thisTile->GetGridCenterPos()) - frustum.leftPlane;
 			float OnL = tool::OnPlane(plane, building);
 			if (OnL > 0.f)
 			{
-				y.second.second.lock()->SetDrawDeep(0.f);
-				y.second.second.lock()->SetShow(false);
+				thisTile->SetDrawDeep(0.f);
+				thisTile->SetShow(false);
 				continue;
 			}
 
 			plane = frustum.rightPlane - tool::To3D(view.getCenter());
-			building = tool::To3D(y.second.second.lock()->GetGridCenterPos()) - frustum.rightPlane;
+			building = tool::To3D(thisTile->GetGridCenterPos()) - frustum.rightPlane;
 			float OnR = tool::OnPlane(plane, building);
 			if (OnR > 0.f)
 			{
-				y.second.second.lock()->SetDrawDeep(0.f);
-				y.second.second.lock()->SetShow(false);
+				thisTile->SetDrawDeep(0.f);
+				thisTile->SetShow(false);
 				continue;
 			}
 			else
 			{
-				y.second.second.lock()->SetDrawDeep(-OnN);
-				y.second.second.lock()->SetShow(true);
+				thisTile->SetDrawDeep(-OnN);
+				thisTile->SetShow(true);
 			}
 		}
 	}
@@ -802,12 +828,12 @@ void SceneGame::SetBGMSync()
 
 void SceneGame::ChangeBGM()
 {
-	if (!isMiddleCity && ObjectUnit::GetUnitCount() >= 100)
+	if ((gameOver || !isMiddleCity) && ObjectUnit::GetUnitCount() >= 100)
 	{
 		isMiddleCity = true;
 		IOManager::BGMSyncPlay("resource/music/MiddleClose.wav", "resource/music/MiddleFar.wav", true, true);
 	}
-	else if (isMiddleCity && ObjectUnit::GetUnitCount() <= 50)
+	else if ((gameOver || isMiddleCity) && ObjectUnit::GetUnitCount() <= 50)
 	{
 		isMiddleCity = false;
 		IOManager::BGMSyncPlay("resource/music/LittleClose.wav", "resource/music/LittleFar.wav", true, true);

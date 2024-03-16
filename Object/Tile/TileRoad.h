@@ -16,7 +16,7 @@ public:
 
 	static std::shared_ptr<TileRoad> Create(std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord);
 	static std::shared_ptr<TileRoad> Create(std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord,
-		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect);
+		const std::list<GAME_OBJECT_TAG>& tagList);
 
 	void UpdateAdjacent() override;
 };

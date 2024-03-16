@@ -30,12 +30,13 @@ public:
 	void SetPosition(const sf::Vector2f& position) override;
 	static std::shared_ptr<TileBuilding> Create(RCI rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE type);
 	static std::shared_ptr<TileBuilding> Create(const RCI& rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord,
-		const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration);
+		const std::list<GAME_OBJECT_TAG>& tagList, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration);
 
 	void UpdateAdjacent() override;
 
 	inline const RCI& GetRCI() { return rci; }
 	inline const sf::Sprite& GetSprite() const { return buildingSprite; }
+	inline const sf::IntRect& GetTextureRect() { return rci.textureRect; }
 
 	bool CanUseR(std::weak_ptr<ObjectUnit> citizen);
 	void UseR(std::weak_ptr<ObjectUnit> citizen);

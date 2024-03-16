@@ -71,6 +71,7 @@ void IOManager::KeyEventUpdate(const sf::Event& event)
 						inputText.pop_back();
 					break;
 				case 0x000D:
+				case 0x001B:
 					doInputText = false;
 					break;
 				}
@@ -261,7 +262,7 @@ float IOManager::bgm1Volume = 100.f;
 float IOManager::bgm2Volume = 100.f;
 int IOManager::mainChannel = 0;
 bool IOManager::isCrossFading = false;
-float IOManager::fadeDuration = 10.f;
+float IOManager::fadeDuration = 5.f;
 
 void IOManager::SoundInit(int sfxCount)
 {

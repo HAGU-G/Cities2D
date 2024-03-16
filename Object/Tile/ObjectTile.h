@@ -25,7 +25,6 @@ protected:
 
 	std::unordered_map<ADDIREC, std::weak_ptr<ObjectTile>> adjacent; //인접 리스트 최대 4개
 	sf::VertexArray edge;
-	sf::IntRect textureRect;
 
 	explicit ObjectTile(std::weak_ptr<Scene> scene,const sf::Vector2i& gridCoord, GAME_OBJECT_TYPE objectType);
 public:
@@ -41,7 +40,6 @@ public:
 	void Release() override;
 
 	void SetPosition(const sf::Vector2f& position) override;
-	inline void SetTextureRect(const sf::IntRect rect) { textureRect = rect; }
 	bool AddAdjacent(ADDIREC ad, std::weak_ptr<ObjectTile> ptr);
 	virtual void UpdateAdjacent() = 0;
 	void UpdateEdge(ADDIREC ad);
@@ -50,7 +48,6 @@ public:
 
 	inline const sf::Vector2i& GetGridCoord() { return gridCoord; }
 	inline const sf::Vector2f& GetGridCenterPos() { return gridCenterPos; }
-	inline const sf::IntRect& GetTextureRect() { return textureRect; }
 	inline static size_t GetTileCount() { return tileCount; }
 	inline std::unordered_map<ADDIREC, std::weak_ptr<ObjectTile>>& GetAdjacent() { return adjacent; }
 	inline const sf::Sprite& GetSprite() { return buildingSprite; }

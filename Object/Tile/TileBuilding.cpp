@@ -134,14 +134,13 @@ std::shared_ptr<TileBuilding> TileBuilding::Create(RCI rci, std::weak_ptr<Scene>
 }
 
 std::shared_ptr<TileBuilding> TileBuilding::Create(const RCI& rci, std::weak_ptr<Scene> scene, const sf::Vector2i& gridCoord,
-	const std::list<GAME_OBJECT_TAG>& tagList, const sf::IntRect& rect, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration)
+	const std::list<GAME_OBJECT_TAG>& tagList, GAME_OBJECT_TYPE type, float soundTimer, float soundDuration)
 {
 	std::shared_ptr<TileBuilding> tileBuilding = Create(rci, scene, gridCoord, type);
 	for (auto tag : tagList)
 	{
 		tileBuilding->AddTag(tag);
 	}
-	tileBuilding->SetTextureRect(rect);
 	tileBuilding->soundTimer = soundTimer;
 	tileBuilding->soundDuration = soundDuration;
 

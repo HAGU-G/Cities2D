@@ -40,6 +40,7 @@ void ButtonNameTag::Update(float timeDelta, float timeScale)
 		{
 			if (funcVoid_void != nullptr)
 				funcVoid_void();
+			IOManager::ClearInputText();
 			isInputMode = false;
 			UnSelect();
 		}

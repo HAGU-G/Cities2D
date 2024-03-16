@@ -31,7 +31,7 @@ public:
 	void SetWidth(float width);
 
 	inline void SetIsTextField(bool value) { isTextField = value; }
-	void SetInputMode(bool value, size_t textSize = 6);
+	void SetInputMode(bool value, size_t textSize = 12);
 
 	inline std::string GetString() { return text.getString(); }
 	inline bool IsInputMode() const { return isInputMode; }

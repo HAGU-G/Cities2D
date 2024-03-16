@@ -77,9 +77,9 @@ public:
 
 	const RCI& GetRCI() const { return rci; }
 
+	void Pause();
 	void Play();
 	void Fast();
-	void Pause();
 	void Road();
 	void R();
 	void C();

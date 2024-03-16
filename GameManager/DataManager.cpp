@@ -489,23 +489,13 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						unit->startingPoint = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
-					}
-				case 4:
-					if (tempStr != "N")
-						tempVi.x = std::stoi(tempStr);
-					break;
-				case 5:
-					if (tempStr != "N")
-					{
-						tempVi.y = std::stoi(tempStr);
 						unit->destination = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 					}
 					break;
-				case 6:
+				case 4:
 					tempVi.x = std::stoi(tempStr);
 					break;
-				case 7:
+				case 5:
 					tempVi.y = std::stoi(tempStr);
 					unit->preGridCoord = tempVi;
 					break;
@@ -545,10 +535,11 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		unit->gameObjectTagList = tagList;
 
 		//shop µ·
-		unit->needShopTimer = std::stof(row[16]);
-		unit->needShopInterval = std::stof(row[17]);
-		unit->needShop = std::stoi(row[18]);
-		unit->money = std::stoi(row[19]);
+		unit->needShopTimer = stof(row[16]);
+		unit->needShopInterval = stof(row[17]);
+		unit->needShop = stoi(row[18]);
+		unit->money = stoi(row[19]);
+		unit->maxPatience = stoi(row[20]);
 
 	}
 
@@ -565,7 +556,7 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 	if (!outFile.is_open())
 		return false;
 
-	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK/SHOP_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/HAS_HOME/HAS_WORK_PLACE/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY" << std::endl;
+	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK/SHOP_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/HAS_HOME/HAS_WORK_PLACE/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY,MAXPATIENCE" << std::endl;
 	
 	const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& unitList = sceneGame->GetUnitList();
 	if (unitList.empty())
@@ -669,14 +660,6 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		{
 			str += "N/N/";
 		}
-		if (!unit->startingPoint.expired())
-		{
-			str += to_string(unit->startingPoint.lock()->GetGridCoord().x) + slash + to_string(unit->startingPoint.lock()->GetGridCoord().y) + slash;
-		}
-		else
-		{
-			str += "N/N/";
-		}
 		if (!unit->destination.expired())
 		{
 			str += to_string(unit->destination.lock()->GetGridCoord().x) + slash + to_string(unit->destination.lock()->GetGridCoord().y) + slash;
@@ -709,8 +692,8 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		str += to_string(unit->needShopTimer) + comma;
 		str += to_string(unit->needShopInterval) + comma;
 		str += to_string(unit->needShop) + comma;
-		str += to_string(unit->money);
-
+		str += to_string(unit->money) + comma;
+		str += to_string(unit->maxPatience);
 		outFile << str << std::endl;
 
 	}

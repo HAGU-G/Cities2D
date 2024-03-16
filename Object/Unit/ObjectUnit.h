@@ -14,9 +14,9 @@ private:
 	
 	static size_t citizenCount;
 
-	void NoHome();
-	void NoWorkPlace();
-	void NoShop();
+
+	void BeCitizen();
+	void NoCitizen();
 public:
 	enum class STATUS
 	{
@@ -30,6 +30,8 @@ public:
 		READY,
 		WALK
 	};
+
+
 protected:
 	std::weak_ptr<SceneGame> sceneGame;
 
@@ -58,8 +60,9 @@ protected:
 	int	patience = 10;
 	int	maxPatience = 10;
 
-	STATUS status = STATUS::NONE;
 	STATUS preStatus = STATUS::NONE;
+	STATUS status = STATUS::NONE;
+	STATUS nextstatus = STATUS::NONE;
 	float lifeTimer = 0.f;
 	float lifeInterval = 1.f;
 	float needShopTimer = 0.f;
@@ -71,8 +74,9 @@ protected:
 	bool isMoving = false;
 	std::deque<sf::Vector2i> walkPath;
 	std::weak_ptr<ObjectTile> nextTile;
-	std::weak_ptr<ObjectTile> startingPoint;
 	std::weak_ptr<ObjectTile> destination;
+
+
 
 public:
 	explicit ObjectUnit(std::weak_ptr<Scene> scene, GAME_OBJECT_TYPE objectType);
@@ -112,7 +116,7 @@ public:
 	bool UseMoney(int value);
 	////////////
 	void FindHome();
-	void SetHome(std::shared_ptr<TileBuilding> building);
+	void SetHome(std::weak_ptr<TileBuilding> building);
 	void FindWorkPlace();
 	void SetWorkPlace(std::weak_ptr<TileBuilding> building);
 
@@ -120,24 +124,11 @@ public:
 	void LostHome();
 	void SetShop(std::weak_ptr<TileBuilding> building);
 
-
-
 	void GridUpdate();
 	void Moving(float timeDelta, float timeScale);//수정 필요
-	void MovingReverse(float timeDelta, float timeScale);//수정 필요
-
-	void UpdateHome(float timeDelta, float timeScale);
-	void UpdateWorkSpace(float timeDelta, float timeScale);
-	void UpdateShop(float timeDelta, float timeScale);
-	void ResetHome();
-	void ResetWorkPlace();
-	void CheckHome();
-	void CheckWorkPlace();
-	void ShopUsed();
+	void ReRoute();
 
 
-	void BeCitizen();
-	void NoCitizen();
 	void BeHomeLess();
 	void NoHomeLess();
 };

@@ -53,7 +53,6 @@ void TileBuilding::Reset()
 		if (!pair.second.expired())
 		{
 			pair.second.lock()->isReset = true;
-			pair.second.lock()->NoHome();
 		}
 	}
 	for (auto& pair : rci.commerceSlot)
@@ -61,7 +60,6 @@ void TileBuilding::Reset()
 		if (!pair.second.expired())
 		{
 			pair.second.lock()->isReset = true;
-			pair.second.lock()->NoShop();
 		}
 	}
 	for (auto& pair : rci.industrySlot)
@@ -69,7 +67,6 @@ void TileBuilding::Reset()
 		if (!pair.second.expired())
 		{
 			pair.second.lock()->isReset = true;
-			pair.second.lock()->NoWorkPlace();
 		}
 	}
 
@@ -101,7 +98,6 @@ void TileBuilding::Release()
 		if (!pair.second.expired())
 		{
 			pair.second.lock()->isReset = true;
-			pair.second.lock()->NoHome();
 		}
 	}
 	for (auto& pair : rci.commerceSlot)
@@ -109,7 +105,6 @@ void TileBuilding::Release()
 		if (!pair.second.expired())
 		{
 			pair.second.lock()->isReset = true;
-			pair.second.lock()->NoShop();
 		}
 	}
 	for (auto& pair : rci.industrySlot)
@@ -117,7 +112,6 @@ void TileBuilding::Release()
 		if (!pair.second.expired())
 		{
 			pair.second.lock()->isReset = true;
-			pair.second.lock()->NoWorkPlace();
 		}
 	}
 	SFGM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
@@ -212,7 +206,7 @@ bool TileBuilding::CanUseI(std::weak_ptr<ObjectUnit> citizen)
 		return false;
 	if (adjacent.empty())
 		return false;
-	if (rci.commerceSlot.size() == rci.commerce)
+	if (rci.industrySlot.size() == rci.industry)
 		return false;
 
 	return true;
@@ -228,6 +222,18 @@ void TileBuilding::UnuseI(const std::string& key)
 {
 	if (rci.industrySlot.erase(key) > 0)
 		SFGM_RCI.UseIndustry(-1);
+}
+
+bool TileBuilding::CanUseC(std::weak_ptr<ObjectUnit> citizen)
+{
+	if (citizen.expired())
+		return false;
+	if (adjacent.empty())
+		return false;
+	if (rci.commerceSlot.size() == rci.commerce)
+		return false;
+
+	return true;
 }
 
 void TileBuilding::UseC(std::weak_ptr<ObjectUnit> citizen)

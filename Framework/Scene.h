@@ -23,7 +23,7 @@ protected:
 
 	float timeScale = 1.f;
 	bool useGlobalTimeScale = true;
-
+	bool doDrawLayerSort = false;
 	sf::View view;
 	sf::View resetView;
 	sf::Vector2f mousePosWorld;
@@ -54,7 +54,7 @@ public:
 	//Set
 	void UseGlobalTimeScale(bool value) { useGlobalTimeScale = value; }
 	void SetTimeScale(float value) { timeScale = value; }
-
+	inline void SetDoDrawlayerSort(bool value) { doDrawLayerSort = value; }
 	//Get
 	const std::shared_ptr<Scene>& This() { return SceneManager::Get(name); };
 	static size_t GetScenesCount();
@@ -74,8 +74,7 @@ public:
 	void DeleteObject(const std::string& key);
 
 	//drawList
-	void ResetDrawList();
-
+	virtual void SortDrawList();
 };
 
 

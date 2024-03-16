@@ -110,6 +110,7 @@ void SceneGame::Init()
 
 void SceneGame::PreUpdate(float timeDelta, float timeScale)
 {
+	doDrawLayerSort = false;
 	isCameraMoved = false;
 	CameraInput(timeDelta);
 
@@ -196,8 +197,6 @@ void SceneGame::PostUpdate(float timeDelta, float timeScale)
 
 void SceneGame::Draw(sf::RenderWindow& window)
 {
-	ResetDrawList();
-
 	const sf::View& preView = window.getView();
 	window.setView(view);
 	groundTileMap->Draw(window);
@@ -671,6 +670,7 @@ void SceneGame::OnCameraMove()
 
 void SceneGame::TileSort()
 {
+	doDrawLayerSort = true;
 	sf::Vector3f plane;
 	sf::Vector3f building;
 	for (auto& x : gridInfo)
@@ -738,8 +738,7 @@ void SceneGame::TileSort()
 
 void SceneGame::UnitSort()
 {
-	sf::Vector3f plane;
-	sf::Vector3f unit;
+	doDrawLayerSort = true;
 	for (auto& x : unitOnGrid)
 	{
 		for (auto& y : x.second)
@@ -748,50 +747,7 @@ void SceneGame::UnitSort()
 			{
 				if (units.expired())
 					continue;
-				plane = frustum.nearPlane - tool::To3D(view.getCenter());
-				unit = tool::To3D(units.lock()->GetPosition()) - frustum.nearPlane;
-				float OnN = tool::OnPlane(plane, unit);
-				if (OnN > 0.f)
-				{
-					units.lock()->SetDrawDeep(0.f);
-					units.lock()->SetShow(false);
-					continue;
-				}
-
-				plane = frustum.farPlane - tool::To3D(view.getCenter());
-				unit = tool::To3D(units.lock()->GetPosition()) - frustum.farPlane;
-				float OnF = tool::OnPlane(plane, unit);
-				if (OnF > 0.f)
-				{
-					units.lock()->SetDrawDeep(0.f);
-					units.lock()->SetShow(false);
-					continue;
-				}
-
-				plane = frustum.leftPlane - tool::To3D(view.getCenter());
-				unit = tool::To3D(units.lock()->GetPosition()) - frustum.leftPlane;
-				float OnL = tool::OnPlane(plane, unit);
-				if (OnL > 0.f)
-				{
-					units.lock()->SetDrawDeep(0.f);
-					units.lock()->SetShow(false);
-					continue;
-				}
-
-				plane = frustum.rightPlane - tool::To3D(view.getCenter());
-				unit = tool::To3D(units.lock()->GetPosition()) - frustum.rightPlane;
-				float OnR = tool::OnPlane(plane, unit);
-				if (OnR > 0.f)
-				{
-					units.lock()->SetDrawDeep(0.f);
-					units.lock()->SetShow(false);
-					continue;
-				}
-				else
-				{
-					units.lock()->SetDrawDeep(-OnN);
-					units.lock()->SetShow(true);
-				}
+				units.lock()->AutoDrawDeep();
 			}
 		}
 	}

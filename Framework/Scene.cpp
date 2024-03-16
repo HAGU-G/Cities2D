@@ -86,6 +86,8 @@ void Scene::PostUpdate(float timeDelta, float timeScale)
 
 void Scene::Draw(sf::RenderWindow& window)
 {
+	if (doDrawLayerSort)
+		SortDrawList();
 	const sf::View& preView = window.getView();
 	window.setView(view);
 	for (auto& pair : drawList)
@@ -193,38 +195,14 @@ const std::shared_ptr<GameObject>& Scene::AddObject(const std::shared_ptr<GameOb
 	}
 }
 
-void Scene::ResetDrawList()
+void Scene::SortDrawList()
 {
-	drawList.clear();
-	for (auto& pair : gameObjectList)
-	{
-		if (!pair.second->IsShow())
-			continue;
-		if (drawList.empty())
+	drawList.sort(
+		[](std::pair<std::string, std::weak_ptr<GameObject>>& left,
+			std::pair<std::string, std::weak_ptr<GameObject>>& right)
 		{
-			drawList.push_back(pair);
-			continue;
-		}
-
-		auto drawIt = drawList.begin();
-		while (drawIt != drawList.end())
-		{
-			if (pair.second->GetDrawDeep() > drawIt->second.lock()->GetDrawDeep())
-			{
-				drawList.insert(drawIt, pair);
-				break;
-			}
-			else
-			{
-				drawIt++;
-				if (drawIt == drawList.end())
-				{
-					drawList.push_back(pair);
-				}
-			}
-		}
-
-	}
+			return left.second.lock()->GetDrawDeep() > right.second.lock()->GetDrawDeep();
+		});
 }
 
 const std::shared_ptr<GameObject>& Scene::GetObject(const std::string& key) const

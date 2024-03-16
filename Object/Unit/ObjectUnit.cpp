@@ -872,6 +872,7 @@ void ObjectUnit::MovingReverse(float timeDelta, float timeScale)
 
 void ObjectUnit::AutoDrawDeep()
 {
+	sceneGame.lock()->SetDoDrawlayerSort(true);
 	const Frustum& frustum = sceneGame.lock()->GetFrustum();
 	sf::Vector3f veiwCenter = tool::To3D(sceneGame.lock()->GetView().getCenter());
 
@@ -882,6 +883,7 @@ void ObjectUnit::AutoDrawDeep()
 	{
 		drawDeep = 0.f;
 		isShow = false;
+		return;
 	}
 
 	plane = frustum.farPlane - veiwCenter;
@@ -891,6 +893,7 @@ void ObjectUnit::AutoDrawDeep()
 	{
 		drawDeep = 0.f;
 		isShow = false;
+		return;
 	}
 
 	plane = frustum.leftPlane - veiwCenter;
@@ -900,6 +903,7 @@ void ObjectUnit::AutoDrawDeep()
 	{
 		drawDeep = 0.f;
 		isShow = false;
+		return;
 	}
 
 	plane = frustum.rightPlane - veiwCenter;
@@ -909,6 +913,7 @@ void ObjectUnit::AutoDrawDeep()
 	{
 		drawDeep = 0.f;
 		isShow = false;
+		return;
 	}
 	else
 	{

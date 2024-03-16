@@ -65,9 +65,6 @@ void SceneManager::Draw(sf::RenderWindow& window)
 	}
 }
 
-void SceneManager::DrawOnLayer(sf::RenderWindow& window)
-{
-}
 
 void SceneManager::Use()
 {

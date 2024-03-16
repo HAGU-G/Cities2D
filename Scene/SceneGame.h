@@ -16,7 +16,7 @@ struct Frustum
 struct CITY
 {
 	std::string mayorName = "My City";
-	int money = 5000;
+	int money = 50000000;
 	unsigned int moneyProfit = 0;
 	int moneyTex = 0;
 	time_t cityTime = 0;
@@ -139,6 +139,5 @@ public:
 	inline const Frustum& GetFrustum() const { return frustum; }
 	void TileSort();
 	void UnitSort();
-
 };
 

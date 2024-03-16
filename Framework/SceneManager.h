@@ -33,7 +33,6 @@ public:
 	//Draw - sceneList에 추가된 순서대로 Draw. Scene안에서는 게임오브젝트의 레이어 순서대로 Draw
 	static void Draw(sf::RenderWindow& window); //usingList
 	//DrawOnLayer - 사용하고 있는 Scene의 오브젝트들을 레이어 순서대로 Draw.
-	static void DrawOnLayer(sf::RenderWindow& window); //usingList
 	static void Reset(); //allList
 	static void Release(); //allList
 

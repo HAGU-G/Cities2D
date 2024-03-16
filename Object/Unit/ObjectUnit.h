@@ -25,13 +25,10 @@ public:
 		HOME,
 		WORK_PLACE,
 		SHOP,
-
-		WALK,
-		TO_HOME = WALK,
-		TO_WORK_PLACE,
-		TO_SHOP,
 		HOMELESS,
-		WALK_END
+
+		READY,
+		WALK
 	};
 protected:
 	std::weak_ptr<SceneGame> sceneGame;
@@ -62,6 +59,7 @@ protected:
 	int	maxPatience = 10;
 
 	STATUS status = STATUS::NONE;
+	STATUS preStatus = STATUS::NONE;
 	float lifeTimer = 0.f;
 	float lifeInterval = 1.f;
 	float needShopTimer = 0.f;
@@ -99,30 +97,48 @@ public:
 	inline std::weak_ptr<ObjectTile> GetNextTile() const { return nextTile; }
 	inline static size_t GetUnitCount() { return citizenCount; }
 
-	void BeCitizen();
-	void NoCitizen();
-	void BeHomeLess();
-	void NoHomeLess();
+
+
+
+
+
+
+
+
+	void AutoDrawDeep();
+
+
+
+	bool UseMoney(int value);
+	////////////
+	void FindHome();
+	void SetHome(std::shared_ptr<TileBuilding> building);
+	void FindWorkPlace();
+	void SetWorkPlace(std::weak_ptr<TileBuilding> building);
+
+	void LifeCycle(float timeDelta, float timeScale);
+	void LostHome();
+	void SetShop(std::weak_ptr<TileBuilding> building);
+
+
+
+	void GridUpdate();
+	void Moving(float timeDelta, float timeScale);//수정 필요
+	void MovingReverse(float timeDelta, float timeScale);//수정 필요
 
 	void UpdateHome(float timeDelta, float timeScale);
 	void UpdateWorkSpace(float timeDelta, float timeScale);
 	void UpdateShop(float timeDelta, float timeScale);
-	bool FindHome();
-	void SetHome(std::shared_ptr<TileBuilding> building);
 	void ResetHome();
-	bool FindWorkSpace();
-	void SetWorkPlace(std::weak_ptr<TileBuilding> building);
 	void ResetWorkPlace();
 	void CheckHome();
 	void CheckWorkPlace();
 	void ShopUsed();
 
-	void GridUpdate();
 
-	void LifeCycle(float timeDelta, float timeScale);
-	void Moving(float timeDelta, float timeScale);//수정 필요
-	void MovingReverse(float timeDelta, float timeScale);//수정 필요
-
-	void AutoDrawDeep();
+	void BeCitizen();
+	void NoCitizen();
+	void BeHomeLess();
+	void NoHomeLess();
 };
 

@@ -46,6 +46,7 @@ public:
 	void UseI(std::weak_ptr<ObjectUnit> citizen);
 	void UnuseI(const std::string& key);
 
+	bool CanUseC(std::weak_ptr<ObjectUnit> citizen);
 	void UseC(std::weak_ptr<ObjectUnit> citizen);
 	void UnuseC(const std::string& key);
 

@@ -212,7 +212,7 @@ bool TileBuilding::CanUseI(std::weak_ptr<ObjectUnit> citizen)
 		return false;
 	if (adjacent.empty())
 		return false;
-	if (rci.industrySlot.size() == rci.industry)
+	if (rci.commerceSlot.size() == rci.commerce)
 		return false;
 
 	return true;

@@ -571,47 +571,58 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 	case ObjectUnit::STATUS::HOMELESS:
 		break;
 	case ObjectUnit::STATUS::READY:
-		if (needShop && money > -(home.lock()->GetRCI().tex / 100) + 1)
+		if (lifeTimer == 0.f)
 		{
-			auto pathToShop = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, GAME_OBJECT_TAG::C);
-			if (!pathToShop.empty())
+			if (needShop && money > -(home.lock()->GetRCI().tex / 100) + 1)
 			{
-				std::shared_ptr<TileBuilding> shop = C_TILE_BUILDING(sceneGame.lock()->GetTileInfo(pathToWorkPlace.back()).second.lock());
-				if (shop->CanUseC(C_OBJECT_UNIT(This())))
+				auto pathToShop = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, GAME_OBJECT_TAG::C);
+				if (!pathToShop.empty())
 				{
-					needShop = false;
-					needShopTimer = 0.f;
-					patience++;
-					SetShop(shop);
-					walkPath = pathToShop;
-					status = STATUS::WALK;
-					break;
+					std::shared_ptr<TileBuilding> shop = C_TILE_BUILDING(sceneGame.lock()->GetTileInfo(pathToWorkPlace.back()).second.lock());
+					if (shop->CanUseC(C_OBJECT_UNIT(This())))
+					{
+						needShop = false;
+						needShopTimer = 0.f;
+						patience++;
+						SetShop(shop);
+						walkPath = pathToShop;
+						status = STATUS::WALK;
+						break;
+					}
 				}
+				else
+			}
+			else if (!workPlace.expired() && preStatus == STATUS::HOME)
+			{
+				walkPath = pathToWorkPlace;
+				status = STATUS::WALK;
+				break;
+			}
+			else if (!home.expired())
+			{
+				if (preStatus == STATUS::WORK_PLACE)
+				{
+					walkPath.clear();
+					auto it = pathToWorkPlace.rbegin();
+					while (it != pathToWorkPlace.rend())
+					{
+						walkPath.push_back(*it);
+						it++;
+					}
+				}
+				else
+				{
+					walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, home);
+				}
+				status = STATUS::WALK;
+				break;
 			}
 		}
-		else if (!workPlace.expired() && preStatus == STATUS::HOME)
+		lifeTimer += timeDelta * timeScale;
+		if (lifeTimer >= lifeInterval / 3.f)
 		{
-			walkPath = pathToWorkPlace;
-			status = STATUS::WALK;
-			break;
-		}
-		else if (!home.expired())
-		{
-			if (preStatus == STATUS::WORK_PLACE)
-			{
-				walkPath.clear();
-				auto it = pathToWorkPlace.rbegin();
-				while (it != pathToWorkPlace.rend())
-				{
-					walkPath.push_back(*it);
-					it++;
-				}
-			}
-			else
-			{
-				walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, home);
-			}
-			status = STATUS::WALK;
+			lifeTimer = 0.f;
+			status = STATUS::READY;
 			break;
 		}
 		break;

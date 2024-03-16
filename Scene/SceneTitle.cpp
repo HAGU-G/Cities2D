@@ -156,5 +156,5 @@ void SceneTitle::LoadingGame()
 	SceneManager::Wait("SceneMenu",true);
 	SceneManager::canChange = true;
 	isLoaded = true;
-	GameManager::SetDoDebug(true);
+	GameManager::SetCanDebug(true);
 }

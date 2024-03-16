@@ -55,6 +55,7 @@ protected:
 	int clickMode = 0; //0:Nothing 1:build -1:destroy
 	sf::Vector2i selectTile;
 
+
 public:
 	explicit SceneGameUI(const std::string& name);
 	~SceneGameUI() override = default;

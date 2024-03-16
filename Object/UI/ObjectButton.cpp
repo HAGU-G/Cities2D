@@ -26,52 +26,53 @@ void ObjectButton::Update(float timeDelta, float timeScale)
 {
 	mousePos = GameManager::GetWindow().mapPixelToCoords(GameManager::GetMousePosWindow(), *view);
 
-		switch (state)
+	switch (state)
+	{
+	case 0:
+		if (canReact && (bound.contains(mousePos) || IOManager::IsKeyDown(keybind)))
 		{
-		case 0:
-			if (canReact && bound.contains(mousePos))
+			SetState(1);
+			mouseOn.play();
+		}
+		break;
+	case 1:
+		if (!bound.contains(mousePos) && !IOManager::IsKeyPress(keybind))
+		{
+			SetState(0);
+		}
+		else if (IOManager::IsKeyDown(sf::Mouse::Left) || IOManager::IsKeyPress(keybind))
+		{
+			SetState(2);
+			click.play();
+		}
+		break;
+	case 2:
+		if (IOManager::IsKeyUp(sf::Mouse::Left)
+			|| IOManager::IsKeyUp(keybind))
+		{
+			if (canReact && (bound.contains(mousePos) || IOManager::IsKeyUp(keybind)))
 			{
-				SetState(1);
-				mouseOn.play();
+				if (doToggle)
+					isSelect = !isSelect;
+
+				if (!isOnlyDown)
+				{
+					SetState(1);
+				}
+				if (funcVoid_void != nullptr)
+					funcVoid_void();
+				OnDown();
+
 			}
-			break;
-		case 1:
-			if (!bound.contains(mousePos))
+			else if (!isOnlyDown)
 			{
 				SetState(0);
 			}
-			else if (IOManager::IsKeyDown(sf::Mouse::Left))
-			{
-				SetState(2);
-				click.play();
-			}
-			break;
-		case 2:
-			if (IOManager::IsKeyUp(sf::Mouse::Left))
-			{
-				if (canReact && bound.contains(mousePos))
-				{
-					if (doToggle)
-						isSelect = !isSelect;
-
-					if (!isOnlyDown)
-					{
-						SetState(1);
-					}
-					if (funcVoid_void != nullptr)
-						funcVoid_void();
-					OnDown();
-
-				}
-				else if (!isOnlyDown)
-				{
-					SetState(0);
-				}
-			}
-			break;
-		default:
-			break;
 		}
+		break;
+	default:
+		break;
+	}
 }
 
 void ObjectButton::Draw(sf::RenderWindow& window)

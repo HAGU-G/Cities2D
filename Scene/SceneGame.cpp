@@ -93,9 +93,7 @@ void SceneGame::Init()
 {
 	useGlobalTimeScale = false;
 
-	//선택된 타일 표시용 (임시)
 	Scene::Init();
-	//초기 카메라 위치 -> TODO 게임 저장시 저장하여 다시 불러올 수 있도록
 
 	groundTileMap = ObjectTileMap::Create(This());
 	indicater = ObjectIndicater::Create(This());
@@ -524,6 +522,26 @@ void SceneGame::CameraInput(float timeDelta)
 	if (isCameraFixed)
 		return;
 
+	//UI 숨기기
+	if (IOManager::IsKeyDown(sf::Keyboard::F1))
+	{
+		if (isUIHide)
+		{
+			isUIHide = false;
+			indicater->SetActive(true);
+		}
+		else
+		{
+			isUIHide = true;
+			indicater->SetActive(false);
+		}
+	}
+	if (isUIHide && IOManager::IsKeyDown(sf::Keyboard::Escape))
+	{
+		isUIHide = false;
+		indicater->SetActive(true);
+	}
+
 	if (IOManager::IsKeyPress(sf::Keyboard::Q))
 	{
 		view.rotate(90.f * timeDelta);
@@ -599,6 +617,9 @@ void SceneGame::CameraInput(float timeDelta)
 	{
 		view = resetView;
 		tilt = 1.f;
+		zoomRatio = 1.00f;
+		zoomY = view.getSize().y;
+		view.setCenter(0.f, 0.f);
 		isCameraMoved = true;
 	}
 }
@@ -682,8 +703,8 @@ void SceneGame::TileSort()
 
 			if (y.second.first == GAME_OBJECT_TYPE::ROAD)
 			{
-				y.second.second.lock()->SetShow(false);
-				continue;
+				if (!GameManager::DoDebug())
+					continue;
 			}
 
 			auto thisTile = y.second.second.lock();

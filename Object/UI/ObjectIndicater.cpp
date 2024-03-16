@@ -76,7 +76,8 @@ void ObjectIndicater::PreUpdate(float timeDelta, float timeScale)
 			|| sceneGame->GetTileInfo(gridCoord + sf::Vector2i(0, 1)).first == GAME_OBJECT_TYPE::ROAD
 			|| sceneGame->GetTileInfo(gridCoord + sf::Vector2i(-1, 0)).first == GAME_OBJECT_TYPE::ROAD
 			|| sceneGame->GetTileInfo(gridCoord + sf::Vector2i(1, 0)).first == GAME_OBJECT_TYPE::ROAD)
-			&& sceneGame->GetTileInfo(gridCoord).first == GAME_OBJECT_TYPE::NONE)
+			&& sceneGame->GetTileInfo(gridCoord).first == GAME_OBJECT_TYPE::NONE
+			&& sceneGame->GetMoney() >= rci.cost)
 			canClick = true;
 		else
 			canClick = false;
@@ -102,6 +103,8 @@ void ObjectIndicater::PreUpdate(float timeDelta, float timeScale)
 		if (rci.industry > 0)
 			text << L"일자리: " << rci.industry << "  ";
 		text << L"\n가격: " << rci.cost << L" / 유지비: " << -rci.tex;
+		if (sceneGame->GetMoney() < rci.cost)
+			text << L"\n ** 자금이 부족합니다 **";
 
 		overSprite.setTexture(SFGM_TEXTURE.Get(rci.texturePath));
 		overSprite.setTextureRect(rci.textureRect);

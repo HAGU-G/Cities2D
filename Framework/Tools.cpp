@@ -39,11 +39,6 @@ namespace tool
 		return Magnitude(p2 - p1);
 	}
 
-	float DistancePlane(const sf::Vector3f& plane, const sf::Vector3f& point)
-	{
-		return abs(tool::OnPlane(plane,point)) / sqrt(plane.x * plane.x + plane.y * plane.y + plane.z * plane.z);
-	}
-
 	sf::Vector2f SetOrigin(sf::Transformable& transformable, ORIGIN origin, const sf::FloatRect& rect)
 	{
 		// Rect Width, Height

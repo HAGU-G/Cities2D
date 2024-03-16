@@ -326,7 +326,6 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 						std::shared_ptr<TileBuilding> tempTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 						if (tempTile != nullptr)
 						{
-							tempTile->UseR(unit);
 							unit->SetHome(tempTile);
 						}
 					}
@@ -342,7 +341,6 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 						std::shared_ptr<TileBuilding> tempTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 						if (tempTile != nullptr)
 						{
-							tempTile->UseI(unit);
 							unit->SetWorkPlace(tempTile);
 						}
 					}
@@ -358,8 +356,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 						std::shared_ptr<TileBuilding> tempTile = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
 						if (tempTile != nullptr)
 						{
-							tempTile->UseC(unit);
-							unit->shop = tempTile;
+							unit->SetShop(tempTile);
 						}
 					}
 					break;
@@ -406,10 +403,6 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 				it++;
 			}
 		}
-
-		//bool형 2
-		unit->hasHome = std::stoi(row[5]) & (1 << 2);
-		unit->hasWorkPlace = std::stoi(row[5]) & (1 << 1);
 
 		//find
 		unit->findTimer = std::stof(row[6]);
@@ -477,8 +470,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						//TODO nextTile을 받아오지 못함
-						unit->nextTile = C_TILE_ROAD(sceneGame->GetTileInfo(tempVi).second.lock());
+						unit->nextTile = sceneGame->GetTileInfo(tempVi).second.lock();
 					}
 					break;
 				case 2:
@@ -489,7 +481,7 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 					if (tempStr != "N")
 					{
 						tempVi.y = std::stoi(tempStr);
-						unit->destination = C_TILE_BUILDING(sceneGame->GetTileInfo(tempVi).second.lock());
+						unit->destination = sceneGame->GetTileInfo(tempVi).second.lock();
 					}
 					break;
 				case 4:
@@ -556,7 +548,7 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 	if (!outFile.is_open())
 		return false;
 
-	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK/SHOP_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/HAS_HOME/HAS_WORK_PLACE/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY,MAXPATIENCE" << std::endl;
+	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK/SHOP_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY,MAXPATIENCE" << std::endl;
 	
 	const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& unitList = sceneGame->GetUnitList();
 	if (unitList.empty())
@@ -617,8 +609,8 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		}
 		str += comma;
 
-		//IS_CITIZEN / HAS_HOME / HAS_WORK_PLACE / IS_MOVING
-		str += to_string(((int)(unit->isCitizen) << 3) + ((int)(unit->hasHome) << 2) + ((int)(unit->hasWorkPlace) << 1) + ((int)(unit->isMoving) << 0)) + comma;
+		//IS_CITIZEN / IS_MOVING
+		str += to_string(((int)(unit->isCitizen) << 3) + ((int)(unit->isMoving) << 0)) + comma;
 
 		//FIND_TIMER, FIND_INTERVAL
 		str += to_string(unit->findTimer) + comma;

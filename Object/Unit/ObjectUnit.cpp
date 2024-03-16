@@ -36,20 +36,27 @@ void ObjectUnit::PreUpdate(float timeDelta, float timeScale)
 
 void ObjectUnit::Update(float timeDelta, float timeScale)
 {
+	if (findTimer >= findInterval)
+	{
+		findTimer = 0.f;
+		if (home.expired())
+			FindHome();
+		else if (workPlace.expired())
+			FindWorkPlace();
+	}
+	else
+	{
+		findTimer += timeDelta * timeScale;
+	}
 	if (isCitizen)
 	{
 		spriteAnimator.Update(timeDelta, timeScale);
-		GridUpdate();
 		LifeCycle(timeDelta, timeScale);
 		if (patience > maxPatience)
 			patience = maxPatience;
 		unitSprite.setRotation(scene.lock()->GetView().getRotation());
 		unitSprite.setScale(1.f + (tool::Angle360(direction, scene.lock()->GetView().getRotation()) > 90.f ? -2.f : 0.f), sceneGame.lock()->GetTilt());
 	}
-	if (home.expired())
-		FindHome();
-	else if (workPlace.expired())
-		FindWorkPlace();
 }
 
 void ObjectUnit::PostUpdate(float timeDelta, float timeScale)
@@ -66,14 +73,18 @@ void ObjectUnit::PostUpdate(float timeDelta, float timeScale)
 
 void ObjectUnit::Draw(sf::RenderWindow& window)
 {
+	if (status >= STATUS::WALK)
 		window.draw(unitSprite);
-	
+
 }
 
 void ObjectUnit::Reset()
 {
 	isReset = true;
-
+	LostHome();
+	LostWorkPlace();
+	LeaveShop();
+	ShopUsed();
 	NoCitizen();
 	status = STATUS::NONE;
 
@@ -114,7 +125,10 @@ void ObjectUnit::Reset()
 void ObjectUnit::Release()
 {
 	isReset = true;
-
+	LostHome();
+	LostWorkPlace();
+	LeaveShop();
+	ShopUsed();
 	NoCitizen();
 	sceneGame.reset();
 	nextTile.reset();
@@ -130,6 +144,31 @@ std::shared_ptr<ObjectUnit> ObjectUnit::Create(std::weak_ptr<Scene> scene, GAME_
 	objectUnit->Init();
 	objectUnit->Reset();
 	return objectUnit;
+}
+
+void ObjectUnit::GoWorkPlace()
+{
+	lifeTimer = 0.f;
+	if (preStatus == STATUS::HOME)
+	{
+		walkPath = pathToWorkPlace;
+	}
+	else
+	{
+		walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, workPlace);
+
+	}
+	if (walkPath.empty())
+	{
+		LostWorkPlace();
+		status = STATUS::MISSING;
+		return;
+	}
+	destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+	nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+	nextstatus = STATUS::WORK_PLACE;
+	status = STATUS::WALK;
+
 }
 
 void ObjectUnit::SetPosition(const sf::Vector2f& position)
@@ -181,6 +220,15 @@ void ObjectUnit::GridUpdate()
 	}
 }
 
+void ObjectUnit::ShopUsed()
+{
+	if (needShop)
+	{
+		needShop = false;
+		SFGM_RCI.INeedCommerce(-1);
+	}
+}
+
 
 void ObjectUnit::BeCitizen()
 {
@@ -200,7 +248,7 @@ void ObjectUnit::NoCitizen()
 	}
 }
 
-void ObjectUnit::BeHomeLess()
+void ObjectUnit::BeHomeless()
 {
 	const rapidcsv::Document& unitData = SFGM_CSVFILE.Get("data/UnitData.csv").GetDocument();
 	auto uRow = unitData.GetRow<std::string>(0);
@@ -230,6 +278,36 @@ void ObjectUnit::NoHomeLess()
 
 	spriteAnimator.ClearEvent();
 	spriteAnimator.Play(uRow[2] + uRow[3] + to_string(spriteNum) + spriteAct + ".csv");
+}
+
+void ObjectUnit::GoHome()
+{
+	lifeTimer = 0.f;
+	if (preStatus == STATUS::WORK_PLACE)
+	{
+		walkPath.clear();
+		auto it = pathToWorkPlace.rbegin();
+		while (it != pathToWorkPlace.rend())
+		{
+			walkPath.push_back(*it);
+			it++;
+		}
+	}
+	else
+	{
+		walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, home);
+
+	}
+	if (walkPath.empty())
+	{
+		LostHome();
+		status = STATUS::MISSING;
+		return;
+	}
+	destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+	nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+	nextstatus = STATUS::HOME;
+	status = STATUS::WALK;
 }
 
 bool ObjectUnit::UseMoney(int value)
@@ -342,12 +420,23 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		}
 	}
 
-
-
 	switch (status)
 	{
 	case ObjectUnit::STATUS::HOME:
 		preStatus = STATUS::HOME;
+		if (home.expired())
+		{
+			if (!workPlace.expired())
+			{
+				GoWorkPlace();
+				break;
+			}
+			else
+			{
+				BeHomeless();
+				break;
+			}
+		}
 		lifeTimer += timeDelta * timeScale;
 		if (lifeTimer >= lifeInterval)
 		{
@@ -358,9 +447,23 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		break;
 	case ObjectUnit::STATUS::WORK_PLACE:
 		preStatus = STATUS::WORK_PLACE;
+		needShopTimer += timeDelta * timeScale;
+		if (workPlace.expired())
+		{
+			if (!home.expired())
+			{
+				GoHome();
+				break;
+			}
+			else
+			{
+				BeHomeless();
+				break;
+			}
+		}
 		if (lifeTimer == 0.f)
 		{
-			int pay = -(workPlace.lock()->GetRCI().tex / 100);
+			int pay = -(workPlace.lock()->GetRCI().tex / 200);
 			money += pay * 0.9f + 1;
 			patience++;
 			sceneGame.lock()->MoneyProfit(pay * 0.1f + 1);
@@ -375,10 +478,27 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		break;
 	case ObjectUnit::STATUS::SHOP:
 		preStatus = STATUS::SHOP;
-		needShop = false;
-		needShopTimer = 0.f;
+		if (shop.expired())
+		{
+			if (!home.expired())
+			{
+				GoHome();
+				break;
+			}
+			else if (!workPlace.expired())
+			{
+				GoWorkPlace();
+				break;
+			}
+			else
+			{
+				BeHomeless();
+				break;
+			}
+		}
 		if (lifeTimer == 0.f)
 		{
+			ShopUsed();
 			int pay = -(shop.lock()->GetRCI().tex / 100);
 			if (UseMoney(pay + 1))
 				patience++;
@@ -387,12 +507,16 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		lifeTimer += timeDelta * timeScale;
 		if (lifeTimer >= lifeInterval)
 		{
+			LeaveShop();
 			lifeTimer = 0.f;
 			status = STATUS::READY;
 			break;
 		}
 		break;
 	case ObjectUnit::STATUS::HOMELESS:
+		preStatus = STATUS::HOMELESS;
+		if (!home.expired())
+			NoHomeLess();
 		break;
 	case ObjectUnit::STATUS::READY:
 
@@ -404,10 +528,9 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 				auto pathToShop = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, GAME_OBJECT_TAG::C);
 				if (!pathToShop.empty())
 				{
-					std::shared_ptr<TileBuilding> shop = C_TILE_BUILDING(sceneGame.lock()->GetTileInfo(pathToWorkPlace.back()).second.lock());
+					std::shared_ptr<TileBuilding> shop = C_TILE_BUILDING(sceneGame.lock()->GetTileInfo(pathToShop.back()).second.lock());
 					if (shop->CanUseC(C_OBJECT_UNIT(This())))
 					{
-						needShop = false;
 						needShopTimer = 0.f;
 						patience++;
 						SetShop(shop);
@@ -420,35 +543,19 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 					}
 				}
 			}
-			if (!workPlace.expired() && preStatus == STATUS::HOME) //회사로
+			if (!home.expired() && preStatus != STATUS::HOME)//집으로
 			{
-				walkPath = pathToWorkPlace;
-				destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
-				nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
-				nextstatus = STATUS::WORK_PLACE;
-				status = STATUS::WALK;
+				GoHome();
 				break;
 			}
-			if (!home.expired())//집으로
+			else if (!workPlace.expired() && preStatus != STATUS::WORK_PLACE) //회사로
 			{
-				if (preStatus == STATUS::WORK_PLACE)
-				{
-					walkPath.clear();
-					auto it = pathToWorkPlace.rbegin();
-					while (it != pathToWorkPlace.rend())
-					{
-						walkPath.push_back(*it);
-						it++;
-					}
-				}
-				else
-				{
-					walkPath = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, home);
-				}
-				destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
-				nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
-				nextstatus = STATUS::HOME;
-				status = STATUS::WALK;
+				GoWorkPlace();
+				break;
+			}
+			else if (home.expired() && workPlace.expired())
+			{
+				BeHomeless();
 				break;
 			}
 		}
@@ -464,6 +571,23 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		preStatus = STATUS::WALK;
 		Moving(timeDelta, timeScale);
 		break;
+	case STATUS::MISSING:
+		if (!home.expired())
+		{
+			GoHome();
+			break;
+		}
+		if (!workPlace.expired())
+		{
+			GoWorkPlace();
+			break;
+		}
+		else
+		{
+			BeHomeless();
+			break;
+		}
+		break;
 	default:
 		break;
 	}
@@ -475,28 +599,8 @@ void ObjectUnit::Moving(float timeDelta, float timeScale)
 	if (destination.expired())
 	{
 		walkPath.clear();
-		status = STATUS::READY;
+		status = STATUS::MISSING;
 		return;
-	}
-
-	std::shared_ptr<SceneGame> sceneGame = this->sceneGame.lock();
-	//다음 타일 설정 or 이동 완료
-	if (tool::Distance(position, sf::Vector2f(walkPath.front()) + sceneGame->GetGridSize()*0.5f) <= speed * timeDelta * timeScale);
-	{
-		walkPath.pop_front();
-		if (walkPath.empty())
-		{
-			status = nextstatus;
-			direction = { 0,0 };
-			return;
-		}
-		nextTile = sceneGame->GetTileInfo(walkPath.front()).second;
-		if (nextTile.expired())
-		{
-			ReRoute();
-			return;
-		}
-		direction = tool::GetNormalize(nextTile.lock()->GetGridCenterPos() - position);
 	}
 
 	//다음 타일로 이동
@@ -505,7 +609,33 @@ void ObjectUnit::Moving(float timeDelta, float timeScale)
 		ReRoute();
 		return;
 	}
+	direction = tool::GetNormalize(nextTile.lock()->GetGridCenterPos() - position);
 	SetPosition(position + direction * speed * timeDelta * timeScale);
+
+
+	std::shared_ptr<SceneGame> sceneGame = this->sceneGame.lock();
+	//다음 타일 설정 or 이동 완료
+	if (tool::Distance(position, nextTile.lock()->GetGridCenterPos()) <= speed * timeDelta * timeScale)
+	{
+		SetPosition(nextTile.lock()->GetGridCenterPos());
+		walkPath.pop_front();
+		if (walkPath.empty())
+		{
+			status = nextstatus;
+			if (nextstatus == STATUS::HOME || nextstatus == STATUS::SHOP || nextstatus == STATUS::WORK_PLACE)
+				C_TILE_BUILDING(destination.lock())->Enter();
+			return;
+		}
+		nextTile = sceneGame->GetTileInfo(walkPath.front()).second;
+		if (nextTile.expired())
+		{
+			ReRoute();
+			return;
+		}
+
+	}
+
+
 	GridUpdate();
 
 }
@@ -513,10 +643,16 @@ void ObjectUnit::Moving(float timeDelta, float timeScale)
 
 void ObjectUnit::ReRoute()
 {
+	if (!isReset && soundTimer >= soundDuration && !isMute)
+	{
+		soundTimer = 0.f;
+		soundDuration = IOManager::PlaySfx("resource/sfx/leave.wav", { position.x, position.y, 0.f }, 100, 4);
+	}
+
 	if (destination.expired())
 	{
 		walkPath.clear();
-		status = STATUS::READY;
+		status = STATUS::MISSING;
 		return;
 	}
 
@@ -525,21 +661,17 @@ void ObjectUnit::ReRoute()
 	{
 		walkPath = newPath;
 		destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+		nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
 		status = STATUS::WALK;
 
 	}
 	else
 	{
 		walkPath.clear();
+		status = STATUS::MISSING;
+
 		if (!home.expired() && destination.lock().get() == workPlace.lock().get())
-		{
-			status = STATUS::HOMELESS;
-			nextstatus = STATUS::HOMELESS;
-		}
-		else
-		{
-			status = STATUS::READY;
-		}
+			LostHome();
 	}
 
 	if (!workPlace.expired() && destination.lock().get() == workPlace.lock().get())
@@ -547,7 +679,7 @@ void ObjectUnit::ReRoute()
 
 		pathToWorkPlace = ObjectTile::FindShortPath(home, workPlace);
 		if (pathToWorkPlace.empty())
-			workPlace.reset();
+			LostWorkPlace();
 	}
 }
 
@@ -608,10 +740,8 @@ void ObjectUnit::AutoDrawDeep()
 
 void ObjectUnit::SetHome(std::weak_ptr<TileBuilding> building)
 {
-	building.lock()->UseR(C_OBJECT_UNIT(This()));
 	home = building;
-	
-	//TODO 집 슬롯에 등록
+	home.lock()->UseR(C_OBJECT_UNIT(This()));
 
 	if (!isCitizen)
 	{
@@ -631,8 +761,8 @@ void ObjectUnit::SetHome(std::weak_ptr<TileBuilding> building)
 
 void ObjectUnit::SetWorkPlace(std::weak_ptr<TileBuilding> building)
 {
-	building.lock()->UseI(C_OBJECT_UNIT(This()));
 	workPlace = building;
+	workPlace.lock()->UseI(C_OBJECT_UNIT(This()));
 
 	if (!home.expired())
 	{
@@ -642,12 +772,47 @@ void ObjectUnit::SetWorkPlace(std::weak_ptr<TileBuilding> building)
 
 void ObjectUnit::LostHome()
 {
-	//TODO 집 슬롯에서 삭제
-	home.reset();
+	if (!home.expired())
+	{
+		home.lock()->UnuseR(GetKey());
+		home.reset();
+	}
 }
-
+void ObjectUnit::LeaveShop()
+{
+	if (!shop.expired())
+	{
+		shop.lock()->UnuseC(GetKey());
+		shop.reset();
+	}
+}
+void ObjectUnit::LostWorkPlace()
+{
+	if (!workPlace.expired())
+	{
+		workPlace.lock()->UnuseI(GetKey());
+		workPlace.reset();
+	}
+}
 void ObjectUnit::SetShop(std::weak_ptr<TileBuilding> building)
 {
-	//상점 슬롯에 등록
 	shop = building;
+	shop.lock()->UseC(C_OBJECT_UNIT(This()));
+}
+
+
+void ObjectUnit::DeleteHome()
+{
+	SFGM_RCI.UseRegidence(-1);
+	home.reset();
+}
+void ObjectUnit::DeleteWorkPlace()
+{
+	SFGM_RCI.UseIndustry(-1);
+	workPlace.reset();
+}
+void ObjectUnit::DeleteShop()
+{
+	SFGM_RCI.UseCommerce(-1);
+	shop.reset();
 }

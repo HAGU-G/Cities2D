@@ -28,6 +28,7 @@ std::mt19937* GameManager::rg = nullptr; //randomGenerator
 std::string GameManager::lastGameName = "";
 
 bool GameManager::doDebug = false;
+bool GameManager::canDebug = false;
 
 
 void GameManager::Init()
@@ -37,14 +38,10 @@ void GameManager::Init()
 	//       윈도우
 	// 
 	/////////////////////////////
-	//currentSize = {sf::VideoMode::getDesktopMode().width ,sf::VideoMode::getDesktopMode().height };
-	currentSize = { 1920,1080 };
+	currentSize = {sf::VideoMode::getDesktopMode().width ,sf::VideoMode::getDesktopMode().height };
+	//currentSize = { 1920,1080 };
 	windowRatio = sf::Vector2f(currentSize);
-
-	sf::ContextSettings setting;
-	setting.antialiasingLevel = 0;
-
-	window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::Close, setting);
+	window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::Close);
 	currentMode = WINDOW_MODE::WINDOW;
 	SetWindowSize(1440);
 	SetWindowPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width - currentSize.x) / 2,
@@ -143,6 +140,34 @@ void GameManager::MainLoop()
 		//       디버그 윈도우
 		// 
 		/////////////////////////////
+		if (IOManager::IsKeyDown(sf::Keyboard::F3) && canDebug)
+		{
+			doDebug = !doDebug;
+			debugWindow.setVisible(doDebug);
+			window.requestFocus();
+		}
+		if (IOManager::IsKeyDown(sf::Keyboard::Enter) && event.key.alt)
+		{
+			switch (currentMode)
+			{
+			case WINDOW_MODE::WINDOW:
+				doDebug = false;
+				debugWindow.setVisible(doDebug);
+				currentSize = { sf::VideoMode::getDesktopMode().width ,sf::VideoMode::getDesktopMode().height };
+				window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::None);
+				currentMode = WINDOW_MODE::BORDERLESS;
+				break;
+			case WINDOW_MODE::BORDERLESS:
+				window.create(sf::VideoMode(currentSize.x, currentSize.y), "Cities2D", sf::Style::Close);
+				currentMode = WINDOW_MODE::WINDOW;
+				SetWindowSize(1440);
+				SetWindowPosition(sf::Vector2i((sf::VideoMode::getDesktopMode().width - currentSize.x) / 2,
+					(sf::VideoMode::getDesktopMode().height - currentSize.y) / 2));
+				break;
+			}
+
+		}
+
 		DebugUpdate();
 	}
 }
@@ -284,17 +309,9 @@ void GameManager::Exit()
 	window.close();
 }
 
-void GameManager::SetDoDebug(bool value)
+void GameManager::SetCanDebug(bool value)
 {
-	if (!doDebug && value)
-	{
-		debugWindow.setVisible(true);
-		doDebug = value;
-	}
-	else if (doDebug && !value)
-	{
-		debugWindow.setVisible(false);
-	}
+	canDebug = value;
 }
 
 float GameManager::RandomRange(float a, float b)

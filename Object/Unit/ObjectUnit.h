@@ -14,9 +14,6 @@ private:
 	
 	static size_t citizenCount;
 
-
-	void BeCitizen();
-	void NoCitizen();
 public:
 	enum class STATUS
 	{
@@ -25,10 +22,11 @@ public:
 		HOME,
 		WORK_PLACE,
 		SHOP,
-		HOMELESS,
-
 		READY,
-		WALK
+
+		WALK,
+		MISSING,
+		HOMELESS
 	};
 
 
@@ -52,8 +50,6 @@ protected:
 	std::deque<sf::Vector2i> pathToWorkPlace;
 
 	bool isCitizen = false;
-	bool hasHome = false;
-	bool hasWorkPlace = false;
 
 	float findTimer = 0.f;
 	float findInterval = 10.f;
@@ -76,6 +72,35 @@ protected:
 	std::weak_ptr<ObjectTile> nextTile;
 	std::weak_ptr<ObjectTile> destination;
 
+	void BeCitizen();
+	void NoCitizen();
+
+	void FindHome();
+	void FindWorkPlace();
+	void SetHome(std::weak_ptr<TileBuilding> building);
+	void SetWorkPlace(std::weak_ptr<TileBuilding> building);
+	void BeHomeless();
+	void NoHomeLess();
+	void LostHome();
+	void LostWorkPlace();
+	void LeaveShop();
+
+	void DeleteHome();
+	void DeleteWorkPlace();
+	void DeleteShop();
+
+	void LifeCycle(float timeDelta, float timeScale);
+	void SetShop(std::weak_ptr<TileBuilding> building);
+	void ShopUsed();
+
+	void GridUpdate();
+	void Moving(float timeDelta, float timeScale);
+	void ReRoute();
+
+	bool UseMoney(int value);
+
+	void GoHome();
+	void GoWorkPlace();
 
 
 public:
@@ -101,35 +126,7 @@ public:
 	inline std::weak_ptr<ObjectTile> GetNextTile() const { return nextTile; }
 	inline static size_t GetUnitCount() { return citizenCount; }
 
-
-
-
-
-
-
-
-
 	void AutoDrawDeep();
 
-
-
-	bool UseMoney(int value);
-	////////////
-	void FindHome();
-	void SetHome(std::weak_ptr<TileBuilding> building);
-	void FindWorkPlace();
-	void SetWorkPlace(std::weak_ptr<TileBuilding> building);
-
-	void LifeCycle(float timeDelta, float timeScale);
-	void LostHome();
-	void SetShop(std::weak_ptr<TileBuilding> building);
-
-	void GridUpdate();
-	void Moving(float timeDelta, float timeScale);//수정 필요
-	void ReRoute();
-
-
-	void BeHomeLess();
-	void NoHomeLess();
 };
 

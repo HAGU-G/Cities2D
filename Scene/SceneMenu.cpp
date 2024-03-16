@@ -66,8 +66,9 @@ void SceneMenu::Init()
 	saveGame = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 85.f),
 		"save", L"게임 저장", std::bind(&SceneMenu::Save, this));
 	saveGame->SetActive(false);
-	ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 170.f),
+	auto option = ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 170.f),
 		"option", L"옵션", std::bind(&SceneMenu::Option, this));
+	option->SetCanReact(false);
 	ButtonNineSlice::Create(This(), view.getCenter() + sf::Vector2f(-452.5f, 255.f),
 		"exit", L"종료", std::bind(&GameManager::Exit));
 

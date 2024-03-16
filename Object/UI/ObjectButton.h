@@ -9,6 +9,7 @@ protected:
 
 	const sf::View* view;
 	sf::Vector2f mousePos;
+	sf::Keyboard::Key keybind = sf::Keyboard::Unknown;
 
 	sf::Vector2f origin;
 	sf::Vector2f scale = {1.f,1.f};
@@ -49,12 +50,12 @@ public:
 	inline void SetOnlyDown(bool value) { isOnlyDown = value; }
 	inline void SetCanReact(bool value) { canReact = value; }
 	inline void SetView(const sf::View* view) { this->view = view; }
+	inline void SetKeyBind(sf::Keyboard::Key key) { keybind = key; }
 
 	void UnSelect();
 	void Select();
 	virtual void OnDown();
-
-
+	inline void PlayClickSound() { click.play(); }
 
 	static std::shared_ptr<ObjectButton> Create(std::weak_ptr<Scene> scene, sf::Vector2f position, const std::string& iconPath, const std::function<void()>& func = nullptr, bool toggle = true);
 

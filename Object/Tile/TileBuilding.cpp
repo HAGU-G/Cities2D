@@ -29,9 +29,6 @@ void TileBuilding::Update(float timeDelta, float timeScale)
 	if (soundTimer <= soundDuration)
 		soundTimer += timeDelta;
 
-	buildingSprite.setRotation(sceneGame.lock()->GetView().getRotation());
-	buildingSprite.setScale(1.f, sceneGame.lock()->GetTilt());
-
 	if (sceneGame.lock()->DoPayTex())
 	{
 		sceneGame.lock()->MoneyTex(rci.tex);
@@ -40,7 +37,10 @@ void TileBuilding::Update(float timeDelta, float timeScale)
 
 void TileBuilding::Draw(sf::RenderWindow& window)
 {
+	buildingSprite.setRotation(sceneGame.lock()->GetView().getRotation());
+	buildingSprite.setScale(1.f, sceneGame.lock()->GetTilt());
 	window.draw(buildingSprite);
+
 	ObjectTile::Draw(window);
 }
 
@@ -51,23 +51,17 @@ void TileBuilding::Reset()
 	for (auto& pair : rci.residenceSlot)
 	{
 		if (!pair.second.expired())
-		{
-			pair.second.lock()->isReset = true;
-		}
+			pair.second.lock()->DeleteHome();
 	}
 	for (auto& pair : rci.commerceSlot)
 	{
 		if (!pair.second.expired())
-		{
-			pair.second.lock()->isReset = true;
-		}
+			pair.second.lock()->DeleteShop();
 	}
 	for (auto& pair : rci.industrySlot)
 	{
 		if (!pair.second.expired())
-		{
-			pair.second.lock()->isReset = true;
-		}
+			pair.second.lock()->DeleteWorkPlace();
 	}
 
 	if (rci.residence > 0)
@@ -96,23 +90,17 @@ void TileBuilding::Release()
 	for (auto& pair : rci.residenceSlot)
 	{
 		if (!pair.second.expired())
-		{
-			pair.second.lock()->isReset = true;
-		}
+			pair.second.lock()->DeleteHome();
 	}
 	for (auto& pair : rci.commerceSlot)
 	{
 		if (!pair.second.expired())
-		{
-			pair.second.lock()->isReset = true;
-		}
+			pair.second.lock()->DeleteShop();
 	}
 	for (auto& pair : rci.industrySlot)
 	{
 		if (!pair.second.expired())
-		{
-			pair.second.lock()->isReset = true;
-		}
+			pair.second.lock()->DeleteWorkPlace();
 	}
 	SFGM_RCI.UpdateRCI(-rci.residence, -rci.commerce, -rci.industry);
 	rci = RCI();

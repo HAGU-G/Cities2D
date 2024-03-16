@@ -28,6 +28,7 @@ private:
 	static std::mt19937* rg; //randomGenerator
 
 	static bool doDebug;
+	static bool canDebug;
 public:
 
 	static std::string lastGameName;
@@ -39,7 +40,7 @@ public:
 	//Window
 	static void DebugUpdate();
 	static void Exit();
-	static void SetDoDebug(bool valuse);
+	static void SetCanDebug(bool valuse);
 
 	//Set
 	inline static float SetGlobalTimeScale(float value) { globalTimeScale = value; }
@@ -57,6 +58,7 @@ public:
 	inline static sf::Vector2i GetMousePosWindow() { return mousePosWindow; }
 	inline static float GetGlobalTimeScale() { return globalTimeScale; }
 	inline static float GetGlobalTimer() { return globalTimer; }
+	inline static bool DoDebug() { return doDebug; }
 
 	//AddScene
 	static void AddScene();

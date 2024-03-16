@@ -1,9 +1,9 @@
 TYPE(1=R 2=C 3=I),RESIDENCE,COMMERCE,INDUSTRY,COST,TEX,TEXTRUE_PATH,TEXTURE_RECT_LEFT,TOP,WIDTH,HEIGHT,ICON_NAME
-1,1,0,0,30,-30,resource/tile/Buildings.png,0,0,50,150,r_b_1
-2,0,1,0,50,-50,resource/tile/Buildings.png,0,300,50,150,c_b_1
-3,0,0,1,300,-300,resource/tile/Buildings.png,0,150,50,150,i_b_1
+1,3,0,0,30,-30,resource/tile/Buildings.png,0,0,50,150,r_b_1
+2,0,3,1,50,-50,resource/tile/Buildings.png,0,300,50,150,c_b_1
+3,0,0,10,300,-300,resource/tile/Buildings.png,0,150,50,150,i_b_1
 0,0,0,0,5,0,resource/tile/Tile.png,0,0,0,0,road_b_1
-1,10,0,0,150,-80,resource/tile/Buildings.png,50,0,50,150,r_b_2
+1,10,0,0,150,-80,resource/tile/Buildings.png,50,0,48,150,r_b_2
 1,100,20,5,30000,-5000,resource/tile/Buildings.png,100,0,50,150,r_b_3
 2,0,15,2,220,-90,resource/tile/Buildings.png,50,300,50,150,c_b_2
 3,2,0,30,1000,-1200,resource/tile/Buildings.png,50,150,50,150,i_b_2

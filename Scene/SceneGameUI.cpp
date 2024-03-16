@@ -99,6 +99,7 @@ void SceneGameUI::Init()
 	//상단
 	buttonMenu = ObjectButton::Create(This(), { view.getSize().x - 5.f, 5.f }, "optionSquare", std::bind(&SceneGameUI::Menu, this), false);
 	buttonMenu->SetOrigin(ORIGIN::TR);
+	buttonMenu->SetKeyBind(sf::Keyboard::Escape);
 	//하단
 	underBarBack.setSize({ view.getSize().x, 140.f });
 	underBarFront.setSize({ view.getSize().x, 70.f });
@@ -127,6 +128,7 @@ void SceneGameUI::Init()
 	buttonI->SetOrigin(ORIGIN::LM);
 	buttonDestroy = ObjectButton::Create(This(), { view.getSize().x - 5.f, secondFloarY }, "destroy", std::bind(&SceneGameUI::Destroy, this));
 	buttonDestroy->SetOrigin(ORIGIN::RM);
+	buttonDestroy->SetKeyBind(sf::Keyboard::B);
 
 	rBar.setFillColor(sf::Color::Green);
 	rBar.setSize({ buttonRCI->GetBound().width - 90.f, 20.f });
@@ -148,6 +150,7 @@ void SceneGameUI::Init()
 	buttonPause = ObjectButton::Create(This(), { 5.f, firstFloarY }, "pause", std::bind(&SceneGameUI::Pause, this));
 	buttonPause->SetOrigin(ORIGIN::LM);
 	buttonPause->SetOnlyDown(true);
+	buttonPause->SetKeyBind(sf::Keyboard::Hyphen);
 	pauseOutline.setSize({ view.getSize().x - 10.f, view.getSize().y - 10.f });
 	tool::SetOrigin(pauseOutline, ORIGIN::MC);
 	pauseOutline.setOutlineColor(sf::Color::Red);
@@ -158,9 +161,11 @@ void SceneGameUI::Init()
 	buttonPlay = ObjectButton::Create(This(), { 74.f, firstFloarY }, "play", std::bind(&SceneGameUI::Play, this));
 	buttonPlay->SetOrigin(ORIGIN::LM);
 	buttonPlay->SetOnlyDown(true);
+	buttonPlay->SetKeyBind(sf::Keyboard::Num1);
 	button4x = ObjectButton::Create(This(), { 141.f, firstFloarY }, "fast", std::bind(&SceneGameUI::Fast, this));
 	button4x->SetOrigin(ORIGIN::LM);
 	button4x->SetOnlyDown(true);
+	button4x->SetKeyBind(sf::Keyboard::Num2);
 	buttonCityTime = ButtonNameTag::Create(This(), { 206.f, firstFloarY }, "grid", "0");
 	buttonCityTime->SetOrigin(ORIGIN::LM);
 	buttonCityTime->SetWidth(400);
@@ -210,25 +215,39 @@ void SceneGameUI::Init()
 
 void SceneGameUI::Draw(sf::RenderWindow& window)
 {
-	const sf::View& preView = window.getView();
-	window.setView(view);
-	window.draw(underBarBack);
-	window.draw(underBarFront);
-	window.draw(tempText);
-
-
-	Scene::Draw(window);
-
-	window.draw(rBar);
-	window.draw(cBar);
-	window.draw(iBar);
-	window.draw(textProfit);
-	window.draw(textTex);
-	if (sceneGame.lock()->GetTimeScale() == 0.f)
+	if (sceneGame.lock()->IsUIHide())
 	{
-		window.draw(pauseOutline);
+		const sf::View& preView = window.getView();
+		window.setView(view);
+		if (sceneGame.lock()->GetTimeScale() == 0.f)
+		{
+			window.draw(pauseOutline);
+		}
+		window.setView(preView);
 	}
-	window.setView(preView);
+	else
+	{
+		const sf::View& preView = window.getView();
+		window.setView(view);
+		window.draw(underBarBack);
+		window.draw(underBarFront);
+		window.draw(tempText);
+
+
+		Scene::Draw(window);
+
+		window.draw(rBar);
+		window.draw(cBar);
+		window.draw(iBar);
+		window.draw(textProfit);
+		window.draw(textTex);
+		if (sceneGame.lock()->GetTimeScale() == 0.f)
+		{
+			window.draw(pauseOutline);
+		}
+		window.setView(preView);
+	}
+
 
 }
 void SceneGameUI::Reset()
@@ -260,6 +279,11 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 		button4x->SetCanReact(true);
 	}
 
+	if (sceneGame->IsUIHide())
+		return;
+
+
+
 	if (buttonRCI->IsInputMode())
 	{
 		sceneGame->SetCameraFixed(true);
@@ -270,6 +294,20 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 	else
 	{
 		sceneGame->SetCameraFixed(false);
+
+		if (IOManager::IsKeyDown(sf::Keyboard::Space))
+		{
+			if (sceneGame->GetTimeScale() == 0.f)
+			{
+				buttonPlay->Select();
+				Play();
+			}
+			else
+			{
+				buttonPause->Select();
+				Pause();
+			}
+		}
 
 		if (!sceneGame->IsGameOver() && IOManager::IsKeyPress(sf::Mouse::Left) && !underBarBack.getGlobalBounds().contains(GetMousePosWorld())
 			&& !buttonMenu->GetBound().contains(GetMousePosWorld()))
@@ -303,6 +341,9 @@ void SceneGameUI::PreUpdate(float timeDelta, float timeScale)
 }
 void SceneGameUI::Update(float timeDelta, float timeScale)
 {
+	if (sceneGame.lock()->IsUIHide())
+		return;
+
 	Scene::Update(timeDelta, timeScale);
 
 	if (sceneGame.lock()->IsGameOver())

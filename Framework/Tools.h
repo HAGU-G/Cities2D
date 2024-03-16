@@ -22,7 +22,6 @@ namespace tool {
 	sf::Vector2f GetNormalize(const sf::Vector2f& vec);
 	void Normalize(sf::Vector2f& vec);
 	float Distance(const sf::Vector2f& p1, const sf::Vector2f& p2);
-	float DistancePlane(const sf::Vector3f& plane, const sf::Vector3f& point);
 
 	//Origin
 	sf::Vector2f SetOrigin(sf::Transformable& transformable, ORIGIN origin, const sf::FloatRect& rect);

@@ -16,7 +16,7 @@ struct Frustum
 struct CITY
 {
 	std::string mayorName = "My City";
-	int money = 50000000;
+	int money = 5000;
 	unsigned int moneyProfit = 0;
 	int moneyTex = 0;
 	time_t cityTime = 0;
@@ -66,6 +66,7 @@ protected:
 	CITY city;
 	bool gameOver = false;
 	bool isMiddleCity = false;
+	bool isUIHide = false;
 
 public:
 	bool isLoading = false;
@@ -111,6 +112,7 @@ public:
 	inline const TileInfo& GetTileInfo(int x, int y) { return gridInfo[x][y]; }
 	inline const TileInfo& GetTileInfo(sf::Vector2i gridCoord){	return gridInfo[gridCoord.x][gridCoord.y];	}
 	inline float GetZoomRatio() const { return zoomRatio; }
+	inline bool IsUIHide() const { return isUIHide; }
 
 
 	inline const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& GetUnitList() { return unitList; };

@@ -373,36 +373,37 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 			it++;
 		}
 
+		//생성될 때 자동으로 경로 재설정
 		//pathToWorkPlace
-		divide = 0;
-		tempStr = "";
-		if (row[4] != "N")
-		{
-			auto it = row[4].begin();
-			while (it != row[4].end())
-			{
-				if (*it == '/')
-				{
-					if (divide == 0)
-					{
-						tempVi.x = std::stoi(tempStr);
-						divide++;
-					}
-					else if (divide == 1)
-					{
-						tempVi.y = std::stoi(tempStr);
-						unit->pathToWorkPlace.push_back(tempVi);
-						divide--;
-					}
-					tempStr = "";
-				}
-				else
-				{
-					tempStr += *it;
-				}
-				it++;
-			}
-		}
+		//divide = 0;
+		//tempStr = "";
+		//if (row[4] != "N")
+		//{
+		//	auto it = row[4].begin();
+		//	while (it != row[4].end())
+		//	{
+		//		if (*it == '/')
+		//		{
+		//			if (divide == 0)
+		//			{
+		//				tempVi.x = std::stoi(tempStr);
+		//				divide++;
+		//			}
+		//			else if (divide == 1)
+		//			{
+		//				tempVi.y = std::stoi(tempStr);
+		//				unit->pathToWorkPlace.push_back(tempVi);
+		//				divide--;
+		//			}
+		//			tempStr = "";
+		//		}
+		//		else
+		//		{
+		//			tempStr += *it;
+		//		}
+		//		it++;
+		//	}
+		//}
 
 		//find
 		unit->findTimer = std::stof(row[6]);
@@ -533,6 +534,10 @@ bool DataManager::LoadUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		unit->money = stoi(row[19]);
 		unit->maxPatience = stoi(row[20]);
 
+		//STATUS2
+		unit->preStatus = ObjectUnit::STATUS(std::stoi(row[21]));
+		unit->nextStatus = ObjectUnit::STATUS(std::stoi(row[22]));
+
 	}
 
 
@@ -548,7 +553,7 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 	if (!outFile.is_open())
 		return false;
 
-	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK/SHOP_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY,MAXPATIENCE" << std::endl;
+	outFile << "OBJECT_TYPE,POSITION_X,POSITION_Y,HOME/WORK/SHOP_GRID,PATH_TO_WORK_PLACE,IS_CITIZEN/IS_MOVING,FIND_TIMER,FIND_INTERVAL,PATIENCE,STATUS,LIFE_TIEMR,LIFE_INTERVAL,SPEED,WALK_PATH,NEXT/START/DEST/PRE_GRID,TAGS,SHOP_TIMER,SHOP_INTERVAL,SHOP_NEED,MONEY,MAXPATIENCE,PRESTATUS,NEXTSTATUS" << std::endl;
 	
 	const std::unordered_map<std::string, std::weak_ptr<ObjectUnit>>& unitList = sceneGame->GetUnitList();
 	if (unitList.empty())
@@ -685,7 +690,12 @@ bool DataManager::SaveUnit(const std::shared_ptr<SceneGame>& sceneGame)
 		str += to_string(unit->needShopInterval) + comma;
 		str += to_string(unit->needShop) + comma;
 		str += to_string(unit->money) + comma;
-		str += to_string(unit->maxPatience);
+		str += to_string(unit->maxPatience) + comma;
+
+		//STATUS2
+		str += to_string((int)unit->preStatus) + comma;
+		str += to_string((int)unit->nextStatus);
+
 		outFile << str << std::endl;
 
 	}

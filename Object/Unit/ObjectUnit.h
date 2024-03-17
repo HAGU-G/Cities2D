@@ -58,7 +58,7 @@ protected:
 
 	STATUS preStatus = STATUS::NONE;
 	STATUS status = STATUS::NONE;
-	STATUS nextstatus = STATUS::NONE;
+	STATUS nextStatus = STATUS::NONE;
 	float lifeTimer = 0.f;
 	float lifeInterval = 1.f;
 	float needShopTimer = 0.f;

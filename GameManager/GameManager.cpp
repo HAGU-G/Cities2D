@@ -146,7 +146,7 @@ void GameManager::MainLoop()
 			debugWindow.setVisible(doDebug);
 			window.requestFocus();
 		}
-		if (IOManager::IsKeyDown(sf::Keyboard::Enter) && event.key.alt)
+		if (IOManager::IsKeyDown(sf::Keyboard::Enter) && IOManager::IsKeyPress(sf::Keyboard::LAlt))
 		{
 			switch (currentMode)
 			{

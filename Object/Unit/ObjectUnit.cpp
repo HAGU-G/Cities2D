@@ -87,6 +87,8 @@ void ObjectUnit::Reset()
 	ShopUsed();
 	NoCitizen();
 	status = STATUS::NONE;
+	preStatus = STATUS::NONE;
+	nextStatus = STATUS::NONE;
 
 	pathToWorkPlace.clear();
 	walkPath.clear();
@@ -166,7 +168,7 @@ void ObjectUnit::GoWorkPlace()
 	}
 	destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
 	nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
-	nextstatus = STATUS::WORK_PLACE;
+	nextStatus = STATUS::WORK_PLACE;
 	status = STATUS::WALK;
 
 }
@@ -225,6 +227,7 @@ void ObjectUnit::ShopUsed()
 	if (needShop)
 	{
 		needShop = false;
+		needShopTimer = 0.f;
 		SFGM_RCI.INeedCommerce(-1);
 	}
 }
@@ -306,7 +309,7 @@ void ObjectUnit::GoHome()
 	}
 	destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
 	nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
-	nextstatus = STATUS::HOME;
+	nextStatus = STATUS::HOME;
 	status = STATUS::WALK;
 }
 
@@ -353,6 +356,15 @@ void ObjectUnit::FindHome()
 			{
 				patience++;
 				SetHome(home);
+				if (status == STATUS::HOMELESS)
+				{
+					walkPath = pathToHome;
+					destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
+					nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
+					nextStatus = STATUS::HOME;
+					status = STATUS::WALK;
+					NoHomeLess();
+				}
 				return;
 			}
 		}
@@ -423,17 +435,18 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 	switch (status)
 	{
 	case ObjectUnit::STATUS::HOME:
-		preStatus = STATUS::HOME;
 		if (home.expired())
 		{
 			if (!workPlace.expired())
 			{
 				GoWorkPlace();
+				preStatus = STATUS::HOME;
 				break;
 			}
 			else
 			{
 				BeHomeless();
+				preStatus = STATUS::HOME;
 				break;
 			}
 		}
@@ -442,26 +455,29 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		{
 			lifeTimer = 0.f;
 			status = STATUS::READY;
+			preStatus = STATUS::HOME;
 			break;
 		}
+		preStatus = STATUS::HOME;
 		break;
 	case ObjectUnit::STATUS::WORK_PLACE:
-		preStatus = STATUS::WORK_PLACE;
 		needShopTimer += timeDelta * timeScale;
 		if (workPlace.expired())
 		{
 			if (!home.expired())
 			{
 				GoHome();
+				preStatus = STATUS::WORK_PLACE;
 				break;
 			}
 			else
 			{
 				BeHomeless();
+				preStatus = STATUS::WORK_PLACE;
 				break;
 			}
 		}
-		if (lifeTimer == 0.f)
+		if (preStatus != STATUS::WORK_PLACE)
 		{
 			int pay = -(workPlace.lock()->GetRCI().tex / 200);
 			money += pay * 0.9f + 1;
@@ -473,30 +489,34 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 		{
 			lifeTimer = 0.f;
 			status = STATUS::READY;
+			preStatus = STATUS::WORK_PLACE;
 			break;
 		}
+		preStatus = STATUS::WORK_PLACE;
 		break;
 	case ObjectUnit::STATUS::SHOP:
-		preStatus = STATUS::SHOP;
 		if (shop.expired())
 		{
 			if (!home.expired())
 			{
 				GoHome();
+				preStatus = STATUS::SHOP;
 				break;
 			}
 			else if (!workPlace.expired())
 			{
 				GoWorkPlace();
+				preStatus = STATUS::SHOP;
 				break;
 			}
 			else
 			{
 				BeHomeless();
+				preStatus = STATUS::SHOP;
 				break;
 			}
 		}
-		if (lifeTimer == 0.f)
+		if (preStatus != STATUS::SHOP)
 		{
 			ShopUsed();
 			int pay = -(shop.lock()->GetRCI().tex / 100);
@@ -510,20 +530,18 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 			LeaveShop();
 			lifeTimer = 0.f;
 			status = STATUS::READY;
+			preStatus = STATUS::SHOP;
 			break;
 		}
+		preStatus = STATUS::SHOP;
 		break;
 	case ObjectUnit::STATUS::HOMELESS:
 		preStatus = STATUS::HOMELESS;
-		if (!home.expired())
-			NoHomeLess();
 		break;
 	case ObjectUnit::STATUS::READY:
-
 		if (lifeTimer == 0.f)
 		{
-
-			if (needShop && money > (home.expired() ? 0 : -(home.lock()->GetRCI().tex / 100) + 1)) //상점으로
+			if (preStatus != STATUS::SHOP && needShop && money > (home.expired() ? 0 : -(home.lock()->GetRCI().tex / 100) + 1)) //상점으로
 			{
 				auto pathToShop = ObjectTile::FindShortPath(sceneGame.lock()->GetTileInfo(gridCoord).second, GAME_OBJECT_TAG::C);
 				if (!pathToShop.empty())
@@ -537,8 +555,9 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 						walkPath = pathToShop;
 						destination = sceneGame.lock()->GetTileInfo(walkPath.back()).second;
 						nextTile = sceneGame.lock()->GetTileInfo(walkPath.front()).second;
-						nextstatus = STATUS::SHOP;
+						nextStatus = STATUS::SHOP;
 						status = STATUS::WALK;
+						preStatus = STATUS::READY;
 						break;
 					}
 				}
@@ -546,47 +565,70 @@ void ObjectUnit::LifeCycle(float timeDelta, float timeScale)
 			if (!home.expired() && preStatus != STATUS::HOME)//집으로
 			{
 				GoHome();
+				preStatus = STATUS::READY;
 				break;
 			}
 			else if (!workPlace.expired() && preStatus != STATUS::WORK_PLACE) //회사로
 			{
 				GoWorkPlace();
+				preStatus = STATUS::READY;
 				break;
 			}
-			else if (home.expired() && workPlace.expired())
+			else if (workPlace.expired())
+			{
+				GoHome();
+				preStatus = STATUS::READY;
+				break;
+			}
+			else if (home.expired())
+			{
+				GoWorkPlace();
+				preStatus = STATUS::READY;
+				break;
+			}
+			else
 			{
 				BeHomeless();
+				preStatus = STATUS::READY;
 				break;
 			}
+
+			lifeTimer += 0.001;
 		}
 		lifeTimer += timeDelta * timeScale;
 		if (lifeTimer >= lifeInterval / 3.f)
 		{
 			lifeTimer = 0.f;
 			status = STATUS::READY;
+			preStatus = STATUS::READY;
 			break;
 		}
+		preStatus = STATUS::READY;
 		break;
 	case ObjectUnit::STATUS::WALK:
-		preStatus = STATUS::WALK;
 		Moving(timeDelta, timeScale);
+		preStatus = STATUS::WALK;
 		break;
 	case STATUS::MISSING:
 		if (!home.expired())
 		{
 			GoHome();
+			preStatus = STATUS::MISSING;
 			break;
 		}
 		if (!workPlace.expired())
 		{
 			GoWorkPlace();
+			preStatus = STATUS::MISSING;
 			break;
 		}
 		else
 		{
 			BeHomeless();
+			preStatus = STATUS::MISSING;
 			break;
 		}
+		preStatus = STATUS::MISSING;
 		break;
 	default:
 		break;
@@ -621,9 +663,12 @@ void ObjectUnit::Moving(float timeDelta, float timeScale)
 		walkPath.pop_front();
 		if (walkPath.empty())
 		{
-			status = nextstatus;
-			if (nextstatus == STATUS::HOME || nextstatus == STATUS::SHOP || nextstatus == STATUS::WORK_PLACE)
+			status = nextStatus;
+			if (nextStatus == STATUS::HOME || nextStatus == STATUS::SHOP || nextStatus == STATUS::WORK_PLACE)
 				C_TILE_BUILDING(destination.lock())->Enter();
+			nextTile.reset();
+			destination.reset();
+			nextStatus == STATUS::NONE;
 			return;
 		}
 		nextTile = sceneGame->GetTileInfo(walkPath.front()).second;
@@ -670,11 +715,11 @@ void ObjectUnit::ReRoute()
 		walkPath.clear();
 		status = STATUS::MISSING;
 
-		if (!home.expired() && destination.lock().get() == workPlace.lock().get())
+		if (!home.expired() && destination.lock().get() == home.lock().get())
 			LostHome();
 	}
 
-	if (!workPlace.expired() && destination.lock().get() == workPlace.lock().get())
+	if (!home.expired() && !workPlace.expired() && destination.lock().get() == workPlace.lock().get())
 	{
 
 		pathToWorkPlace = ObjectTile::FindShortPath(home, workPlace);

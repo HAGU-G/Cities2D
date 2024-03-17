@@ -711,8 +711,8 @@ void SceneGame::TileSort()
 
 			plane = frustum.nearPlane - tool::To3D(view.getCenter());
 			building = tool::To3D(thisTile->GetGridCenterPos()) - frustum.nearPlane;
-			float OnN = tool::OnPlane(plane, building);
-			if (OnN > 0.f)
+			float onN = tool::OnPlane(plane, building);
+			if (onN > 0.f)
 			{
 				thisTile->SetDrawDeep(0.f);
 				thisTile->SetShow(false);
@@ -721,8 +721,8 @@ void SceneGame::TileSort()
 
 			plane = frustum.farPlane - tool::To3D(view.getCenter());
 			building = tool::To3D(thisTile->GetGridCenterPos()) - frustum.farPlane;
-			float OnF = tool::OnPlane(plane, building);
-			if (OnF > 0.f)
+			float onF = tool::OnPlane(plane, building);
+			if (onF > 0.f)
 			{
 				thisTile->SetDrawDeep(0.f);
 				thisTile->SetShow(false);
@@ -731,8 +731,8 @@ void SceneGame::TileSort()
 
 			plane = frustum.leftPlane - tool::To3D(view.getCenter());
 			building = tool::To3D(thisTile->GetGridCenterPos()) - frustum.leftPlane;
-			float OnL = tool::OnPlane(plane, building);
-			if (OnL > 0.f)
+			float onL = tool::OnPlane(plane, building);
+			if (onL > 0.f)
 			{
 				thisTile->SetDrawDeep(0.f);
 				thisTile->SetShow(false);
@@ -741,8 +741,8 @@ void SceneGame::TileSort()
 
 			plane = frustum.rightPlane - tool::To3D(view.getCenter());
 			building = tool::To3D(thisTile->GetGridCenterPos()) - frustum.rightPlane;
-			float OnR = tool::OnPlane(plane, building);
-			if (OnR > 0.f)
+			float onR = tool::OnPlane(plane, building);
+			if (onR > 0.f)
 			{
 				thisTile->SetDrawDeep(0.f);
 				thisTile->SetShow(false);
@@ -750,7 +750,7 @@ void SceneGame::TileSort()
 			}
 			else
 			{
-				thisTile->SetDrawDeep(-OnN);
+				thisTile->SetDrawDeep(-onN);
 				thisTile->SetShow(true);
 			}
 		}
